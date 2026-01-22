@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { 
   Phone, 
@@ -7,7 +7,6 @@ import {
   Globe,
   Download,
   Sparkles,
-  User,
   Share2,
   Check,
   UserPlus,
@@ -31,6 +30,8 @@ import { DocumentLinks } from '@/components/card/DocumentLinks';
 import { SocialLinkChip } from '@/components/card/SocialLinkChip';
 import { getPublicCardUrl } from '@/lib/publicUrls';
 import { ContactShareSheet, ContactFormData } from '@/components/public-card/ContactShareSheet';
+import { ExchangeSuccessSheet } from '@/components/public-card/ExchangeSuccessSheet';
+import { hapticFeedback } from '@/lib/haptics';
 
 // Helper to generate WhatsApp link
 const getWhatsappLink = (number: string) => {
@@ -82,9 +83,10 @@ export default function PublicCard() {
   const [ownerActiveEventId, setOwnerActiveEventId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [scanLogged, setScanLogged] = useState(false);
-  const [exchangeSuccess, setExchangeSuccess] = useState(false);
   const [exchangeInProgress, setExchangeInProgress] = useState(false);
   const [sharedBack, setSharedBack] = useState(false);
+  const [showExchangeSuccess, setShowExchangeSuccess] = useState(false);
+  const [exchangeButtonSaved, setExchangeButtonSaved] = useState(false);
   
   // Contact share sheet state
   const [showContactSheet, setShowContactSheet] = useState(false);
@@ -388,14 +390,10 @@ export default function PublicCard() {
       // 3. Log analytics
       await logContactSave(profile.user_id, card?.id || null);
 
-      // 4. Success
-      setExchangeSuccess(true);
-      navigator.vibrate?.(10);
-      
-      toast({
-        title: 'Connected!',
-        description: 'Contacts exchanged and updated successfully.',
-      });
+      // 4. Success - Show premium confirmation sheet (not full-screen)
+      await hapticFeedback.success();
+      setExchangeButtonSaved(true);
+      setShowExchangeSuccess(true);
       
     } catch (error) {
       console.error('Exchange error:', error);
@@ -556,62 +554,6 @@ END:VCARD`;
 
   const firstName = displayData.name.split(' ')[0];
 
-  // Exchange success screen
-  if (exchangeSuccess) {
-    return (
-      <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-background p-4 sm:p-6 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-        <div className="w-full max-w-md text-center space-y-6 animate-fade-up">
-          <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-            <Check className="h-10 w-10 text-primary" />
-          </div>
-          
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-foreground">
-              {sharedBack ? 'Connected on Synka!' : 'Contact Saved!'}
-            </h1>
-            <p className="text-muted-foreground">
-              {displayData.name}'s contact is saved to your CRM.
-              {sharedBack ? (
-                <>
-                  <br />
-                  Your card has been shared back.
-                </>
-              ) : (
-                <>
-                  <br />
-                  <span className="text-sm">Set a default card to auto-share next time.</span>
-                </>
-              )}
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 pt-4">
-            <Link to="/crm">
-              <Button variant="gradient" className="w-full">
-                <User className="h-4 w-4 mr-2" />
-                View Contact
-              </Button>
-            </Link>
-            {!sharedBack && (
-              <Link to="/my-card">
-                <Button variant="outline" className="w-full">
-                  Set Up Default Card
-                </Button>
-              </Link>
-            )}
-            {sharedBack && (
-              <Link to="/my-card">
-                <Button variant="outline" className="w-full">
-                  Open My Card
-                </Button>
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-dvh w-full max-w-full overflow-x-hidden bg-background pt-[env(safe-area-inset-top)] pb-[calc(5rem+env(safe-area-inset-bottom))]">
       {/* Smart App Banner */}
@@ -625,6 +567,15 @@ END:VCARD`;
         ownerPhotoUrl={displayData.photo_url}
         onSubmit={handleContactSubmit}
         onSkip={handleContactSkip}
+      />
+      
+      {/* Exchange Success Sheet - Premium non-disruptive confirmation */}
+      <ExchangeSuccessSheet
+        open={showExchangeSuccess}
+        onOpenChange={setShowExchangeSuccess}
+        ownerName={displayData.name}
+        ownerPhotoUrl={displayData.photo_url}
+        sharedBack={sharedBack}
       />
       
       <div className="w-full max-w-lg mx-auto py-4 sm:py-6 px-3 sm:px-4 space-y-4 sm:space-y-6 animate-fade-up">
@@ -721,15 +672,23 @@ END:VCARD`;
               {/* SYNKA USER: Show Save to CRM (ONE-TAP MAGIC) */}
               {isViewerSynkaUser && !isOwnCard ? (
                 <Button 
-                  variant="gradient" 
-                  className="flex-1 h-12 font-medium tracking-tight"
+                  variant={exchangeButtonSaved ? "outline" : "gradient"}
+                  className={cn(
+                    "flex-1 h-12 font-medium tracking-tight transition-all",
+                    exchangeButtonSaved && "border-primary/40 bg-primary/5"
+                  )}
                   onClick={handleSynkaExchange}
-                  disabled={exchangeInProgress}
+                  disabled={exchangeInProgress || exchangeButtonSaved}
                 >
                   {exchangeInProgress ? (
                     <>
                       <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
                       Saving...
+                    </>
+                  ) : exchangeButtonSaved ? (
+                    <>
+                      <Check className="h-4 w-4 mr-2 text-primary" />
+                      <span className="text-primary">Saved</span>
                     </>
                   ) : (
                     <>
@@ -771,7 +730,7 @@ END:VCARD`;
             </div>
 
             {/* Subtitle for Synka users */}
-            {isViewerSynkaUser && !isOwnCard && (
+            {isViewerSynkaUser && !isOwnCard && !exchangeButtonSaved && (
               <p className="text-[11px] text-muted-foreground text-center mt-2">
                 Saves to your CRM and shares your card back
               </p>
