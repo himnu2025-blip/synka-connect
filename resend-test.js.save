@@ -1,0 +1,29 @@
+import { Resend } from 
+"resend"; const resend 
+= new Resend("xyz"); // 
+your API key example 
+async function 
+sendTestEmail() {
+  await 
+  resend.emails.send({
+    from: "SYNKA 
+    <support@synka.in>", 
+    to: 
+    "nitesh.vohra1@gmail.com", 
+    subject: "Resend 
+    test email", html: 
+    `
+      <h2>Test 
+      successful 
+      🎉</h2> <p>Email 
+      is working 
+      perfectly from 
+      Resend.</p> <p>– 
+      SYNKA Team</p>
+    `,
+  });
+  console.log("Email 
+  sent successfully 
+  ✅");
+}
+sendTestEmail();

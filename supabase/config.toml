@@ -1,0 +1,37 @@
+project_id = "qlrnewbkolxjdtfffuml"
+
+[functions.generate-about]
+verify_jwt = true
+
+[functions.generate-template]
+verify_jwt = true
+
+[functions.generate-signatures]
+verify_jwt = true
+
+[functions.scan-business-card]
+verify_jwt = true
+
+[functions.generate-card-design]
+verify_jwt = true
+
+[functions.pin-auth]
+verify_jwt = false
+
+[functions.saira-chat]
+verify_jwt = false
+
+[functions.saira-session]
+verify_jwt = false
+
+[functions.generate-embeddings]
+verify_jwt = false
+
+[functions.card-meta]
+verify_jwt = false
+
+[functions.welcome-email]
+verify_jwt = false
+
+[functions.mutual-contact-exchange]
+verify_jwt = false

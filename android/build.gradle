@@ -1,0 +1,55 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.7.2'
+        classpath 'com.google.gms:google-services:4.4.2'
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+apply from: "variables.gradle"
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+/**
+ * ✅ FORCE JAVA 17 FOR ALL ANDROID MODULES
+ * (Capacitor 7 compatible)
+ */
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty("android")) {
+            project.android {
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+            }
+        }
+    }
+}
+
+/**
+ * ✅ FORCE KOTLIN JVM TARGET = 17 (SAFE METHOD)
+ * No direct class references → no Gradle crash
+ */
+subprojects {
+    tasks.matching { it.name.contains("compile") && it.name.contains("Kotlin") }.configureEach {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

@@ -1,0 +1,37 @@
+{
+  "headers": [
+    {
+      "source": "/.well-known/assetlinks.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" }
+      ]
+    },
+    {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/u/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(WhatsApp|facebookexternalhit|Facebot|Applebot|Twitterbot|TelegramBot|Slackbot|Discordbot|Meta-ExternalAgent|MetaInspector|bot|crawl|spider|preview).*"
+        }
+      ],
+      "destination": "https://qlrnewbkolxjdtfffuml.supabase.co/functions/v1/card-meta?slug=:slug"
+    },
+    {
+      "source": "/u/:slug",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

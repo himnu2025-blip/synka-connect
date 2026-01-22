@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.synka.app",
+      "sha256_cert_fingerprints": [
+        "81:06:B2:9A:AA:65:47:95:38:47:CD:FD:4F:51:53:1C:85:70:C1:87:5A:59:9B:2C:C1:78:95:64:AA:04:70:62"
+      ]
+    }
+  }
+]
