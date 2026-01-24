@@ -255,47 +255,33 @@ export function ContactShareSheet({
         type="email"
       />
 
-      {/* PHONE NUMBER */}
-      <div className="relative">
-        <div className="relative h-14 rounded-xl border border-border focus-within:border-foreground transition-colors">
-          <div className="flex items-center h-full">
-            <div className="flex items-center gap-2 px-4 h-full border-r border-border">
-              <span className="text-base">🇮🇳</span>
-              <select
-                value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value)}
-                className="bg-transparent text-sm font-medium outline-none appearance-none pr-2"
-              >
-                <option value="+91">+91</option>
-                <option value="+1">+1</option>
-                <option value="+44">+44</option>
-                <option value="+61">+61</option>
-              </select>
-            </div>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-              }
-              className="peer flex-1 h-full px-4 text-base outline-none bg-transparent"
-              style={{ fontSize: '16px' }}
-            />
-          </div>
-          {/* Floating label using peer */}
-          <label
-            className={`
-              absolute left-3 px-1 text-muted-foreground transition-all duration-200 pointer-events-none
-              peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background
-              ${formData.phone 
-                ? 'top-0 -translate-y-1/2 text-xs bg-background' 
-                : 'top-1/2 -translate-y-1/2 text-base'
-              }
-            `}
+      {/* PHONE NUMBER - Simple layout without floating label to avoid overlap */}
+      <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
+        {/* Country code selector */}
+        <div className="flex items-center gap-1.5 px-3 h-full border-r border-border shrink-0">
+          <span className="text-base">🇮🇳</span>
+          <select
+            value={countryCode}
+            onChange={(e) => setCountryCode(e.target.value)}
+            className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
           >
-            Phone number
-          </label>
+            <option value="+91">+91</option>
+            <option value="+1">+1</option>
+            <option value="+44">+44</option>
+            <option value="+61">+61</option>
+          </select>
         </div>
+        {/* Phone number input */}
+        <input
+          type="tel"
+          value={formData.phone}
+          onChange={(e) =>
+            setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+          }
+          placeholder="Phone number"
+          className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
+          style={{ fontSize: '16px' }}
+        />
       </div>
 
       {/* JOB + COMPANY PILLS - SMALL LIKE BLINQ */}
