@@ -41,7 +41,7 @@ const BlinqInput = ({
         value={value}
         onChange={onChange}
         placeholder=" "
-        className="peer absolute inset-0 w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
+        className="peer absolute inset-0 w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors leading-[56px]"
         style={{ fontSize: '16px' }}
       />
       <label
