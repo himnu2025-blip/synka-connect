@@ -338,12 +338,14 @@ export function ContactShareSheet({
         />
       </div>
 
-      {/* EMAIL - Exact same as First/Last name, no special keyboard */}
-      <BlinqInput
-        label="Email"
-        value={formData.email}
-        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-      />
+      {/* EMAIL - Wrapped in grid like name fields for layout stability */}
+      <div className="grid grid-cols-1">
+        <BlinqInput
+          label="Email"
+          value={formData.email}
+          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+        />
+      </div>
 
       {/* PHONE NUMBER - Simple layout without floating label to avoid overlap */}
       <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
