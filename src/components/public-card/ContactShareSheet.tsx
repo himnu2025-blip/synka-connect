@@ -14,8 +14,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-// Blinq-style input with border-floating label - defined outside component to prevent re-render focus loss
-const BlinqInput = ({
+// Simple input with placeholder - no floating labels to avoid mobile keyboard race conditions
+const SimpleInput = ({
   label,
   value,
   onChange,
@@ -26,32 +26,15 @@ const BlinqInput = ({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
 }) => {
-  const hasValue = value.length > 0;
-
   return (
-    <div className="relative h-14">
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder=" "
-        className="peer absolute inset-0 w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
-        style={{ fontSize: '16px' }}
-      />
-      <label
-        className={`
-          absolute left-3 px-1 text-muted-foreground pointer-events-none transition-all duration-200
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
-          peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background
-          ${hasValue 
-            ? 'top-0 -translate-y-1/2 text-xs bg-background' 
-            : ''
-          }
-        `}
-      >
-        {label}
-      </label>
-    </div>
+    <input
+      type={type}
+      value={value}
+      onChange={onChange}
+      placeholder={label}
+      className="w-full h-14 px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors placeholder:text-muted-foreground"
+      style={{ fontSize: '16px' }}
+    />
   );
 };
 
@@ -235,12 +218,12 @@ export function ContactShareSheet({
 
       {/* FIRST + LAST NAME */}
       <div className="grid grid-cols-2 gap-3">
-        <BlinqInput
+        <SimpleInput
           label="First name"
           value={formData.firstName}
           onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
         />
-        <BlinqInput
+        <SimpleInput
           label="Last name"
           value={formData.lastName}
           onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
@@ -248,7 +231,7 @@ export function ContactShareSheet({
       </div>
 
       {/* EMAIL */}
-      <BlinqInput
+      <SimpleInput
         label="Email"
         value={formData.email}
         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
