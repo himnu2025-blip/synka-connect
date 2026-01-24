@@ -48,6 +48,7 @@ export function ContactShareSheet({
   const [submitting, setSubmitting] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
+  const [focusedField, setFocusedField] = useState<string | null>(null);
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
     lastName: '',
@@ -57,6 +58,19 @@ export function ContactShareSheet({
     company: '',
     linkedin: '',
   });
+
+  const normalizeLinkedInUrl = (value: string) => {
+    let v = value.trim();
+    if (!v) return '';
+    
+    v = v.replace(/^https?:\/\//, '');
+    
+    if (v.includes('linkedin.com')) {
+      return `https://${v}`;
+    }
+    
+    return `https://linkedin.com/in/${v}`;
+  };
 
   const handleSubmit = async () => {
     if (!formData.firstName.trim()) {
@@ -164,6 +178,56 @@ export function ContactShareSheet({
     e.target.value = '';
   };
 
+  // Blinq-style input with border-floating label
+  const BlinqInput = ({ 
+    label, 
+    value, 
+    onChange, 
+    type = 'text',
+    placeholder = '',
+    name,
+    className = ''
+  }: {
+    label: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    type?: string;
+    placeholder?: string;
+    name: string;
+    className?: string;
+  }) => {
+    const isFocused = focusedField === name;
+    const hasValue = value.length > 0;
+    const showLabel = isFocused || hasValue;
+
+    return (
+      <div className={`relative ${className}`}>
+        <div className={`relative h-14 rounded-xl border ${isFocused ? 'border-primary' : 'border-border'} transition-colors`}>
+          {/* Floating label on border - FIXED: Always show when has value */}
+          <div 
+            className={`absolute -top-2 left-3 px-1 transition-all duration-200 ${
+              showLabel 
+                ? 'text-xs text-muted-foreground bg-white' 
+                : 'text-transparent'
+            }`}
+          >
+            {label}
+          </div>
+          
+          <input
+            type={type}
+            value={value}
+            onChange={onChange}
+            onFocus={() => setFocusedField(name)}
+            onBlur={() => setFocusedField(null)}
+            placeholder={placeholder}
+            className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl placeholder:text-muted-foreground"
+          />
+        </div>
+      </div>
+    );
+  };
+
   const Content = (
     <div className="space-y-4 px-4">
       {/* Hidden file input */}
@@ -176,93 +240,101 @@ export function ContactShareSheet({
         className="hidden"
       />
 
-      {/* FIRST + LAST NAME - SIMPLE INPUTS */}
+      {/* FIRST + LAST NAME */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="relative h-14 rounded-xl border border-border">
-          <div className="absolute -top-2 left-3 px-1 text-xs text-muted-foreground bg-white">
-            First name
-          </div>
-          <input
-            type="text"
-            value={formData.firstName}
-            onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-            placeholder="Hello"
-            className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl placeholder:text-muted-foreground"
-          />
-        </div>
-        <div className="relative h-14 rounded-xl border border-border">
-          <div className="absolute -top-2 left-3 px-1 text-xs text-muted-foreground bg-white">
-            Last name
-          </div>
-          <input
-            type="text"
-            value={formData.lastName}
-            onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-            placeholder="Ji"
-            className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl placeholder:text-muted-foreground"
-          />
-        </div>
-      </div>
-
-      {/* EMAIL - SIMPLE INPUT */}
-      <div className="relative h-14 rounded-xl border border-border">
-        <div className="absolute -top-2 left-3 px-1 text-xs text-muted-foreground bg-white">
-          Email
-        </div>
-        <input
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-          placeholder="your@email.com"
-          className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl placeholder:text-muted-foreground"
+        <BlinqInput
+          label="First name"
+          value={formData.firstName}
+          onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+          name="firstName"
+          placeholder="Hello"
+        />
+        <BlinqInput
+          label="Last name"
+          value={formData.lastName}
+          onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+          name="lastName"
+          placeholder="Ji"
         />
       </div>
 
-      {/* PHONE NUMBER - SIMPLE INPUT */}
-      <div className="relative h-14 rounded-xl border border-border">
-        <div className="absolute -top-2 left-3 px-1 text-xs text-muted-foreground bg-white">
-          Phone number
-        </div>
-        <div className="flex items-center h-full">
-          <div className="flex items-center gap-2 px-4 h-full border-r border-border">
-            <span className="text-base">🇮🇳</span>
-            <select
-              value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
-              className="bg-transparent text-sm font-medium outline-none appearance-none pr-2"
-            >
-              <option value="+91">+91</option>
-              <option value="+1">+1</option>
-              <option value="+44">+44</option>
-              <option value="+61">+61</option>
-            </select>
+      {/* EMAIL */}
+      <BlinqInput
+        label="Email"
+        value={formData.email}
+        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+        type="email"
+        name="email"
+        placeholder="your@email.com"
+      />
+
+      {/* PHONE NUMBER */}
+      <div className="space-y-1">
+        <div className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}>
+          {/* Floating label on border for phone */}
+          <div 
+            className={`absolute -top-2 left-3 px-1 transition-all duration-200 ${
+              (focusedField === 'phone' || formData.phone) 
+                ? 'text-xs text-muted-foreground bg-white' 
+                : 'text-transparent'
+            }`}
+          >
+            Phone number
           </div>
-          <input
-            type="tel"
-            value={formData.phone}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-            }
-            placeholder="87006 97970"
-            className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
-          />
+          
+          <div className="flex items-center h-full">
+            <div className="flex items-center gap-2 px-4 h-full border-r border-border">
+              <span className="text-base">🇮🇳</span>
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                className="bg-transparent text-sm font-medium outline-none appearance-none pr-2"
+                onFocus={() => setFocusedField('phone')}
+                onBlur={() => setFocusedField(null)}
+              >
+                <option value="+91">+91</option>
+                <option value="+1">+1</option>
+                <option value="+44">+44</option>
+                <option value="+61">+61</option>
+              </select>
+            </div>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+              }
+              onFocus={() => setFocusedField('phone')}
+              onBlur={() => setFocusedField(null)}
+              placeholder="87006 97970"
+              className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
+            />
+          </div>
         </div>
       </div>
 
-      {/* JOB + COMPANY PILLS */}
+      {/* JOB + COMPANY PILLS - SMALL LIKE BLINQ */}
       <div className="grid grid-cols-2 gap-2">
-        <input
-          value={formData.designation}
-          onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
-          placeholder="+ Job title"
-          className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
-        />
-        <input
-          value={formData.company}
-          onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-          placeholder="+ Company name"
-          className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
-        />
+        <div className="relative">
+          <input
+            value={formData.designation}
+            onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
+            placeholder="+ Job title"
+            className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
+            onFocus={() => setFocusedField('designation')}
+            onBlur={() => setFocusedField(null)}
+          />
+        </div>
+        <div className="relative">
+          <input
+            value={formData.company}
+            onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+            placeholder="+ Company name"
+            className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
+            onFocus={() => setFocusedField('company')}
+            onBlur={() => setFocusedField(null)}
+          />
+        </div>
       </div>
 
       {/* SEND BUTTON WITH GRADIENT */}
@@ -284,9 +356,11 @@ export function ContactShareSheet({
   // Common header component for both mobile and desktop
   const BlinqHeader = () => (
     <>
+      {/* EXACT BLINQ HEADER - NO BORDER AT BOTTOM */}
       <div className="px-4 pt-5 pb-4">
-        {/* SCAN & SKIP ROW */}
+        {/* SCAN & SKIP ROW - EXACTLY LIKE BLINQ */}
         <div className="flex justify-between items-center mb-5">
+          {/* Scan button aligned left like Blinq */}
           <button
             onClick={handleScanBusinessCard}
             disabled={scanState === 'uploading' || scanState === 'processing'}
@@ -296,6 +370,7 @@ export function ContactShareSheet({
             <span className="font-medium">Scan</span>
           </button>
           
+          {/* Skip button at top right with tight spacing */}
           <button
             onClick={handleSkip}
             className="text-sm font-semibold text-gray-900 hover:text-gray-700 transition-colors"
@@ -304,8 +379,9 @@ export function ContactShareSheet({
           </button>
         </div>
         
-        {/* PROFILE AND TITLE */}
+        {/* PROFILE AND TITLE - EXACTLY LIKE BLINQ */}
         <div className="flex items-start gap-3">
+          {/* LARGE PROFILE PHOTO - EXACT SIZE AS BLINQ */}
           <div className="relative flex-shrink-0">
             {ownerPhotoUrl ? (
               <img
@@ -320,11 +396,13 @@ export function ContactShareSheet({
                 </span>
               </div>
             )}
+            {/* SHARE ICON BADGE - EXACTLY LIKE BLINQ */}
             <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-full shadow-md flex items-center justify-center border border-gray-200">
               <Send className="w-3.5 h-3.5 text-red-500" />
             </div>
           </div>
           
+          {/* TITLE TEXT - EXACT FONT AND SPACING AS BLINQ */}
           <div className="flex-1 min-w-0">
             <h2 className="text-[18px] font-bold text-gray-900 leading-tight -mt-0.5 break-words">
               Share your contact information with {ownerName}
