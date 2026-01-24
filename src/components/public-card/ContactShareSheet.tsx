@@ -41,7 +41,7 @@ const BlinqInput = ({
         value={value}
         onChange={onChange}
         placeholder=" "
-        className="peer absolute inset-0 w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors leading-[56px]"
+        className="peer absolute inset-0 w-full h-full px-4 pt-5 pb-2 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
         style={{ fontSize: '16px' }}
       />
       <label
@@ -409,15 +409,12 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-        <DrawerContent
-          className="h-[calc(var(--vh,1vh)*85)] flex flex-col"
-          style={{ paddingBottom: 'env(keyboard-inset-height)' }}
-        >
+        <DrawerContent className="max-h-[85dvh] flex flex-col">
           <DrawerHeader className="p-0">
             <BlinqHeader />
           </DrawerHeader>
 
-          <div className="flex-1 overflow-y-auto pt-4 pb-10">
+          <div className="flex-1 overflow-y-auto pt-2 pb-6">
             {FormContent}
           </div>
         </DrawerContent>
