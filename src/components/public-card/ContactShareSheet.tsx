@@ -280,13 +280,31 @@ export function ContactShareSheet({
         />
       </div>
 
-      {/* EMAIL */}
-      <BlinqInput
-        label="Email"
-        value={formData.email}
-        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-        type="email"
-      />
+      {/* EMAIL - Same structure as name fields, using inputMode instead of type for consistent behavior */}
+      <div className="relative h-14">
+        <input
+          inputMode="email"
+          autoComplete="email"
+          value={formData.email}
+          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+          placeholder=" "
+          className="peer absolute inset-0 w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
+          style={{ fontSize: '16px' }}
+        />
+        <label
+          className={`
+            absolute left-4 px-1 text-muted-foreground pointer-events-none transition-all duration-200
+            peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
+            peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background
+            ${formData.email.length > 0 
+              ? 'top-0 -translate-y-1/2 text-xs bg-background' 
+              : ''
+            }
+          `}
+        >
+          Email
+        </label>
+      </div>
 
       {/* PHONE NUMBER - Simple layout without floating label to avoid overlap */}
       <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
