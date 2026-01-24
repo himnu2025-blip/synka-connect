@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -45,10 +45,12 @@ export function ContactShareSheet({
 }: ContactShareSheetProps) {
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const phoneInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
     lastName: '',
@@ -58,6 +60,27 @@ export function ContactShareSheet({
     company: '',
     linkedin: '',
   });
+
+  // Handle keyboard visibility on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleResize = () => {
+      // Check if keyboard is visible (window height shrinks)
+      const isKeyboardVisible = window.visualViewport?.height < window.screen.height * 0.8;
+      setKeyboardVisible(isKeyboardVisible);
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+    }
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize);
+      }
+    };
+  }, [isMobile]);
 
   const normalizeLinkedInUrl = (value: string) => {
     let v = value.trim();
@@ -186,7 +209,8 @@ export function ContactShareSheet({
     type = 'text',
     placeholder = '',
     name,
-    className = ''
+    className = '',
+    inputRef
   }: {
     label: string;
     value: string;
@@ -195,6 +219,7 @@ export function ContactShareSheet({
     placeholder?: string;
     name: string;
     className?: string;
+    inputRef?: React.Ref<HTMLInputElement>;
   }) => {
     const isFocused = focusedField === name;
     const hasValue = value.length > 0;
@@ -215,13 +240,24 @@ export function ContactShareSheet({
           </div>
           
           <input
+            ref={inputRef}
             type={type}
             value={value}
             onChange={onChange}
-            onFocus={() => setFocusedField(name)}
+            onFocus={() => {
+              setFocusedField(name);
+              // Auto-focus on mobile for better UX
+              if (isMobile) {
+                setTimeout(() => {
+                  const input = inputRef?.current || document.querySelector(`[name="${name}"]`);
+                  input?.focus();
+                }, 100);
+              }
+            }}
             onBlur={() => setFocusedField(null)}
             placeholder={placeholder}
             className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl placeholder:text-muted-foreground"
+            name={name}
           />
         </div>
       </div>
@@ -229,7 +265,7 @@ export function ContactShareSheet({
   };
 
   const Content = (
-    <div className="space-y-4 px-4">
+    <div className={`space-y-4 px-4 ${keyboardVisible ? 'pb-20' : ''}`}>
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -268,9 +304,21 @@ export function ContactShareSheet({
         placeholder="your@email.com"
       />
 
-      {/* PHONE NUMBER */}
+      {/* PHONE NUMBER - Fixed to prevent gaps */}
       <div className="space-y-1">
-        <div className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}>
+        <div 
+          className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}
+          onClick={(e) => {
+            // Handle first tap on mobile
+            if (isMobile && focusedField !== 'phone') {
+              setFocusedField('phone');
+              e.stopPropagation();
+              return;
+            }
+            // Second tap or desktop - focus input
+            phoneInputRef.current?.focus();
+          }}
+        >
           {/* Floating label on border for phone */}
           <div 
             className={`absolute -top-2 left-3 px-1 transition-all duration-200 ${
@@ -297,15 +345,27 @@ export function ContactShareSheet({
               </select>
             </div>
             <input
+              ref={phoneInputRef}
               type="tel"
               value={formData.phone}
               onChange={(e) =>
                 setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
               }
-              onFocus={() => setFocusedField('phone')}
+              onFocus={() => {
+                setFocusedField('phone');
+                // Prevent default scroll behavior on mobile
+                if (isMobile) {
+                  setTimeout(() => {
+                    window.scrollTo(0, 0);
+                  }, 100);
+                }
+              }}
               onBlur={() => setFocusedField(null)}
               placeholder="87006 97970"
               className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
+              inputMode="numeric"
+              // Add pattern for mobile keyboards
+              pattern="[0-9]*"
             />
           </div>
         </div>
@@ -319,6 +379,8 @@ export function ContactShareSheet({
             onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
             placeholder="+ Job title"
             className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
+            onFocus={() => setFocusedField('designation')}
+            onBlur={() => setFocusedField(null)}
           />
         </div>
         <div className="relative">
@@ -327,6 +389,8 @@ export function ContactShareSheet({
             onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
             placeholder="+ Company name"
             className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
+            onFocus={() => setFocusedField('company')}
+            onBlur={() => setFocusedField(null)}
           />
         </div>
       </div>
