@@ -230,7 +230,7 @@ export function ContactShareSheet({
   };
 
   const Content = (
-    <div className="space-y-4">
+    <div className="space-y-4 px-4">
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -285,11 +285,11 @@ export function ContactShareSheet({
           
           <div className="flex items-center h-full">
             <div className="flex items-center gap-2 px-4 h-full border-r border-border">
-              <span>🇮🇳</span>
+              <span className="text-base">🇮🇳</span>
               <select
                 value={countryCode}
                 onChange={(e) => setCountryCode(e.target.value)}
-                className="bg-transparent text-sm font-medium outline-none"
+                className="bg-transparent text-sm font-medium outline-none appearance-none pr-2"
               >
                 <option value="+91">+91</option>
                 <option value="+1">+1</option>
@@ -312,8 +312,8 @@ export function ContactShareSheet({
         </div>
       </div>
 
-      {/* JOB + COMPANY + LINKEDIN PILLS */}
-      <div className="grid grid-cols-3 gap-2">
+      {/* JOB + COMPANY + LINKEDIN PILLS - FIXED FOR NO HORIZONTAL SCROLL */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div className="relative">
           <input
             value={formData.designation}
@@ -370,10 +370,10 @@ export function ContactShareSheet({
   // Common header component for both mobile and desktop
   const BlinqHeader = () => (
     <>
-      {/* EXACT BLINQ HEADER WITH TIGHT GAPS */}
-      <div className="px-4 pt-4 pb-4 border-b border-gray-100">
+      {/* EXACT BLINQ HEADER - NO BORDER AT BOTTOM */}
+      <div className="px-4 pt-5 pb-4">
         {/* SCAN & SKIP ROW - EXACTLY LIKE BLINQ */}
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-5">
           {/* Scan button aligned left like Blinq */}
           <button
             onClick={handleScanBusinessCard}
@@ -417,8 +417,8 @@ export function ContactShareSheet({
           </div>
           
           {/* TITLE TEXT - EXACT FONT AND SPACING AS BLINQ */}
-          <div>
-            <h2 className="text-[18px] font-bold text-gray-900 leading-tight -mt-0.5">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-[18px] font-bold text-gray-900 leading-tight -mt-0.5 break-words">
               Share your contact information with {ownerName}
             </h2>
           </div>
@@ -430,12 +430,13 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90dvh] pb-8">
+        <DrawerContent className="max-h-[90dvh] pb-8 overflow-hidden">
           <DrawerHeader className="p-0">
             <BlinqHeader />
           </DrawerHeader>
           
-          <div className="px-4 pt-4 pb-6 overflow-y-auto">
+          {/* NO BORDER LINE - JUST CLEAN SPACING LIKE BLINQ */}
+          <div className="overflow-y-auto flex-1">
             {Content}
           </div>
         </DrawerContent>
@@ -448,7 +449,8 @@ export function ContactShareSheet({
       <DialogContent className="sm:max-w-md p-0 overflow-hidden" hideCloseButton>
         <BlinqHeader />
         
-        <div className="pt-4 pb-6 px-4">
+        {/* NO BORDER LINE - JUST CLEAN SPACING LIKE BLINQ */}
+        <div className="overflow-y-auto max-h-[60vh]">
           {Content}
         </div>
       </DialogContent>
