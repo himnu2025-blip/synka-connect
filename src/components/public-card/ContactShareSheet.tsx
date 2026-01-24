@@ -372,58 +372,36 @@ export function ContactShareSheet({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[90dvh]">
-          {/* HEADER WITH SCAN BUTTON - FIXED: Better layout */}
+          {/* HEADER - FIXED TO MATCH BLINQ EXACTLY */}
           <DrawerHeader className="relative px-5 pt-5 pb-4 border-b">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-3">
-                {ownerPhotoUrl ? (
-                  <img
-                    src={ownerPhotoUrl}
-                    alt={ownerName}
-                    className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-lg font-semibold text-blue-600">
-                      {ownerName.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <h2 className="text-[16px] font-semibold text-foreground leading-tight">
-                    Share your contact information
-                  </h2>
-                  <p className="text-sm text-muted-foreground truncate">
-                    with {ownerName}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
             <div className="flex items-center justify-between">
-              <div className="text-xs text-muted-foreground">
-                Fill in your details below
+              {/* LEFT: SCAN BUTTON */}
+              <button
+                onClick={handleScanBusinessCard}
+                disabled={scanState === 'uploading' || scanState === 'processing'}
+                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Camera className="w-4 h-4" />
+                <span>Scan</span>
+              </button>
+              
+              {/* CENTER: TITLE */}
+              <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
+                <h2 className="text-[16px] font-semibold text-foreground">
+                  Share your contact information
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  with {ownerName}
+                </p>
               </div>
               
-              <div className="flex items-center gap-3">
-                {/* SCAN BUTTON */}
-                <button
-                  onClick={handleScanBusinessCard}
-                  disabled={scanState === 'uploading' || scanState === 'processing'}
-                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Camera className="w-4 h-4" />
-                  <span>Scan</span>
-                </button>
-                
-                {/* SKIP BUTTON */}
-                <button
-                  onClick={handleSkip}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Skip
-                </button>
-              </div>
+              {/* RIGHT: SKIP BUTTON */}
+              <button
+                onClick={handleSkip}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Skip
+              </button>
             </div>
           </DrawerHeader>
           
@@ -438,56 +416,36 @@ export function ContactShareSheet({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" hideCloseButton>
-        {/* DESKTOP HEADER - FIXED: Better layout */}
+        {/* DESKTOP HEADER - FIXED TO MATCH BLINQ EXACTLY */}
         <div className="relative px-6 pt-6 pb-4 border-b">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              {ownerPhotoUrl ? (
-                <img
-                  src={ownerPhotoUrl}
-                  alt={ownerName}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                  <span className="text-lg font-semibold text-blue-600">
-                    {ownerName.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
-              <div>
-                <h2 className="text-[16px] font-semibold text-foreground">
-                  Share your contact information
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  with {ownerName}
-                </p>
-              </div>
-            </div>
-          </div>
-          
           <div className="flex items-center justify-between">
-            <div className="text-xs text-muted-foreground">
-              Fill in your details below
+            {/* LEFT: SCAN BUTTON */}
+            <button
+              onClick={handleScanBusinessCard}
+              disabled={scanState === 'uploading' || scanState === 'processing'}
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Camera className="w-4 h-4" />
+              <span>Scan</span>
+            </button>
+            
+            {/* CENTER: TITLE */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
+              <h2 className="text-[16px] font-semibold text-foreground">
+                Share your contact information
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                with {ownerName}
+              </p>
             </div>
             
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleScanBusinessCard}
-                disabled={scanState === 'uploading' || scanState === 'processing'}
-                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Camera className="w-4 h-4" />
-                <span>Scan</span>
-              </button>
-              
-              <button
-                onClick={handleSkip}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Skip
-              </button>
-            </div>
+            {/* RIGHT: SKIP BUTTON */}
+            <button
+              onClick={handleSkip}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Skip
+            </button>
           </div>
         </div>
         
