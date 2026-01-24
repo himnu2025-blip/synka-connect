@@ -179,8 +179,8 @@ export function ContactShareSheet({
     e.target.value = '';
   };
 
-  // Floating label style input component
-  const FloatingInput = ({ 
+  // Blinq-style input with border-floating label
+  const BlinqInput = ({ 
     label, 
     value, 
     onChange, 
@@ -199,28 +199,32 @@ export function ContactShareSheet({
   }) => {
     const isFocused = focusedField === name;
     const hasValue = value.length > 0;
-    const showLabelTop = isFocused || hasValue;
+    const showLabel = isFocused || hasValue;
 
     return (
       <div className={`relative ${className}`}>
-        <input
-          type={type}
-          value={value}
-          onChange={onChange}
-          onFocus={() => setFocusedField(name)}
-          onBlur={() => setFocusedField(null)}
-          placeholder={isFocused ? placeholder : ''}
-          className="w-full h-14 rounded-xl border border-border px-4 pt-5 pb-1 text-base focus:outline-none focus:border-primary"
-        />
-        <label
-          className={`absolute left-4 pointer-events-none transition-all duration-200 ${
-            showLabelTop
-              ? 'top-2 text-xs text-muted-foreground'
-              : 'top-1/2 -translate-y-1/2 text-base text-muted-foreground'
-          }`}
-        >
-          {label}
-        </label>
+        <div className={`relative h-14 rounded-xl border ${isFocused ? 'border-primary' : 'border-border'} transition-colors`}>
+          {/* Floating label on border */}
+          <div 
+            className={`absolute -top-2 left-3 px-1 transition-all duration-200 ${
+              showLabel 
+                ? 'text-xs text-muted-foreground bg-white' 
+                : 'text-transparent'
+            }`}
+          >
+            {label}
+          </div>
+          
+          <input
+            type={type}
+            value={value}
+            onChange={onChange}
+            onFocus={() => setFocusedField(name)}
+            onBlur={() => setFocusedField(null)}
+            placeholder={isFocused ? placeholder : ''}
+            className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl"
+          />
+        </div>
       </div>
     );
   };
@@ -237,16 +241,16 @@ export function ContactShareSheet({
         className="hidden"
       />
 
-      {/* FIRST + LAST NAME - BLINQ STYLE */}
+      {/* FIRST + LAST NAME - EXACT BLINQ STYLE */}
       <div className="grid grid-cols-2 gap-3">
-        <FloatingInput
+        <BlinqInput
           label="First name"
           value={formData.firstName}
           onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
           name="firstName"
           placeholder="Hello"
         />
-        <FloatingInput
+        <BlinqInput
           label="Last name"
           value={formData.lastName}
           onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
@@ -255,8 +259,8 @@ export function ContactShareSheet({
         />
       </div>
 
-      {/* EMAIL - BLINQ STYLE */}
-      <FloatingInput
+      {/* EMAIL - EXACT BLINQ STYLE */}
+      <BlinqInput
         label="Email"
         value={formData.email}
         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
@@ -265,13 +269,21 @@ export function ContactShareSheet({
         placeholder="your@email.com"
       />
 
-      {/* PHONE NUMBER - BLINQ STYLE */}
+      {/* PHONE NUMBER - EXACT BLINQ STYLE */}
       <div className="space-y-1">
-        <div className="relative h-14 rounded-xl border border-border focus-within:border-primary overflow-hidden">
-          <div className="absolute top-2 left-4 text-xs text-muted-foreground">
+        <div className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}>
+          {/* Floating label on border for phone */}
+          <div 
+            className={`absolute -top-2 left-3 px-1 transition-all duration-200 ${
+              (focusedField === 'phone' || formData.phone) 
+                ? 'text-xs text-muted-foreground bg-white' 
+                : 'text-transparent'
+            }`}
+          >
             Phone number
           </div>
-          <div className="flex items-center h-full pt-5">
+          
+          <div className="flex items-center h-full">
             <div className="flex items-center gap-2 px-4 h-full border-r border-border">
               <span>🇮🇳</span>
               <select
@@ -300,14 +312,14 @@ export function ContactShareSheet({
         </div>
       </div>
 
-      {/* JOB + COMPANY + LINKEDIN PILLS */}
+      {/* JOB + COMPANY + LINKEDIN PILLS - EXACT BLINQ STYLE */}
       <div className="grid grid-cols-3 gap-2">
         <div className="relative">
           <input
             value={formData.designation}
             onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
             placeholder="+ Job title"
-            className="w-full h-12 rounded-full border border-border text-sm pl-3 pr-3 focus:outline-none focus:border-primary"
+            className="w-full h-12 rounded-full border border-border text-sm px-4 focus:outline-none focus:border-primary"
           />
         </div>
         <div className="relative">
@@ -315,7 +327,7 @@ export function ContactShareSheet({
             value={formData.company}
             onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
             placeholder="+ Company name"
-            className="w-full h-12 rounded-full border border-border text-sm pl-3 pr-3 focus:outline-none focus:border-primary"
+            className="w-full h-12 rounded-full border border-border text-sm px-4 focus:outline-none focus:border-primary"
           />
         </div>
         <div className="relative">
@@ -334,17 +346,17 @@ export function ContactShareSheet({
               }))
             }
             placeholder="+ LinkedIn"
-            className="w-full h-12 rounded-full border border-border text-sm pl-10 pr-3 focus:outline-none focus:border-primary"
+            className="w-full h-12 rounded-full border border-border text-sm px-10 focus:outline-none focus:border-primary"
           />
-          <Linkedin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Linkedin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         </div>
       </div>
 
-      {/* SEND BUTTON */}
+      {/* SEND BUTTON - EXACT BLINQ STYLE */}
       <Button
         onClick={handleSubmit}
         disabled={submitting}
-        className="w-full h-14 rounded-xl bg-black text-white text-base font-medium mt-6"
+        className="w-full h-14 rounded-xl bg-black text-white text-base font-medium mt-6 hover:bg-black/90"
       >
         {submitting ? 'Sending...' : 'Send'}
       </Button>
@@ -359,23 +371,23 @@ export function ContactShareSheet({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[90dvh]">
-          {/* HEADER WITH SCAN BUTTON */}
+          {/* HEADER WITH SCAN BUTTON - EXACT BLINQ STYLE */}
           <DrawerHeader className="relative px-5 pt-5 pb-4 border-b">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 {ownerPhotoUrl && (
                   <img
                     src={ownerPhotoUrl}
                     alt={ownerName}
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                   />
                 )}
-                <h2 className="text-[16px] font-semibold text-foreground">
+                <h2 className="text-[16px] font-semibold text-foreground truncate">
                   Share your contact information with {ownerName}
                 </h2>
               </div>
               
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-shrink-0">
                 {/* SCAN BUTTON */}
                 <button
                   onClick={handleScanBusinessCard}
