@@ -416,16 +416,19 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="pb-8">
-          <DrawerHeader className="p-0">
-            <BlinqHeader />
-          </DrawerHeader>
-          
-          <div className="pt-4">
-            {Content}
-          </div>
-        </DrawerContent>
-      </Drawer>
+  <DrawerContent
+    className="h-[calc(var(--vh,1vh)*85)] flex flex-col"
+    style={{ paddingBottom: 'env(keyboard-inset-height)' }}
+  >
+    <DrawerHeader className="p-0">
+      <BlinqHeader />
+    </DrawerHeader>
+
+    <div className="flex-1 overflow-y-auto pt-4 pb-10">
+      {Content}
+    </div>
+  </DrawerContent>
+</Drawer>
     );
   }
 
