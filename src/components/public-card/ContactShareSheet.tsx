@@ -39,7 +39,7 @@ const BlinqInput = ({
           onChange={onChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className={`w-full h-full px-4 text-base bg-transparent outline-none rounded-xl ${shouldFloat ? 'pt-5' : ''}`}
+          className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl"
           style={{ fontSize: '16px' }}
         />
         <label
