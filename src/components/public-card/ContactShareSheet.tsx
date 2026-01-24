@@ -338,13 +338,11 @@ export function ContactShareSheet({
         />
       </div>
 
-      {/* EMAIL - Uses same BlinqInput component for consistency */}
+      {/* EMAIL - Exact same as First/Last name, no special keyboard */}
       <BlinqInput
         label="Email"
         value={formData.email}
         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-        inputMode="email"
-        autoComplete="email"
       />
 
       {/* PHONE NUMBER - Simple layout without floating label to avoid overlap */}
