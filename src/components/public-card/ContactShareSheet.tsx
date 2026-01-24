@@ -198,7 +198,7 @@ export function ContactShareSheet({
           value={value}
           onChange={onChange}
           placeholder=" "
-          className="peer w-full h-full px-4 pt-5 text-base bg-transparent outline-none rounded-xl"
+          className="peer w-full h-full px-4 text-base bg-transparent outline-none rounded-xl leading-[56px]"
           style={{ fontSize: '16px' }}
         />
 
