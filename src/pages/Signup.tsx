@@ -437,12 +437,13 @@ export default function Signup() {
         </div>
       </div>
 
-      {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-12">
-        <div className="w-full max-w-md space-y-8 animate-fade-up">
-          <div className="text-center lg:text-left">
-            <div className="mb-8">
-              <BrandLogo size="lg" />
+      {/* Right Panel - Form - Scrollable on mobile */}
+      <div className="flex-1 min-h-screen overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-4 py-8 md:p-12">
+          <div className="w-full max-w-md space-y-6 animate-fade-up">
+            <div className="text-center lg:text-left">
+              <div className="mb-6">
+                <BrandLogo size="lg" />
             </div>
             
             <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -720,6 +721,7 @@ export default function Signup() {
           </p>
         </div>
       </div>
+    </div>
     </div>
   );
 }
