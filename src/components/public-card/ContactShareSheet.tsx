@@ -14,8 +14,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-// Simple input with consistent padding
-const SimpleInput = ({
+// Blinq-style input with border-floating label - defined outside component to prevent re-render focus loss
+const BlinqInput = ({
   label,
   value,
   onChange,
@@ -26,15 +26,32 @@ const SimpleInput = ({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
 }) => {
+  const hasValue = value.length > 0;
+
   return (
-    <input
-      type={type}
-      value={value}
-      onChange={onChange}
-      placeholder={label}
-      className="w-full h-14 px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors placeholder:text-muted-foreground leading-[56px]"
-      style={{ fontSize: '16px' }}
-    />
+    <div className="relative h-14">
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder=" "
+        className="peer absolute inset-0 w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
+        style={{ fontSize: '16px' }}
+      />
+      <label
+        className={`
+          absolute left-3 px-1 text-muted-foreground pointer-events-none transition-all duration-200
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
+          peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background
+          ${hasValue 
+            ? 'top-0 -translate-y-1/2 text-xs bg-background' 
+            : ''
+          }
+        `}
+      >
+        {label}
+      </label>
+    </div>
   );
 };
 
@@ -202,6 +219,8 @@ export function ContactShareSheet({
     e.target.value = '';
   };
 
+  
+
   const Content = (
     <div className="space-y-4 px-4">
       {/* Hidden file input */}
@@ -216,12 +235,12 @@ export function ContactShareSheet({
 
       {/* FIRST + LAST NAME */}
       <div className="grid grid-cols-2 gap-3">
-        <SimpleInput
+        <BlinqInput
           label="First name"
           value={formData.firstName}
           onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
         />
-        <SimpleInput
+        <BlinqInput
           label="Last name"
           value={formData.lastName}
           onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
@@ -229,17 +248,17 @@ export function ContactShareSheet({
       </div>
 
       {/* EMAIL */}
-      <SimpleInput
+      <BlinqInput
         label="Email"
         value={formData.email}
         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
         type="email"
       />
 
-      {/* PHONE NUMBER - Fixed alignment */}
+      {/* PHONE NUMBER - Simple layout without floating label to avoid overlap */}
       <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
-        {/* Country code selector with proper padding */}
-        <div className="flex items-center gap-2 pl-4 pr-3 h-full border-r border-border shrink-0">
+        {/* Country code selector */}
+        <div className="flex items-center gap-1.5 px-3 h-full border-r border-border shrink-0">
           <span className="text-base">🇮🇳</span>
           <select
             value={countryCode}
@@ -252,7 +271,7 @@ export function ContactShareSheet({
             <option value="+61">+61</option>
           </select>
         </div>
-        {/* Phone number input with proper vertical alignment */}
+        {/* Phone number input */}
         <input
           type="tel"
           value={formData.phone}
@@ -260,25 +279,25 @@ export function ContactShareSheet({
             setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
           }
           placeholder="Phone number"
-          className="flex-1 h-full px-4 text-base outline-none bg-transparent leading-[56px] placeholder:text-muted-foreground"
+          className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
           style={{ fontSize: '16px' }}
         />
       </div>
 
-      {/* JOB + COMPANY PILLS - Fixed padding */}
+      {/* JOB + COMPANY PILLS - SMALL LIKE BLINQ */}
       <div className="grid grid-cols-2 gap-2">
         <input
           value={formData.designation}
           onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
           placeholder="+ Job title"
-          className="w-full h-10 rounded-full border border-border text-sm px-4 focus:outline-none focus:border-foreground placeholder:text-muted-foreground"
+          className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-foreground placeholder:text-muted-foreground"
           style={{ fontSize: '16px' }}
         />
         <input
           value={formData.company}
           onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
           placeholder="+ Company name"
-          className="w-full h-10 rounded-full border border-border text-sm px-4 focus:outline-none focus:border-foreground placeholder:text-muted-foreground"
+          className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-foreground placeholder:text-muted-foreground"
           style={{ fontSize: '16px' }}
         />
       </div>
@@ -362,19 +381,19 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent
-          className="h-[calc(var(--vh,1vh)*85)] flex flex-col"
-          style={{ paddingBottom: 'env(keyboard-inset-height)' }}
-        >
-          <DrawerHeader className="p-0">
-            <BlinqHeader />
-          </DrawerHeader>
+  <DrawerContent
+    className="h-[calc(var(--vh,1vh)*85)] flex flex-col"
+    style={{ paddingBottom: 'env(keyboard-inset-height)' }}
+  >
+    <DrawerHeader className="p-0">
+      <BlinqHeader />
+    </DrawerHeader>
 
-          <div className="flex-1 overflow-y-auto pt-4 pb-10">
-            {Content}
-          </div>
-        </DrawerContent>
-      </Drawer>
+    <div className="flex-1 overflow-y-auto pt-4 pb-10">
+      {Content}
+    </div>
+  </DrawerContent>
+</Drawer>
     );
   }
 
