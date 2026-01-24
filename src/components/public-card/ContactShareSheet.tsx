@@ -89,7 +89,7 @@ export function ContactShareSheet({
   const [submitting, setSubmitting] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
-  const [focusedField, setFocusedField] = useState<string | null>(null);
+  
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
     lastName: '',
@@ -256,19 +256,8 @@ export function ContactShareSheet({
       />
 
       {/* PHONE NUMBER */}
-      <div className="space-y-1">
-        <div className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}>
-          {/* Floating label on border for phone */}
-          <div 
-            className={`absolute -top-2 left-3 px-1 transition-all duration-200 ${
-              (focusedField === 'phone' || formData.phone) 
-                ? 'text-xs text-muted-foreground bg-white' 
-                : 'text-transparent'
-            }`}
-          >
-            Phone number
-          </div>
-          
+      <div className="relative">
+        <div className="relative h-14 rounded-xl border border-border focus-within:border-foreground transition-colors">
           <div className="flex items-center h-full">
             <div className="flex items-center gap-2 px-4 h-full border-r border-border">
               <span className="text-base">🇮🇳</span>
@@ -276,8 +265,6 @@ export function ContactShareSheet({
                 value={countryCode}
                 onChange={(e) => setCountryCode(e.target.value)}
                 className="bg-transparent text-sm font-medium outline-none appearance-none pr-2"
-                onFocus={() => setFocusedField('phone')}
-                onBlur={() => setFocusedField(null)}
               >
                 <option value="+91">+91</option>
                 <option value="+1">+1</option>
@@ -291,37 +278,42 @@ export function ContactShareSheet({
               onChange={(e) =>
                 setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
               }
-              onFocus={() => setFocusedField('phone')}
-              onBlur={() => setFocusedField(null)}
-              placeholder="87006 97970"
-              className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
+              className="peer flex-1 h-full px-4 text-base outline-none bg-transparent"
+              style={{ fontSize: '16px' }}
             />
           </div>
+          {/* Floating label using peer */}
+          <label
+            className={`
+              absolute left-3 px-1 text-muted-foreground transition-all duration-200 pointer-events-none
+              peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background
+              ${formData.phone 
+                ? 'top-0 -translate-y-1/2 text-xs bg-background' 
+                : 'top-1/2 -translate-y-1/2 text-base'
+              }
+            `}
+          >
+            Phone number
+          </label>
         </div>
       </div>
 
       {/* JOB + COMPANY PILLS - SMALL LIKE BLINQ */}
       <div className="grid grid-cols-2 gap-2">
-        <div className="relative">
-          <input
-            value={formData.designation}
-            onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
-            placeholder="+ Job title"
-            className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
-            onFocus={() => setFocusedField('designation')}
-            onBlur={() => setFocusedField(null)}
-          />
-        </div>
-        <div className="relative">
-          <input
-            value={formData.company}
-            onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-            placeholder="+ Company name"
-            className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
-            onFocus={() => setFocusedField('company')}
-            onBlur={() => setFocusedField(null)}
-          />
-        </div>
+        <input
+          value={formData.designation}
+          onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
+          placeholder="+ Job title"
+          className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-foreground placeholder:text-muted-foreground"
+          style={{ fontSize: '16px' }}
+        />
+        <input
+          value={formData.company}
+          onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+          placeholder="+ Company name"
+          className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-foreground placeholder:text-muted-foreground"
+          style={{ fontSize: '16px' }}
+        />
       </div>
 
       {/* SEND BUTTON WITH GRADIENT */}
