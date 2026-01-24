@@ -179,54 +179,45 @@ export function ContactShareSheet({
   };
 
   // Blinq-style input with border-floating label
-  const BlinqInput = ({ 
-    label, 
-    value, 
-    onChange, 
-    type = 'text',
-    placeholder = '',
-    name,
-    className = ''
-  }: {
-    label: string;
-    value: string;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    type?: string;
-    placeholder?: string;
-    name: string;
-    className?: string;
-  }) => {
-    const isFocused = focusedField === name;
-    const hasValue = value.length > 0;
-    const showLabel = isFocused || hasValue;
+  const BlinqInput = ({
+  label,
+  value,
+  onChange,
+  type = 'text',
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+}) => {
+  return (
+    <div className="relative">
+      <div className="relative h-14 rounded-xl border border-border focus-within:border-black transition-colors">
 
-    return (
-      <div className={`relative ${className}`}>
-        <div className={`relative h-14 rounded-xl border ${isFocused ? 'border-primary' : 'border-border'} transition-colors`}>
-          {/* Floating label on border - FIXED: Always show when has value */}
-          <div 
-            className={`absolute -top-2 left-3 px-1 transition-all duration-200 ${
-              showLabel 
-                ? 'text-xs text-muted-foreground bg-white' 
-                : 'text-transparent'
-            }`}
-          >
-            {label}
-          </div>
-          
-          <input
-            type={type}
-            value={value}
-            onChange={onChange}
-            onFocus={() => setFocusedField(name)}
-            onBlur={() => setFocusedField(null)}
-            placeholder={placeholder}
-            className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl placeholder:text-muted-foreground"
-          />
-        </div>
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder=" "
+          className="peer w-full h-full px-4 pt-5 text-base bg-transparent outline-none rounded-xl"
+          style={{ fontSize: '16px' }}
+        />
+
+        <label
+          className="
+            absolute left-3 bg-white px-1 text-muted-foreground transition-all
+            top-1/2 -translate-y-1/2 text-base
+            peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs
+            peer-not-placeholder-shown:top-0 peer-not-placeholder-shown:-translate-y-1/2 peer-not-placeholder-shown:text-xs
+          "
+        >
+          {label}
+        </label>
+
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   const Content = (
     <div className="space-y-4 px-4">
