@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react';
-import { Send, Camera, Linkedin } from 'lucide-react';
+import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -312,14 +311,14 @@ export function ContactShareSheet({
         </div>
       </div>
 
-      {/* JOB + COMPANY PILLS - EXACTLY 2 ON ONE LINE LIKE BLINQ */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* JOB + COMPANY PILLS - SMALL LIKE BLINQ */}
+      <div className="grid grid-cols-2 gap-2">
         <div className="relative">
           <input
             value={formData.designation}
             onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
             placeholder="+ Job title"
-            className="w-full h-12 rounded-full border border-border text-sm px-4 focus:outline-none focus:border-primary placeholder:text-muted-foreground"
+            className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
           />
         </div>
         <div className="relative">
@@ -327,16 +326,17 @@ export function ContactShareSheet({
             value={formData.company}
             onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
             placeholder="+ Company name"
-            className="w-full h-12 rounded-full border border-border text-sm px-4 focus:outline-none focus:border-primary placeholder:text-muted-foreground"
+            className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
           />
         </div>
       </div>
 
-      {/* SEND BUTTON */}
+      {/* SEND BUTTON WITH GRADIENT */}
       <Button
         onClick={handleSubmit}
         disabled={submitting}
-        className="w-full h-14 rounded-xl bg-black text-white text-base font-medium mt-6 hover:bg-black/90"
+        variant="gradient"
+        className="w-full h-14 rounded-xl text-white text-base font-medium mt-6 hover:opacity-90 transition-opacity"
       >
         {submitting ? 'Sending...' : 'Send'}
       </Button>
