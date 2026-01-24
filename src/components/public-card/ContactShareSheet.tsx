@@ -372,10 +372,10 @@ export function ContactShareSheet({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[90dvh]">
-          {/* HEADER - FIXED TO MATCH BLINQ EXACTLY */}
+          {/* HEADER - MATCHES BLINQ EXACTLY */}
           <DrawerHeader className="relative px-5 pt-5 pb-4 border-b">
-            <div className="flex items-center justify-between">
-              {/* LEFT: SCAN BUTTON */}
+            {/* TOP RIGHT: SCAN + SKIP BUTTONS */}
+            <div className="flex justify-end gap-3 mb-3">
               <button
                 onClick={handleScanBusinessCard}
                 disabled={scanState === 'uploading' || scanState === 'processing'}
@@ -385,23 +385,26 @@ export function ContactShareSheet({
                 <span>Scan</span>
               </button>
               
-              {/* CENTER: TITLE */}
-              <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
-                <h2 className="text-[16px] font-semibold text-foreground">
-                  Share your contact information
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  with {ownerName}
-                </p>
-              </div>
-              
-              {/* RIGHT: SKIP BUTTON */}
               <button
                 onClick={handleSkip}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Skip
               </button>
+            </div>
+            
+            {/* TITLE - BLINQ STYLE */}
+            <div className="flex items-center gap-3">
+              {ownerPhotoUrl && (
+                <img
+                  src={ownerPhotoUrl}
+                  alt={ownerName}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              )}
+              <h2 className="text-[16px] font-semibold text-foreground">
+                Share your contact information with {ownerName}
+              </h2>
             </div>
           </DrawerHeader>
           
@@ -416,10 +419,10 @@ export function ContactShareSheet({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" hideCloseButton>
-        {/* DESKTOP HEADER - FIXED TO MATCH BLINQ EXACTLY */}
+        {/* DESKTOP HEADER - MATCHES BLINQ EXACTLY */}
         <div className="relative px-6 pt-6 pb-4 border-b">
-          <div className="flex items-center justify-between">
-            {/* LEFT: SCAN BUTTON */}
+          {/* TOP RIGHT: SCAN + SKIP BUTTONS */}
+          <div className="flex justify-end gap-3 mb-3">
             <button
               onClick={handleScanBusinessCard}
               disabled={scanState === 'uploading' || scanState === 'processing'}
@@ -429,23 +432,26 @@ export function ContactShareSheet({
               <span>Scan</span>
             </button>
             
-            {/* CENTER: TITLE */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
-              <h2 className="text-[16px] font-semibold text-foreground">
-                Share your contact information
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                with {ownerName}
-              </p>
-            </div>
-            
-            {/* RIGHT: SKIP BUTTON */}
             <button
               onClick={handleSkip}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Skip
             </button>
+          </div>
+          
+          {/* TITLE - BLINQ STYLE */}
+          <div className="flex items-center gap-3">
+            {ownerPhotoUrl && (
+              <img
+                src={ownerPhotoUrl}
+                alt={ownerName}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            )}
+            <h2 className="text-[16px] font-semibold text-foreground">
+              Share your contact information with {ownerName}
+            </h2>
           </div>
         </div>
         
