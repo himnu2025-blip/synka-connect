@@ -2,7 +2,6 @@ import { useState, useRef } from 'react';
 import { Send, Camera, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -50,6 +49,7 @@ export function ContactShareSheet({
   const [submitting, setSubmitting] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
+  const [focusedField, setFocusedField] = useState<string | null>(null);
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
     lastName: '',
@@ -64,15 +64,12 @@ export function ContactShareSheet({
     let v = value.trim();
     if (!v) return '';
     
-    // Remove protocol
     v = v.replace(/^https?:\/\//, '');
     
-    // If user pasted full LinkedIn URL
     if (v.includes('linkedin.com')) {
       return `https://${v}`;
     }
     
-    // If user typed only username
     return `https://linkedin.com/in/${v}`;
   };
 
@@ -92,7 +89,6 @@ export function ContactShareSheet({
         phone: `${countryCode}${formData.phone}`,
       });
       onOpenChange(false);
-      // Reset form
       setFormData({
         firstName: '',
         lastName: '',
@@ -183,8 +179,54 @@ export function ContactShareSheet({
     e.target.value = '';
   };
 
+  // Floating label style input component
+  const FloatingInput = ({ 
+    label, 
+    value, 
+    onChange, 
+    type = 'text',
+    placeholder = '',
+    name,
+    className = ''
+  }: {
+    label: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    type?: string;
+    placeholder?: string;
+    name: string;
+    className?: string;
+  }) => {
+    const isFocused = focusedField === name;
+    const hasValue = value.length > 0;
+    const showLabelTop = isFocused || hasValue;
+
+    return (
+      <div className={`relative ${className}`}>
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          onFocus={() => setFocusedField(name)}
+          onBlur={() => setFocusedField(null)}
+          placeholder={isFocused ? placeholder : ''}
+          className="w-full h-14 rounded-xl border border-border px-4 pt-5 pb-1 text-base focus:outline-none focus:border-primary"
+        />
+        <label
+          className={`absolute left-4 pointer-events-none transition-all duration-200 ${
+            showLabelTop
+              ? 'top-2 text-xs text-muted-foreground'
+              : 'top-1/2 -translate-y-1/2 text-base text-muted-foreground'
+          }`}
+        >
+          {label}
+        </label>
+      </div>
+    );
+  };
+
   const Content = (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -195,85 +237,89 @@ export function ContactShareSheet({
         className="hidden"
       />
 
-      {/* FIRST + LAST - SIMPLIFIED LIKE BLINQ */}
+      {/* FIRST + LAST NAME - BLINQ STYLE */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">First name</Label>
-          <Input
-            value={formData.firstName}
-            onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-            className="h-12 rounded-xl border border-border px-3 text-base"
-            placeholder="Hello"
-          />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Last name</Label>
-          <Input
-            value={formData.lastName}
-            onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-            className="h-12 rounded-xl border border-border px-3 text-base"
-            placeholder="Ji"
-          />
-        </div>
-      </div>
-
-      {/* EMAIL */}
-      <div className="space-y-1">
-        <Label className="text-xs text-muted-foreground">Email</Label>
-        <Input
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-          className="h-12 rounded-xl border border-border px-3 text-base"
-          placeholder="your@email.com"
+        <FloatingInput
+          label="First name"
+          value={formData.firstName}
+          onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+          name="firstName"
+          placeholder="Hello"
+        />
+        <FloatingInput
+          label="Last name"
+          value={formData.lastName}
+          onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+          name="lastName"
+          placeholder="Ji"
         />
       </div>
 
-      {/* PHONE WITH COUNTRY - EXACTLY LIKE BLINQ */}
+      {/* EMAIL - BLINQ STYLE */}
+      <FloatingInput
+        label="Email"
+        value={formData.email}
+        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+        type="email"
+        name="email"
+        placeholder="your@email.com"
+      />
+
+      {/* PHONE NUMBER - BLINQ STYLE */}
       <div className="space-y-1">
-        <Label className="text-xs text-muted-foreground">Phone number</Label>
-        <div className="flex items-center h-12 rounded-xl border border-border overflow-hidden">
-          <div className="flex items-center gap-2 px-3 h-full">
-            <span>🇮🇳</span>
-            <select
-              value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
-              className="bg-transparent text-sm font-medium outline-none"
-            >
-              <option value="+91">+91</option>
-              <option value="+1">+1</option>
-              <option value="+44">+44</option>
-              <option value="+61">+61</option>
-            </select>
+        <div className="relative h-14 rounded-xl border border-border focus-within:border-primary overflow-hidden">
+          <div className="absolute top-2 left-4 text-xs text-muted-foreground">
+            Phone number
           </div>
-          <input
-            type="tel"
-            value={formData.phone}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-            }
-            placeholder="87006 97970"
-            className="flex-1 px-3 text-base outline-none bg-transparent"
-          />
+          <div className="flex items-center h-full pt-5">
+            <div className="flex items-center gap-2 px-4 h-full border-r border-border">
+              <span>🇮🇳</span>
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                className="bg-transparent text-sm font-medium outline-none"
+              >
+                <option value="+91">+91</option>
+                <option value="+1">+1</option>
+                <option value="+44">+44</option>
+                <option value="+61">+61</option>
+              </select>
+            </div>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+              }
+              onFocus={() => setFocusedField('phone')}
+              onBlur={() => setFocusedField(null)}
+              placeholder={focusedField === 'phone' ? '87006 97970' : ''}
+              className="flex-1 h-full px-4 text-base outline-none bg-transparent"
+            />
+          </div>
         </div>
       </div>
 
-      {/* JOB + COMPANY + LINKEDIN PILLS - EXACTLY LIKE BLINQ */}
+      {/* JOB + COMPANY + LINKEDIN PILLS */}
       <div className="grid grid-cols-3 gap-2">
-        <Input
-          value={formData.designation}
-          onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
-          placeholder="+ Job title"
-          className="h-12 rounded-full border border-border text-sm px-3"
-        />
-        <Input
-          value={formData.company}
-          onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-          placeholder="+ Company name"
-          className="h-12 rounded-full border border-border text-sm px-3"
-        />
         <div className="relative">
-          <Input
+          <input
+            value={formData.designation}
+            onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
+            placeholder="+ Job title"
+            className="w-full h-12 rounded-full border border-border text-sm pl-3 pr-3 focus:outline-none focus:border-primary"
+          />
+        </div>
+        <div className="relative">
+          <input
+            value={formData.company}
+            onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+            placeholder="+ Company name"
+            className="w-full h-12 rounded-full border border-border text-sm pl-3 pr-3 focus:outline-none focus:border-primary"
+          />
+        </div>
+        <div className="relative">
+          <input
             value={formData.linkedin || ''}
             onChange={(e) =>
               setFormData(prev => ({
@@ -288,22 +334,22 @@ export function ContactShareSheet({
               }))
             }
             placeholder="+ LinkedIn"
-            className="h-12 rounded-full border border-border text-sm pl-10 pr-3"
+            className="w-full h-12 rounded-full border border-border text-sm pl-10 pr-3 focus:outline-none focus:border-primary"
           />
           <Linkedin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         </div>
       </div>
 
-      {/* SEND BUTTON - EXACTLY LIKE BLINQ */}
+      {/* SEND BUTTON */}
       <Button
         onClick={handleSubmit}
         disabled={submitting}
-        className="w-full h-14 rounded-xl bg-black text-white text-base font-medium shadow-sm"
+        className="w-full h-14 rounded-xl bg-black text-white text-base font-medium mt-6"
       >
         {submitting ? 'Sending...' : 'Send'}
       </Button>
 
-      <p className="text-[11px] text-center text-muted-foreground/70">
+      <p className="text-[11px] text-center text-muted-foreground/70 mt-4">
         We don't sell your contact details
       </p>
     </div>
@@ -313,7 +359,7 @@ export function ContactShareSheet({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[90dvh]">
-          {/* HEADER WITH SCAN BUTTON - EXACTLY LIKE BLINQ */}
+          {/* HEADER WITH SCAN BUTTON */}
           <DrawerHeader className="relative px-5 pt-5 pb-4 border-b">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -330,7 +376,7 @@ export function ContactShareSheet({
               </div>
               
               <div className="flex items-center gap-3">
-                {/* SCAN BUTTON - Small at top */}
+                {/* SCAN BUTTON */}
                 <button
                   onClick={handleScanBusinessCard}
                   disabled={scanState === 'uploading' || scanState === 'processing'}
