@@ -40,13 +40,48 @@ const BlinqInput = ({
       />
       <label
         className={`
-          absolute left-3 px-1 text-muted-foreground pointer-events-none transition-all duration-200
+          absolute left-4 px-1 text-muted-foreground pointer-events-none transition-all duration-200
           peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
           peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background
           ${hasValue 
             ? 'top-0 -translate-y-1/2 text-xs bg-background' 
             : ''
           }
+        `}
+      >
+        {label}
+      </label>
+    </div>
+  );
+};
+
+// Pill input with floating label for Job Title and Company
+const PillInput = ({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => {
+  const hasValue = value.length > 0;
+
+  return (
+    <div className="relative h-10">
+      <input
+        value={value}
+        onChange={onChange}
+        placeholder=" "
+        className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-transparent focus:border-foreground"
+        style={{ fontSize: '16px' }}
+      />
+      <label
+        className={`
+          absolute left-4 px-1 text-muted-foreground pointer-events-none transition-all
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm
+          peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-[10px] peer-focus:bg-background
+          ${hasValue ? 'top-0 -translate-y-1/2 text-[10px] bg-background' : ''}
         `}
       >
         {label}
@@ -219,8 +254,6 @@ export function ContactShareSheet({
     e.target.value = '';
   };
 
-  
-
   const Content = (
     <div className="space-y-4 px-4">
       {/* Hidden file input */}
@@ -284,21 +317,17 @@ export function ContactShareSheet({
         />
       </div>
 
-      {/* JOB + COMPANY PILLS - SMALL LIKE BLINQ */}
+      {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}
       <div className="grid grid-cols-2 gap-2">
-        <input
+        <PillInput
+          label="Job title"
           value={formData.designation}
           onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
-          placeholder="+ Job title"
-          className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-foreground placeholder:text-muted-foreground"
-          style={{ fontSize: '16px' }}
         />
-        <input
+        <PillInput
+          label="Company name"
           value={formData.company}
           onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-          placeholder="+ Company name"
-          className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-foreground placeholder:text-muted-foreground"
-          style={{ fontSize: '16px' }}
         />
       </div>
 
@@ -381,19 +410,19 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-  <DrawerContent
-    className="h-[calc(var(--vh,1vh)*85)] flex flex-col"
-    style={{ paddingBottom: 'env(keyboard-inset-height)' }}
-  >
-    <DrawerHeader className="p-0">
-      <BlinqHeader />
-    </DrawerHeader>
+        <DrawerContent
+          className="h-[calc(var(--vh,1vh)*85)] flex flex-col"
+          style={{ paddingBottom: 'env(keyboard-inset-height)' }}
+        >
+          <DrawerHeader className="p-0">
+            <BlinqHeader />
+          </DrawerHeader>
 
-    <div className="flex-1 overflow-y-auto pt-4 pb-10">
-      {Content}
-    </div>
-  </DrawerContent>
-</Drawer>
+          <div className="flex-1 overflow-y-auto pt-4 pb-10">
+            {Content}
+          </div>
+        </DrawerContent>
+      </Drawer>
     );
   }
 
