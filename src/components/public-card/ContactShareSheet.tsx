@@ -221,7 +221,6 @@ export function ContactShareSheet({
             onChange={onChange}
             onFocus={() => setFocusedField(name)}
             onBlur={() => setFocusedField(null)}
-            // FIXED: Show placeholder always (not just when focused)
             placeholder={placeholder}
             className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl placeholder:text-muted-foreground"
           />
@@ -249,14 +248,14 @@ export function ContactShareSheet({
           value={formData.firstName}
           onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
           name="firstName"
-          placeholder="Hello"  // Shows always
+          placeholder="Hello"
         />
         <BlinqInput
           label="Last name"
           value={formData.lastName}
           onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
           name="lastName"
-          placeholder="Ji"  // Shows always
+          placeholder="Ji"
         />
       </div>
 
@@ -267,7 +266,7 @@ export function ContactShareSheet({
         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
         type="email"
         name="email"
-        placeholder="your@email.com"  // Shows always
+        placeholder="your@email.com"
       />
 
       {/* PHONE NUMBER */}
@@ -306,7 +305,7 @@ export function ContactShareSheet({
               }
               onFocus={() => setFocusedField('phone')}
               onBlur={() => setFocusedField(null)}
-              placeholder="87006 97970"  // Shows always
+              placeholder="87006 97970"
               className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
             />
           </div>
@@ -368,46 +367,75 @@ export function ContactShareSheet({
     </div>
   );
 
+  // Common header component for both mobile and desktop
+  const BlinqHeader = () => (
+    <>
+      {/* EXACT BLINQ HEADER WITH TIGHT GAPS */}
+      <div className="px-4 pt-4 pb-4 border-b border-gray-100">
+        {/* SCAN & SKIP ROW - EXACTLY LIKE BLINQ */}
+        <div className="flex justify-between items-center mb-4">
+          {/* Scan button aligned left like Blinq */}
+          <button
+            onClick={handleScanBusinessCard}
+            disabled={scanState === 'uploading' || scanState === 'processing'}
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <Camera className="w-4 h-4" />
+            <span className="font-medium">Scan</span>
+          </button>
+          
+          {/* Skip button at top right with tight spacing */}
+          <button
+            onClick={handleSkip}
+            className="text-sm font-semibold text-gray-900 hover:text-gray-700 transition-colors"
+          >
+            Skip
+          </button>
+        </div>
+        
+        {/* PROFILE AND TITLE - EXACTLY LIKE BLINQ */}
+        <div className="flex items-start gap-3">
+          {/* LARGE PROFILE PHOTO - EXACT SIZE AS BLINQ */}
+          <div className="relative flex-shrink-0">
+            {ownerPhotoUrl ? (
+              <img
+                src={ownerPhotoUrl}
+                alt={ownerName}
+                className="w-16 h-16 rounded-2xl object-cover border-2 border-white shadow-sm"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center border-2 border-white shadow-sm">
+                <span className="text-xl font-semibold text-blue-600">
+                  {ownerName.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+            {/* SHARE ICON BADGE - EXACTLY LIKE BLINQ */}
+            <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-full shadow-md flex items-center justify-center border border-gray-200">
+              <Send className="w-3.5 h-3.5 text-red-500" />
+            </div>
+          </div>
+          
+          {/* TITLE TEXT - EXACT FONT AND SPACING AS BLINQ */}
+          <div>
+            <h2 className="text-[18px] font-bold text-gray-900 leading-tight -mt-0.5">
+              Share your contact information with {ownerName}
+            </h2>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90dvh]">
-          {/* HEADER - EXACT MATCH TO BLINQ */}
-          <DrawerHeader className="relative px-5 py-4 border-b">
-            {/* TOP RIGHT: ONLY SKIP BUTTON - EXACTLY LIKE BLINQ */}
-            <div className="absolute right-5 top-4">
-              <button
-                onClick={handleSkip}
-                className="text-sm text-black font-medium hover:text-black/80 transition-colors"
-              >
-                Skip
-              </button>
-            </div>
-            
-            {/* PHOTO AND TEXT - COMPACT, NO EXTRA GAP */}
-            <div className="flex items-center gap-3 pt-1">
-              <div className="relative flex-shrink-0">
-                {ownerPhotoUrl ? (
-                  <img
-                    src={ownerPhotoUrl}
-                    alt={ownerName}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                    <span className="text-lg font-semibold text-blue-600">
-                      {ownerName.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <h2 className="text-[16px] font-semibold text-foreground">
-                Share your contact information with {ownerName}
-              </h2>
-            </div>
+        <DrawerContent className="max-h-[90dvh] pb-8">
+          <DrawerHeader className="p-0">
+            <BlinqHeader />
           </DrawerHeader>
           
-          <div className="px-5 pt-4 pb-6 overflow-y-auto">
+          <div className="px-4 pt-4 pb-6 overflow-y-auto">
             {Content}
           </div>
         </DrawerContent>
@@ -417,43 +445,10 @@ export function ContactShareSheet({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" hideCloseButton>
-        {/* DESKTOP HEADER - EXACT MATCH TO BLINQ */}
-        <div className="relative px-6 py-4 border-b">
-          {/* TOP RIGHT: ONLY SKIP BUTTON - EXACTLY LIKE BLINQ */}
-          <div className="absolute right-6 top-4">
-            <button
-              onClick={handleSkip}
-              className="text-sm text-black font-medium hover:text-black/80 transition-colors"
-            >
-              Skip
-            </button>
-          </div>
-          
-          {/* PHOTO AND TEXT - COMPACT, NO EXTRA GAP */}
-          <div className="flex items-center gap-3 pt-1">
-            <div className="relative flex-shrink-0">
-              {ownerPhotoUrl ? (
-                <img
-                  src={ownerPhotoUrl}
-                  alt={ownerName}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                  <span className="text-lg font-semibold text-blue-600">
-                    {ownerName.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
-            </div>
-            <h2 className="text-[16px] font-semibold text-foreground">
-              Share your contact information with {ownerName}
-            </h2>
-          </div>
-        </div>
+      <DialogContent className="sm:max-w-md p-0 overflow-hidden" hideCloseButton>
+        <BlinqHeader />
         
-        <div className="pt-4 pb-6 px-6">
+        <div className="pt-4 pb-6 px-4">
           {Content}
         </div>
       </DialogContent>
