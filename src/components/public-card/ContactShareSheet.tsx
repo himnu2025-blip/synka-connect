@@ -29,28 +29,28 @@ const BlinqInput = ({
   const hasValue = value.length > 0;
 
   return (
-    <div className="relative">
-      <div className="relative h-14 rounded-xl border border-border focus-within:border-foreground transition-colors">
-        <input
-          type={type}
-          value={value}
-          onChange={onChange}
-          className="peer w-full h-14 px-4 py-4 text-base bg-transparent outline-none rounded-xl"
-          style={{ fontSize: '16px' }}
-        />
-        <label
-          className={`
-            absolute left-3 px-1 text-muted-foreground transition-all duration-200 pointer-events-none
-            peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background
-            ${hasValue 
-              ? 'top-0 -translate-y-1/2 text-xs bg-background' 
-              : 'top-1/2 -translate-y-1/2 text-base'
-            }
-          `}
-        >
-          {label}
-        </label>
-      </div>
+    <div className="relative h-14">
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder=" "
+        className="peer absolute inset-0 w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
+        style={{ fontSize: '16px' }}
+      />
+      <label
+        className={`
+          absolute left-3 px-1 text-muted-foreground pointer-events-none transition-all duration-200
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
+          peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background
+          ${hasValue 
+            ? 'top-0 -translate-y-1/2 text-xs bg-background' 
+            : ''
+          }
+        `}
+      >
+        {label}
+      </label>
     </div>
   );
 };
