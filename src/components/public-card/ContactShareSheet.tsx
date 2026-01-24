@@ -251,7 +251,68 @@ export function ContactShareSheet({
     e.target.value = '';
   };
 
-  const Content = (
+  // Common header component for both mobile and desktop
+  const BlinqHeader = () => (
+    <>
+      {/* EXACT BLINQ HEADER - NO BORDER AT BOTTOM */}
+      <div className="px-4 pt-5 pb-4">
+        {/* SCAN & SKIP ROW - EXACTLY LIKE BLINQ */}
+        <div className="flex justify-between items-center mb-5">
+          {/* Scan button aligned left like Blinq */}
+          <button
+            onClick={handleScanBusinessCard}
+            disabled={scanState === 'uploading' || scanState === 'processing'}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Camera className="w-4 h-4" />
+            <span className="font-medium">Scan</span>
+          </button>
+          
+          {/* Skip button at top right with tight spacing */}
+          <button
+            onClick={handleSkip}
+            className="text-sm font-semibold text-foreground hover:text-muted-foreground transition-colors"
+          >
+            Skip
+          </button>
+        </div>
+        
+        {/* PROFILE AND TITLE - EXACTLY LIKE BLINQ */}
+        <div className="flex items-start gap-3">
+          {/* LARGE PROFILE PHOTO - EXACT SIZE AS BLINQ */}
+          <div className="relative flex-shrink-0">
+            {ownerPhotoUrl ? (
+              <img
+                src={ownerPhotoUrl}
+                alt={ownerName}
+                className="w-16 h-16 rounded-2xl object-cover border-2 border-background shadow-sm"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border-2 border-background shadow-sm">
+                <span className="text-xl font-semibold text-primary">
+                  {ownerName.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+            {/* SHARE ICON BADGE - EXACTLY LIKE BLINQ */}
+            <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-background rounded-full shadow-md flex items-center justify-center border border-border">
+              <Send className="w-3.5 h-3.5 text-destructive" />
+            </div>
+          </div>
+          
+          {/* TITLE TEXT - EXACT FONT AND SPACING AS BLINQ */}
+          <div className="flex-1 min-w-0">
+            <h2 className="text-[18px] font-bold text-foreground leading-tight -mt-0.5 break-words">
+              Share your contact information with {ownerName}
+            </h2>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
+  // Form content rendered inline to prevent re-mount issues
+  const FormContent = (
     <div className="space-y-4 px-4">
       {/* Hidden file input */}
       <input
@@ -345,69 +406,9 @@ export function ContactShareSheet({
     </div>
   );
 
-  // Common header component for both mobile and desktop
-  const BlinqHeader = () => (
-    <>
-      {/* EXACT BLINQ HEADER - NO BORDER AT BOTTOM */}
-      <div className="px-4 pt-5 pb-4">
-        {/* SCAN & SKIP ROW - EXACTLY LIKE BLINQ */}
-        <div className="flex justify-between items-center mb-5">
-          {/* Scan button aligned left like Blinq */}
-          <button
-            onClick={handleScanBusinessCard}
-            disabled={scanState === 'uploading' || scanState === 'processing'}
-            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            <Camera className="w-4 h-4" />
-            <span className="font-medium">Scan</span>
-          </button>
-          
-          {/* Skip button at top right with tight spacing */}
-          <button
-            onClick={handleSkip}
-            className="text-sm font-semibold text-gray-900 hover:text-gray-700 transition-colors"
-          >
-            Skip
-          </button>
-        </div>
-        
-        {/* PROFILE AND TITLE - EXACTLY LIKE BLINQ */}
-        <div className="flex items-start gap-3">
-          {/* LARGE PROFILE PHOTO - EXACT SIZE AS BLINQ */}
-          <div className="relative flex-shrink-0">
-            {ownerPhotoUrl ? (
-              <img
-                src={ownerPhotoUrl}
-                alt={ownerName}
-                className="w-16 h-16 rounded-2xl object-cover border-2 border-white shadow-sm"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center border-2 border-white shadow-sm">
-                <span className="text-xl font-semibold text-blue-600">
-                  {ownerName.charAt(0).toUpperCase()}
-                </span>
-              </div>
-            )}
-            {/* SHARE ICON BADGE - EXACTLY LIKE BLINQ */}
-            <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-full shadow-md flex items-center justify-center border border-gray-200">
-              <Send className="w-3.5 h-3.5 text-red-500" />
-            </div>
-          </div>
-          
-          {/* TITLE TEXT - EXACT FONT AND SPACING AS BLINQ */}
-          <div className="flex-1 min-w-0">
-            <h2 className="text-[18px] font-bold text-gray-900 leading-tight -mt-0.5 break-words">
-              Share your contact information with {ownerName}
-            </h2>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
+      <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
         <DrawerContent
           className="h-[calc(var(--vh,1vh)*85)] flex flex-col"
           style={{ paddingBottom: 'env(keyboard-inset-height)' }}
@@ -417,7 +418,7 @@ export function ContactShareSheet({
           </DrawerHeader>
 
           <div className="flex-1 overflow-y-auto pt-4 pb-10">
-            {Content}
+            {FormContent}
           </div>
         </DrawerContent>
       </Drawer>
@@ -430,7 +431,7 @@ export function ContactShareSheet({
         <BlinqHeader />
         
         <div className="pt-4 pb-6">
-          {Content}
+          {FormContent}
         </div>
       </DialogContent>
     </Dialog>
