@@ -46,7 +46,8 @@ export function ContactShareSheet({
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const phoneInputRef = useRef<HTMLInputElement>(null);
-  const drawerContentRef = useRef<HTMLDivElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
@@ -61,26 +62,12 @@ export function ContactShareSheet({
     linkedin: '',
   });
 
-  // Handle keyboard visibility
+  // Reset focus when drawer opens
   useEffect(() => {
-    if (!isMobile || !open) return;
-
-    const handleFocusIn = (e: FocusEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
-        // Let the browser handle the scroll naturally
-        setTimeout(() => {
-          window.scrollTo(0, 0);
-        }, 100);
-      }
-    };
-
-    document.addEventListener('focusin', handleFocusIn);
-    
-    return () => {
-      document.removeEventListener('focusin', handleFocusIn);
-    };
-  }, [isMobile, open]);
+    if (open) {
+      setFocusedField(null);
+    }
+  }, [open]);
 
   const normalizeLinkedInUrl = (value: string) => {
     let v = value.trim();
@@ -209,7 +196,8 @@ export function ContactShareSheet({
     type = 'text',
     placeholder = '',
     name,
-    className = ''
+    className = '',
+    inputRef
   }: {
     label: string;
     value: string;
@@ -218,6 +206,7 @@ export function ContactShareSheet({
     placeholder?: string;
     name: string;
     className?: string;
+    inputRef?: React.Ref<HTMLInputElement>;
   }) => {
     const isFocused = focusedField === name;
     const hasValue = value.length > 0;
@@ -225,7 +214,17 @@ export function ContactShareSheet({
 
     return (
       <div className={`relative ${className}`}>
-        <div className={`relative h-14 rounded-xl border ${isFocused ? 'border-primary' : 'border-border'} transition-colors`}>
+        <div 
+          className={`relative h-14 rounded-xl border ${isFocused ? 'border-primary' : 'border-border'} transition-colors`}
+          onClick={() => {
+            if (isMobile && inputRef && 'current' in inputRef) {
+              // Focus the input on mobile tap
+              setTimeout(() => {
+                inputRef.current?.focus();
+              }, 50);
+            }
+          }}
+        >
           {/* Floating label on border - FIXED: Always show when has value */}
           <div 
             className={`absolute -top-2 left-3 px-1 transition-all duration-200 ${
@@ -238,6 +237,7 @@ export function ContactShareSheet({
           </div>
           
           <input
+            ref={inputRef}
             type={type}
             value={value}
             onChange={onChange}
@@ -246,11 +246,6 @@ export function ContactShareSheet({
             placeholder={placeholder}
             className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl placeholder:text-muted-foreground"
             name={name}
-            // Prevent auto-scroll on mobile
-            onTouchStart={(e) => {
-              // Prevent default to avoid double-tap issue
-              e.currentTarget.focus();
-            }}
           />
         </div>
       </div>
@@ -295,11 +290,21 @@ export function ContactShareSheet({
         type="email"
         name="email"
         placeholder="your@email.com"
+        inputRef={emailInputRef}
       />
 
-      {/* PHONE NUMBER */}
+      {/* PHONE NUMBER - Use type="tel" for proper keyboard */}
       <div className="space-y-1">
-        <div className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}>
+        <div 
+          className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}
+          onClick={() => {
+            if (isMobile) {
+              setTimeout(() => {
+                phoneInputRef.current?.focus();
+              }, 50);
+            }
+          }}
+        >
           {/* Floating label on border for phone */}
           <div 
             className={`absolute -top-2 left-3 px-1 transition-all duration-200 ${
@@ -318,6 +323,12 @@ export function ContactShareSheet({
                 value={countryCode}
                 onChange={(e) => setCountryCode(e.target.value)}
                 className="bg-transparent text-sm font-medium outline-none appearance-none pr-2"
+                onFocus={() => setFocusedField('phone')}
+                onBlur={() => {
+                  if (!phoneInputRef.current?.matches(':focus')) {
+                    setFocusedField(null);
+                  }
+                }}
               >
                 <option value="+91">+91</option>
                 <option value="+1">+1</option>
@@ -327,7 +338,7 @@ export function ContactShareSheet({
             </div>
             <input
               ref={phoneInputRef}
-              type="tel"
+              type="tel" // Changed from type="tel" to show proper keyboard
               value={formData.phone}
               onChange={(e) =>
                 setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
@@ -336,11 +347,8 @@ export function ContactShareSheet({
               onBlur={() => setFocusedField(null)}
               placeholder="87006 97970"
               className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              onTouchStart={(e) => {
-                e.currentTarget.focus();
-              }}
+              // REMOVED: inputMode="numeric" pattern="[0-9]*" 
+              // This was causing the numeric keypad instead of regular keyboard
             />
           </div>
         </div>
@@ -356,8 +364,10 @@ export function ContactShareSheet({
             className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
             onFocus={() => setFocusedField('designation')}
             onBlur={() => setFocusedField(null)}
-            onTouchStart={(e) => {
-              e.currentTarget.focus();
+            onClick={(e) => {
+              if (isMobile) {
+                e.currentTarget.focus();
+              }
             }}
           />
         </div>
@@ -369,8 +379,10 @@ export function ContactShareSheet({
             className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
             onFocus={() => setFocusedField('company')}
             onBlur={() => setFocusedField(null)}
-            onTouchStart={(e) => {
-              e.currentTarget.focus();
+            onClick={(e) => {
+              if (isMobile) {
+                e.currentTarget.focus();
+              }
             }}
           />
         </div>
@@ -456,11 +468,11 @@ export function ContactShareSheet({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent 
-          className="pb-0" 
-          ref={drawerContentRef}
+          className="pb-0"
+          ref={drawerRef}
         >
-          {/* Simple container that lets browser handle keyboard naturally */}
-          <div className="max-h-[90vh]">
+          {/* Simple drawer that works with keyboard */}
+          <div>
             <DrawerHeader className="p-0">
               <BlinqHeader />
             </DrawerHeader>
