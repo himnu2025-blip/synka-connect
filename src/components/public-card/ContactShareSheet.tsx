@@ -312,8 +312,8 @@ export function ContactShareSheet({
         </div>
       </div>
 
-      {/* JOB + COMPANY + LINKEDIN PILLS - FIXED FOR NO HORIZONTAL SCROLL */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      {/* JOB + COMPANY PILLS - EXACTLY 2 ON ONE LINE LIKE BLINQ */}
+      <div className="grid grid-cols-2 gap-3">
         <div className="relative">
           <input
             value={formData.designation}
@@ -329,26 +329,6 @@ export function ContactShareSheet({
             placeholder="+ Company name"
             className="w-full h-12 rounded-full border border-border text-sm px-4 focus:outline-none focus:border-primary placeholder:text-muted-foreground"
           />
-        </div>
-        <div className="relative">
-          <input
-            value={formData.linkedin || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                linkedin: e.target.value
-              }))
-            }
-            onBlur={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                linkedin: normalizeLinkedInUrl(e.target.value)
-              }))
-            }
-            placeholder="+ LinkedIn"
-            className="w-full h-12 rounded-full border border-border text-sm px-10 focus:outline-none focus:border-primary placeholder:text-muted-foreground"
-          />
-          <Linkedin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         </div>
       </div>
 
