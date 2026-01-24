@@ -26,24 +26,30 @@ const BlinqInput = ({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
 }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const hasValue = value.length > 0;
+  const shouldFloat = isFocused || hasValue;
+
   return (
     <div className="relative">
-      <div className="relative h-14 rounded-xl border border-border focus-within:border-foreground transition-colors">
+      <div className={`relative h-14 rounded-xl border transition-colors ${isFocused ? 'border-foreground' : 'border-border'}`}>
         <input
           type={type}
           value={value}
           onChange={onChange}
-          placeholder=" "
-          className="peer w-full h-full px-4 pt-5 text-base bg-transparent outline-none rounded-xl"
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          className={`w-full h-full px-4 text-base bg-transparent outline-none rounded-xl ${shouldFloat ? 'pt-5' : ''}`}
           style={{ fontSize: '16px' }}
         />
         <label
-          className="
-            absolute left-3 bg-background px-1 text-muted-foreground transition-all
-            top-1/2 -translate-y-1/2 text-base
-            peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs
-            peer-not-placeholder-shown:top-0 peer-not-placeholder-shown:-translate-y-1/2 peer-not-placeholder-shown:text-xs
-          "
+          className={`
+            absolute left-3 px-1 text-muted-foreground transition-all duration-200 pointer-events-none
+            ${shouldFloat 
+              ? 'top-0 -translate-y-1/2 text-xs bg-background' 
+              : 'top-1/2 -translate-y-1/2 text-base'
+            }
+          `}
         >
           {label}
         </label>
