@@ -410,7 +410,10 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90dvh] pb-8 overflow-hidden">
+        <DrawerContent className="max-h-[90dvh] pb-8 overflow-hidden p-0">
+          {/* NO PULL-DOWN INDICATOR BAR - Remove any top padding/margin that shows the drag handle */}
+          <div className="absolute top-0 left-0 right-0 h-0" /> {/* This prevents any drag handle */}
+          
           <DrawerHeader className="p-0">
             <BlinqHeader />
           </DrawerHeader>
