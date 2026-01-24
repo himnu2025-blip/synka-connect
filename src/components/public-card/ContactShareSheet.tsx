@@ -32,15 +32,15 @@ const BlinqInput = ({
 
   return (
     <div className="relative">
-      <div className={`relative h-14 rounded-xl border transition-colors ${isFocused ? 'border-foreground' : 'border-border'}`}>
+      <div className={`relative h-14 rounded-xl border transition-colors flex items-center ${isFocused ? 'border-foreground' : 'border-border'}`}>
         <input
           type={type}
           value={value}
           onChange={onChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl"
-          style={{ fontSize: '16px' }}
+          className="w-full px-4 text-base bg-transparent outline-none"
+          style={{ fontSize: '16px', lineHeight: '1.5' }}
         />
         <label
           className={`
