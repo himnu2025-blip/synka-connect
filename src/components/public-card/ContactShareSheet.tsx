@@ -179,44 +179,41 @@ export function ContactShareSheet({
 
   // Blinq-style input with border-floating label
   const BlinqInput = ({
-  label,
-  value,
-  onChange,
-  type = 'text',
-}: {
-  label: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
-}) => {
-  return (
-    <div className="relative">
-      <div className="relative h-14 rounded-xl border border-border focus-within:border-black transition-colors">
-
-        <input
-          type={type}
-          value={value}
-          onChange={onChange}
-          placeholder=" "
-          className="peer w-full h-full px-4 text-base bg-transparent outline-none rounded-xl leading-[56px]"
-          style={{ fontSize: '16px' }}
-        />
-
-        <label
-          className="
-            absolute left-3 bg-white px-1 text-muted-foreground transition-all
-            top-1/2 -translate-y-1/2 text-base
-            peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs
-            peer-not-placeholder-shown:top-0 peer-not-placeholder-shown:-translate-y-1/2 peer-not-placeholder-shown:text-xs
-          "
-        >
-          {label}
-        </label>
-
+    label,
+    value,
+    onChange,
+    type = 'text',
+  }: {
+    label: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    type?: string;
+  }) => {
+    return (
+      <div className="relative">
+        <div className="relative h-14 rounded-xl border border-border focus-within:border-black transition-colors">
+          <input
+            type={type}
+            value={value}
+            onChange={onChange}
+            placeholder=" "
+            className="peer w-full h-full px-4 text-base bg-transparent outline-none rounded-xl leading-[56px]"
+            style={{ fontSize: '16px' }}
+          />
+          <label
+            className="
+              absolute left-3 bg-white px-1 text-muted-foreground transition-all
+              top-1/2 -translate-y-1/2 text-base
+              peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs
+              peer-not-placeholder-shown:top-0 peer-not-placeholder-shown:-translate-y-1/2 peer-not-placeholder-shown:text-xs
+            "
+          >
+            {label}
+          </label>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
   const Content = (
     <div className="space-y-4 px-4">
@@ -236,15 +233,11 @@ export function ContactShareSheet({
           label="First name"
           value={formData.firstName}
           onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-          name="firstName"
-          placeholder="Hello"
         />
         <BlinqInput
           label="Last name"
           value={formData.lastName}
           onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-          name="lastName"
-          placeholder="Ji"
         />
       </div>
 
@@ -254,77 +247,55 @@ export function ContactShareSheet({
         value={formData.email}
         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
         type="email"
-        name="email"
-        placeholder="your@email.com"
       />
 
       {/* PHONE NUMBER */}
-      <div className="space-y-1">
-        <div className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}>
-          {/* Floating label on border for phone */}
-          <div 
-            className={`absolute -top-2 left-3 px-1 transition-all duration-200 ${
-              (focusedField === 'phone' || formData.phone) 
-                ? 'text-xs text-muted-foreground bg-white' 
-                : 'text-transparent'
-            }`}
-          >
-            Phone number
+      <div className="relative h-14 rounded-xl border border-border focus-within:border-black transition-colors">
+        <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-muted-foreground">
+          Phone number
+        </label>
+
+        <div className="flex items-center h-full">
+          <div className="flex items-center gap-2 px-4 h-full border-r border-border">
+            <span className="text-base">🇮🇳</span>
+            <select
+              value={countryCode}
+              onChange={(e) => setCountryCode(e.target.value)}
+              className="bg-transparent text-sm font-medium outline-none appearance-none pr-2"
+            >
+              <option value="+91">+91</option>
+              <option value="+1">+1</option>
+              <option value="+44">+44</option>
+              <option value="+61">+61</option>
+            </select>
           </div>
-          
-          <div className="flex items-center h-full">
-            <div className="flex items-center gap-2 px-4 h-full border-r border-border">
-              <span className="text-base">🇮🇳</span>
-              <select
-                value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value)}
-                className="bg-transparent text-sm font-medium outline-none appearance-none pr-2"
-                onFocus={() => setFocusedField('phone')}
-                onBlur={() => setFocusedField(null)}
-              >
-                <option value="+91">+91</option>
-                <option value="+1">+1</option>
-                <option value="+44">+44</option>
-                <option value="+61">+61</option>
-              </select>
-            </div>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-              }
-              onFocus={() => setFocusedField('phone')}
-              onBlur={() => setFocusedField(null)}
-              placeholder="87006 97970"
-              className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
-            />
-          </div>
+
+          <input
+            type="tel"
+            value={formData.phone}
+            onChange={(e) =>
+              setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+            }
+            placeholder=" "
+            className="flex-1 h-full px-4 text-base outline-none bg-transparent leading-[56px]"
+          />
         </div>
       </div>
 
       {/* JOB + COMPANY PILLS - SMALL LIKE BLINQ */}
       <div className="grid grid-cols-2 gap-2">
-        <div className="relative">
-          <input
-            value={formData.designation}
-            onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
-            placeholder="+ Job title"
-            className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
-            onFocus={() => setFocusedField('designation')}
-            onBlur={() => setFocusedField(null)}
-          />
-        </div>
-        <div className="relative">
-          <input
-            value={formData.company}
-            onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-            placeholder="+ Company name"
-            className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
-            onFocus={() => setFocusedField('company')}
-            onBlur={() => setFocusedField(null)}
-          />
-        </div>
+        <input
+          value={formData.designation}
+          onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
+          placeholder="+ Job title"
+          className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-black placeholder:text-muted-foreground placeholder:text-sm"
+        />
+        <input
+          value={formData.company}
+          onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+          placeholder="+ Company name"
+          className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-black placeholder:text-muted-foreground placeholder:text-sm"
+        />
       </div>
 
       {/* SEND BUTTON WITH GRADIENT */}
@@ -406,19 +377,19 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-  <DrawerContent
-    className="h-[calc(var(--vh,1vh)*85)] flex flex-col"
-    style={{ paddingBottom: 'env(keyboard-inset-height)' }}
-  >
-    <DrawerHeader className="p-0">
-      <BlinqHeader />
-    </DrawerHeader>
+        <DrawerContent
+          className="h-[calc(var(--vh,1vh)*85)] flex flex-col"
+          style={{ paddingBottom: 'env(keyboard-inset-height)' }}
+        >
+          <DrawerHeader className="p-0">
+            <BlinqHeader />
+          </DrawerHeader>
 
-    <div className="flex-1 overflow-y-auto pt-4 pb-10">
-      {Content}
-    </div>
-  </DrawerContent>
-</Drawer>
+          <div className="flex-1 overflow-y-auto pt-4 pb-10">
+            {Content}
+          </div>
+        </DrawerContent>
+      </Drawer>
     );
   }
 
