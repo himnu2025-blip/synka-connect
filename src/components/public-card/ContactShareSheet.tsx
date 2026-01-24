@@ -338,12 +338,15 @@ export function ContactShareSheet({
         />
       </div>
 
-      {/* EMAIL - Wrapped in grid like name fields for layout stability */}
-      <div className="grid grid-cols-1">
-        <BlinqInput
-          label="Email"
+      {/* EMAIL - Simple fixed label like phone to avoid first-click issues */}
+      <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
+        <input
+          type="text"
           value={formData.email}
           onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+          placeholder="Email"
+          className="w-full h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
+          style={{ fontSize: '16px' }}
         />
       </div>
 
