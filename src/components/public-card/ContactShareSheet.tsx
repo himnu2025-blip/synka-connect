@@ -372,19 +372,10 @@ export function ContactShareSheet({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[90dvh]">
-          {/* HEADER - MATCHES BLINQ EXACTLY */}
-          <DrawerHeader className="relative px-5 pt-5 pb-4 border-b">
-            {/* TOP RIGHT: SCAN + SKIP BUTTONS - DARK SKIP */}
-            <div className="flex justify-end gap-4 mb-4">
-              <button
-                onClick={handleScanBusinessCard}
-                disabled={scanState === 'uploading' || scanState === 'processing'}
-                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Camera className="w-4 h-4" />
-                <span>Scan</span>
-              </button>
-              
+          {/* HEADER - EXACT MATCH TO BLINQ */}
+          <DrawerHeader className="relative px-5 py-4 border-b">
+            {/* TOP RIGHT: ONLY SKIP BUTTON - EXACTLY LIKE BLINQ */}
+            <div className="absolute right-5 top-4">
               <button
                 onClick={handleSkip}
                 className="text-sm text-black font-medium hover:text-black/80 transition-colors"
@@ -393,28 +384,24 @@ export function ContactShareSheet({
               </button>
             </div>
             
-            {/* TITLE - BLINQ STYLE WITH SHARE ICON */}
-            <div className="flex items-center gap-4">
+            {/* PHOTO AND TEXT - COMPACT, NO EXTRA GAP */}
+            <div className="flex items-center gap-3 pt-1">
               <div className="relative flex-shrink-0">
                 {ownerPhotoUrl ? (
                   <img
                     src={ownerPhotoUrl}
                     alt={ownerName}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
+                    className="w-12 h-12 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center border-2 border-white shadow-sm">
-                    <span className="text-xl font-semibold text-blue-600">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                    <span className="text-lg font-semibold text-blue-600">
                       {ownerName.charAt(0).toUpperCase()}
                     </span>
                   </div>
                 )}
-                {/* SHARE ICON BADGE - LIKE BLINQ */}
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full shadow flex items-center justify-center border border-gray-100">
-                  <Send className="w-3 h-3 text-red-500" />
-                </div>
               </div>
-              <h2 className="text-[18px] font-semibold text-foreground leading-tight">
+              <h2 className="text-[16px] font-semibold text-foreground">
                 Share your contact information with {ownerName}
               </h2>
             </div>
@@ -431,19 +418,10 @@ export function ContactShareSheet({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" hideCloseButton>
-        {/* DESKTOP HEADER - MATCHES BLINQ EXACTLY */}
-        <div className="relative px-6 pt-6 pb-4 border-b">
-          {/* TOP RIGHT: SCAN + SKIP BUTTONS - DARK SKIP */}
-          <div className="flex justify-end gap-4 mb-4">
-            <button
-              onClick={handleScanBusinessCard}
-              disabled={scanState === 'uploading' || scanState === 'processing'}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Camera className="w-4 h-4" />
-              <span>Scan</span>
-            </button>
-            
+        {/* DESKTOP HEADER - EXACT MATCH TO BLINQ */}
+        <div className="relative px-6 py-4 border-b">
+          {/* TOP RIGHT: ONLY SKIP BUTTON - EXACTLY LIKE BLINQ */}
+          <div className="absolute right-6 top-4">
             <button
               onClick={handleSkip}
               className="text-sm text-black font-medium hover:text-black/80 transition-colors"
@@ -452,28 +430,24 @@ export function ContactShareSheet({
             </button>
           </div>
           
-          {/* TITLE - BLINQ STYLE WITH SHARE ICON */}
-          <div className="flex items-center gap-4">
+          {/* PHOTO AND TEXT - COMPACT, NO EXTRA GAP */}
+          <div className="flex items-center gap-3 pt-1">
             <div className="relative flex-shrink-0">
               {ownerPhotoUrl ? (
                 <img
                   src={ownerPhotoUrl}
                   alt={ownerName}
-                  className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
+                  className="w-12 h-12 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center border-2 border-white shadow-sm">
-                  <span className="text-xl font-semibold text-blue-600">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                  <span className="text-lg font-semibold text-blue-600">
                     {ownerName.charAt(0).toUpperCase()}
                   </span>
                 </div>
               )}
-              {/* SHARE ICON BADGE - LIKE BLINQ */}
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full shadow flex items-center justify-center border border-gray-100">
-                <Send className="w-3 h-3 text-red-500" />
-              </div>
             </div>
-            <h2 className="text-[18px] font-semibold text-foreground leading-tight">
+            <h2 className="text-[16px] font-semibold text-foreground">
               Share your contact information with {ownerName}
             </h2>
           </div>
