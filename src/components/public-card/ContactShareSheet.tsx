@@ -14,6 +14,44 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
+// Blinq-style input with border-floating label - defined outside component to prevent re-render focus loss
+const BlinqInput = ({
+  label,
+  value,
+  onChange,
+  type = 'text',
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+}) => {
+  return (
+    <div className="relative">
+      <div className="relative h-14 rounded-xl border border-border focus-within:border-foreground transition-colors">
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder=" "
+          className="peer w-full h-full px-4 pt-5 text-base bg-transparent outline-none rounded-xl"
+          style={{ fontSize: '16px' }}
+        />
+        <label
+          className="
+            absolute left-3 bg-background px-1 text-muted-foreground transition-all
+            top-1/2 -translate-y-1/2 text-base
+            peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs
+            peer-not-placeholder-shown:top-0 peer-not-placeholder-shown:-translate-y-1/2 peer-not-placeholder-shown:text-xs
+          "
+        >
+          {label}
+        </label>
+      </div>
+    </div>
+  );
+};
+
 interface ContactShareSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -178,46 +216,7 @@ export function ContactShareSheet({
     e.target.value = '';
   };
 
-  // Blinq-style input with border-floating label
-  const BlinqInput = ({
-  label,
-  value,
-  onChange,
-  type = 'text',
-}: {
-  label: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
-}) => {
-  return (
-    <div className="relative">
-      <div className="relative h-14 rounded-xl border border-border focus-within:border-black transition-colors">
-
-        <input
-          type={type}
-          value={value}
-          onChange={onChange}
-          placeholder=" "
-          className="peer w-full h-full px-4 pt-5 text-base bg-transparent outline-none rounded-xl"
-          style={{ fontSize: '16px' }}
-        />
-
-        <label
-          className="
-            absolute left-3 bg-white px-1 text-muted-foreground transition-all
-            top-1/2 -translate-y-1/2 text-base
-            peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs
-            peer-not-placeholder-shown:top-0 peer-not-placeholder-shown:-translate-y-1/2 peer-not-placeholder-shown:text-xs
-          "
-        >
-          {label}
-        </label>
-
-      </div>
-    </div>
-  );
-};
+  
 
   const Content = (
     <div className="space-y-4 px-4">
@@ -237,15 +236,11 @@ export function ContactShareSheet({
           label="First name"
           value={formData.firstName}
           onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-          name="firstName"
-          placeholder="Hello"
         />
         <BlinqInput
           label="Last name"
           value={formData.lastName}
           onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-          name="lastName"
-          placeholder="Ji"
         />
       </div>
 
@@ -255,8 +250,6 @@ export function ContactShareSheet({
         value={formData.email}
         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
         type="email"
-        name="email"
-        placeholder="your@email.com"
       />
 
       {/* PHONE NUMBER */}
