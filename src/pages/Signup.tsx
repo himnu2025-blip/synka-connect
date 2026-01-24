@@ -21,6 +21,70 @@ interface LocationState {
 
 type SignupStep = 'details' | 'otp' | 'set_pin';
 
+// Country codes list
+const COUNTRY_CODES = [
+  { code: '+91', flag: '🇮🇳', country: 'India' },
+  { code: '+1', flag: '🇺🇸', country: 'USA/Canada' },
+  { code: '+44', flag: '🇬🇧', country: 'UK' },
+  { code: '+61', flag: '🇦🇺', country: 'Australia' },
+  { code: '+971', flag: '🇦🇪', country: 'UAE' },
+  { code: '+966', flag: '🇸🇦', country: 'Saudi Arabia' },
+  { code: '+65', flag: '🇸🇬', country: 'Singapore' },
+  { code: '+60', flag: '🇲🇾', country: 'Malaysia' },
+  { code: '+49', flag: '🇩🇪', country: 'Germany' },
+  { code: '+33', flag: '🇫🇷', country: 'France' },
+  { code: '+39', flag: '🇮🇹', country: 'Italy' },
+  { code: '+34', flag: '🇪🇸', country: 'Spain' },
+  { code: '+31', flag: '🇳🇱', country: 'Netherlands' },
+  { code: '+41', flag: '🇨🇭', country: 'Switzerland' },
+  { code: '+46', flag: '🇸🇪', country: 'Sweden' },
+  { code: '+47', flag: '🇳🇴', country: 'Norway' },
+  { code: '+45', flag: '🇩🇰', country: 'Denmark' },
+  { code: '+358', flag: '🇫🇮', country: 'Finland' },
+  { code: '+48', flag: '🇵🇱', country: 'Poland' },
+  { code: '+43', flag: '🇦🇹', country: 'Austria' },
+  { code: '+32', flag: '🇧🇪', country: 'Belgium' },
+  { code: '+353', flag: '🇮🇪', country: 'Ireland' },
+  { code: '+351', flag: '🇵🇹', country: 'Portugal' },
+  { code: '+30', flag: '🇬🇷', country: 'Greece' },
+  { code: '+81', flag: '🇯🇵', country: 'Japan' },
+  { code: '+82', flag: '🇰🇷', country: 'South Korea' },
+  { code: '+86', flag: '🇨🇳', country: 'China' },
+  { code: '+852', flag: '🇭🇰', country: 'Hong Kong' },
+  { code: '+886', flag: '🇹🇼', country: 'Taiwan' },
+  { code: '+66', flag: '🇹🇭', country: 'Thailand' },
+  { code: '+84', flag: '🇻🇳', country: 'Vietnam' },
+  { code: '+62', flag: '🇮🇩', country: 'Indonesia' },
+  { code: '+63', flag: '🇵🇭', country: 'Philippines' },
+  { code: '+92', flag: '🇵🇰', country: 'Pakistan' },
+  { code: '+880', flag: '🇧🇩', country: 'Bangladesh' },
+  { code: '+94', flag: '🇱🇰', country: 'Sri Lanka' },
+  { code: '+977', flag: '🇳🇵', country: 'Nepal' },
+  { code: '+27', flag: '🇿🇦', country: 'South Africa' },
+  { code: '+234', flag: '🇳🇬', country: 'Nigeria' },
+  { code: '+254', flag: '🇰🇪', country: 'Kenya' },
+  { code: '+20', flag: '🇪🇬', country: 'Egypt' },
+  { code: '+212', flag: '🇲🇦', country: 'Morocco' },
+  { code: '+55', flag: '🇧🇷', country: 'Brazil' },
+  { code: '+52', flag: '🇲🇽', country: 'Mexico' },
+  { code: '+54', flag: '🇦🇷', country: 'Argentina' },
+  { code: '+57', flag: '🇨🇴', country: 'Colombia' },
+  { code: '+56', flag: '🇨🇱', country: 'Chile' },
+  { code: '+51', flag: '🇵🇪', country: 'Peru' },
+  { code: '+58', flag: '🇻🇪', country: 'Venezuela' },
+  { code: '+7', flag: '🇷🇺', country: 'Russia' },
+  { code: '+380', flag: '🇺🇦', country: 'Ukraine' },
+  { code: '+90', flag: '🇹🇷', country: 'Turkey' },
+  { code: '+972', flag: '🇮🇱', country: 'Israel' },
+  { code: '+964', flag: '🇮🇶', country: 'Iraq' },
+  { code: '+98', flag: '🇮🇷', country: 'Iran' },
+  { code: '+974', flag: '🇶🇦', country: 'Qatar' },
+  { code: '+968', flag: '🇴🇲', country: 'Oman' },
+  { code: '+973', flag: '🇧🇭', country: 'Bahrain' },
+  { code: '+965', flag: '🇰🇼', country: 'Kuwait' },
+  { code: '+64', flag: '🇳🇿', country: 'New Zealand' },
+];
+
 export default function Signup() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,6 +95,7 @@ export default function Signup() {
   const [isSocialLoading, setIsSocialLoading] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
   const [email, setEmail] = useState(state?.email || '');
   const [otp, setOtp] = useState('');
   const [newPin, setNewPin] = useState('');
@@ -83,28 +148,15 @@ export default function Signup() {
 
   // Normalize and validate mobile number
   // Returns normalized number with country code, or null if invalid
-  const normalizeMobile = (rawMobile: string): string | null => {
-    // Remove all non-digit characters except leading +
-    const cleaned = rawMobile.trim().replace(/[^\d+]/g, '');
+  const normalizeMobile = (rawMobile: string, selectedCountryCode: string): string | null => {
+    // Remove all non-digit characters
+    const digitsOnly = rawMobile.trim().replace(/\D/g, '');
     
-    if (!cleaned) return null;
+    if (!digitsOnly) return null;
     
-    // Extract digits only for length validation
-    const digitsOnly = cleaned.replace(/\D/g, '');
-    
-    // Check if it starts with + (has country code)
-    if (cleaned.startsWith('+')) {
-      // Must have at least 10 digits after country code (assuming 1-3 digit country code)
-      if (digitsOnly.length >= 10) {
-        return cleaned;
-      }
-      return null;
-    }
-    
-    // No country code - check if at least 10 digits
-    if (digitsOnly.length >= 10) {
-      // Default to India (+91)
-      return `+91${digitsOnly}`;
+    // Check if at least 6 digits (some countries have shorter numbers)
+    if (digitsOnly.length >= 6 && digitsOnly.length <= 15) {
+      return `${selectedCountryCode}${digitsOnly}`;
     }
     
     return null;
@@ -154,7 +206,7 @@ export default function Signup() {
       return;
     }
 
-    const normalizedMobile = normalizeMobile(trimmedMobile);
+    const normalizedMobile = normalizeMobile(trimmedMobile, countryCode);
     if (!normalizedMobile) {
       toast({
         title: 'Invalid mobile number',
@@ -163,9 +215,6 @@ export default function Signup() {
       });
       return;
     }
-
-    // Update mobile state with normalized value
-    setMobile(normalizedMobile);
 
     setIsLoading(true);
 
@@ -430,15 +479,34 @@ export default function Signup() {
 
                 <div className="space-y-2">
                   <Label htmlFor="mobile">Mobile Number <span className="text-destructive">*</span></Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input
+                  <div className="h-12 rounded-lg border border-border focus-within:border-primary transition-colors flex items-center overflow-hidden bg-background">
+                    {/* Country code selector */}
+                    <div className="flex items-center gap-1.5 px-3 h-full border-r border-border bg-muted/30">
+                      <span className="text-base">
+                        {COUNTRY_CODES.find(c => c.code === countryCode)?.flag || '🇮🇳'}
+                      </span>
+                      <select
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
+                        className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer pr-1"
+                        style={{ fontSize: '14px' }}
+                      >
+                        {COUNTRY_CODES.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {country.code}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {/* Phone number input */}
+                    <input
                       id="mobile"
                       type="tel"
-                      placeholder="+91 98765 43210"
+                      placeholder="98765 43210"
                       value={mobile}
-                      onChange={(e) => setMobile(e.target.value)}
-                      className="pl-10 h-12"
+                      onChange={(e) => setMobile(e.target.value.replace(/[^\d\s]/g, ''))}
+                      className="flex-1 h-full px-3 text-base outline-none bg-transparent placeholder:text-muted-foreground"
+                      style={{ fontSize: '16px' }}
                       required
                     />
                   </div>
