@@ -241,35 +241,35 @@ export function ContactShareSheet({
         className="hidden"
       />
 
-      {/* FIRST + LAST NAME - EXACT BLINQ STYLE */}
+      {/* FIRST + LAST NAME - CORRECT LABELS AND PLACEHOLDERS */}
       <div className="grid grid-cols-2 gap-3">
         <BlinqInput
           label="First name"
           value={formData.firstName}
           onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
           name="firstName"
-          placeholder="Hello"
+          placeholder="Hello"  // This shows only when focused
         />
         <BlinqInput
           label="Last name"
           value={formData.lastName}
           onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
           name="lastName"
-          placeholder="Ji"
+          placeholder="Ji"  // This shows only when focused
         />
       </div>
 
-      {/* EMAIL - EXACT BLINQ STYLE */}
+      {/* EMAIL - CORRECT LABEL AND PLACEHOLDER */}
       <BlinqInput
         label="Email"
         value={formData.email}
         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
         type="email"
         name="email"
-        placeholder="your@email.com"
+        placeholder="your@email.com"  // This shows only when focused
       />
 
-      {/* PHONE NUMBER - EXACT BLINQ STYLE */}
+      {/* PHONE NUMBER - CORRECT LABEL AND PLACEHOLDER */}
       <div className="space-y-1">
         <div className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}>
           {/* Floating label on border for phone */}
@@ -305,14 +305,14 @@ export function ContactShareSheet({
               }
               onFocus={() => setFocusedField('phone')}
               onBlur={() => setFocusedField(null)}
-              placeholder={focusedField === 'phone' ? '87006 97970' : ''}
+              placeholder={focusedField === 'phone' ? '87006 97970' : ''}  // This shows only when focused
               className="flex-1 h-full px-4 text-base outline-none bg-transparent"
             />
           </div>
         </div>
       </div>
 
-      {/* JOB + COMPANY + LINKEDIN PILLS - EXACT BLINQ STYLE */}
+      {/* JOB + COMPANY + LINKEDIN PILLS */}
       <div className="grid grid-cols-3 gap-2">
         <div className="relative">
           <input
@@ -352,7 +352,7 @@ export function ContactShareSheet({
         </div>
       </div>
 
-      {/* SEND BUTTON - EXACT BLINQ STYLE */}
+      {/* SEND BUTTON */}
       <Button
         onClick={handleSubmit}
         disabled={submitting}
@@ -371,7 +371,7 @@ export function ContactShareSheet({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[90dvh]">
-          {/* HEADER WITH SCAN BUTTON - EXACT BLINQ STYLE */}
+          {/* HEADER WITH SCAN BUTTON */}
           <DrawerHeader className="relative px-5 pt-5 pb-4 border-b">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 flex-1 min-w-0">
