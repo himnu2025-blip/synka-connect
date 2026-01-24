@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,6 +46,7 @@ export function ContactShareSheet({
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const phoneInputRef = useRef<HTMLInputElement>(null);
+  const drawerContentRef = useRef<HTMLDivElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
@@ -59,6 +60,27 @@ export function ContactShareSheet({
     company: '',
     linkedin: '',
   });
+
+  // Handle keyboard visibility
+  useEffect(() => {
+    if (!isMobile || !open) return;
+
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+        // Let the browser handle the scroll naturally
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+        }, 100);
+      }
+    };
+
+    document.addEventListener('focusin', handleFocusIn);
+    
+    return () => {
+      document.removeEventListener('focusin', handleFocusIn);
+    };
+  }, [isMobile, open]);
 
   const normalizeLinkedInUrl = (value: string) => {
     let v = value.trim();
@@ -224,6 +246,11 @@ export function ContactShareSheet({
             placeholder={placeholder}
             className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl placeholder:text-muted-foreground"
             name={name}
+            // Prevent auto-scroll on mobile
+            onTouchStart={(e) => {
+              // Prevent default to avoid double-tap issue
+              e.currentTarget.focus();
+            }}
           />
         </div>
       </div>
@@ -231,7 +258,7 @@ export function ContactShareSheet({
   };
 
   const Content = (
-    <div className="space-y-4 px-4 pb-8">
+    <div className="space-y-4 px-4">
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -270,7 +297,7 @@ export function ContactShareSheet({
         placeholder="your@email.com"
       />
 
-      {/* PHONE NUMBER - Clean and simple */}
+      {/* PHONE NUMBER */}
       <div className="space-y-1">
         <div className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}>
           {/* Floating label on border for phone */}
@@ -311,6 +338,9 @@ export function ContactShareSheet({
               className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
               inputMode="numeric"
               pattern="[0-9]*"
+              onTouchStart={(e) => {
+                e.currentTarget.focus();
+              }}
             />
           </div>
         </div>
@@ -326,6 +356,9 @@ export function ContactShareSheet({
             className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
             onFocus={() => setFocusedField('designation')}
             onBlur={() => setFocusedField(null)}
+            onTouchStart={(e) => {
+              e.currentTarget.focus();
+            }}
           />
         </div>
         <div className="relative">
@@ -336,6 +369,9 @@ export function ContactShareSheet({
             className="w-full h-10 rounded-full border border-border text-sm px-3 focus:outline-none focus:border-primary placeholder:text-muted-foreground placeholder:text-sm"
             onFocus={() => setFocusedField('company')}
             onBlur={() => setFocusedField(null)}
+            onTouchStart={(e) => {
+              e.currentTarget.focus();
+            }}
           />
         </div>
       </div>
@@ -419,14 +455,17 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="pb-8">
-          {/* Simple Drawer without complex keyboard handling */}
-          <div className="max-h-[90vh] overflow-y-auto">
-            <DrawerHeader className="p-0 sticky top-0 bg-white z-10">
+        <DrawerContent 
+          className="pb-0" 
+          ref={drawerContentRef}
+        >
+          {/* Simple container that lets browser handle keyboard naturally */}
+          <div className="max-h-[90vh]">
+            <DrawerHeader className="p-0">
               <BlinqHeader />
             </DrawerHeader>
             
-            <div className="pt-4">
+            <div className="pt-4 pb-6">
               {Content}
             </div>
           </div>
