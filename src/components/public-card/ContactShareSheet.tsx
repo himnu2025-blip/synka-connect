@@ -15,23 +15,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 // Blinq-style input with border-floating label - defined outside component to prevent re-render focus loss
+// IMPORTANT: Default state is "has value" (label at top), CSS overrides when empty via peer-placeholder-shown
+// This eliminates race conditions between React state and CSS on first interaction
 const BlinqInput = ({
   label,
   value,
   onChange,
   type = 'text',
+  inputMode,
+  autoComplete,
 }: {
   label: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
+  inputMode?: 'text' | 'email' | 'tel' | 'numeric';
+  autoComplete?: string;
 }) => {
-  const hasValue = value.length > 0;
-
   return (
     <div className="relative h-14">
       <input
         type={type}
+        inputMode={inputMode}
+        autoComplete={autoComplete}
         value={value}
         onChange={onChange}
         placeholder=" "
@@ -39,15 +45,10 @@ const BlinqInput = ({
         style={{ fontSize: '16px' }}
       />
       <label
-        className={`
-          absolute left-4 px-1 text-muted-foreground pointer-events-none transition-all duration-200
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
-          peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background
-          ${hasValue 
-            ? 'top-0 -translate-y-1/2 text-xs bg-background' 
-            : ''
-          }
-        `}
+        className="absolute left-4 px-1 text-muted-foreground pointer-events-none transition-all duration-200
+          top-0 -translate-y-1/2 text-xs bg-background
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
+          peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background"
       >
         {label}
       </label>
@@ -55,7 +56,7 @@ const BlinqInput = ({
   );
 };
 
-// Pill input with floating label for Job Title and Company
+// Pill input with floating label for Job Title and Company - same CSS-first pattern
 const PillInput = ({
   label,
   value,
@@ -65,8 +66,6 @@ const PillInput = ({
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
-  const hasValue = value.length > 0;
-
   return (
     <div className="relative h-10">
       <input
@@ -77,12 +76,10 @@ const PillInput = ({
         style={{ fontSize: '16px' }}
       />
       <label
-        className={`
-          absolute left-4 px-1 text-muted-foreground pointer-events-none transition-all
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm
-          peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-[10px] peer-focus:bg-background
-          ${hasValue ? 'top-0 -translate-y-1/2 text-[10px] bg-background' : ''}
-        `}
+        className="absolute left-4 px-1 text-muted-foreground pointer-events-none transition-all duration-200
+          top-0 -translate-y-1/2 text-[10px] bg-background
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:bg-transparent
+          peer-focus:top-0 peer-focus:text-[10px] peer-focus:bg-background"
       >
         {label}
       </label>
@@ -280,31 +277,14 @@ export function ContactShareSheet({
         />
       </div>
 
-      {/* EMAIL - Same structure as name fields, using inputMode instead of type for consistent behavior */}
-      <div className="relative h-14">
-        <input
-          inputMode="email"
-          autoComplete="email"
-          value={formData.email}
-          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-          placeholder=" "
-          className="peer absolute inset-0 w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
-          style={{ fontSize: '16px' }}
-        />
-        <label
-          className={`
-            absolute left-4 px-1 text-muted-foreground pointer-events-none transition-all duration-200
-            peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
-            peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background
-            ${formData.email.length > 0 
-              ? 'top-0 -translate-y-1/2 text-xs bg-background' 
-              : ''
-            }
-          `}
-        >
-          Email
-        </label>
-      </div>
+      {/* EMAIL - Uses same BlinqInput component for consistency */}
+      <BlinqInput
+        label="Email"
+        value={formData.email}
+        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+        inputMode="email"
+        autoComplete="email"
+      />
 
       {/* PHONE NUMBER - Simple layout without floating label to avoid overlap */}
       <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
