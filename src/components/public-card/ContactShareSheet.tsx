@@ -44,11 +44,14 @@ const BlinqInput = ({
         className="peer absolute inset-0 w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors leading-[56px]"
         style={{ fontSize: '16px' }}
       />
+
       <label
-        className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
+        className="
+          absolute left-4 px-1 text-muted-foreground pointer-events-none transition-all duration-200
           top-0 -translate-y-1/2 text-xs bg-background
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
-          peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background"
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
+          peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background
+        "
       >
         {label}
       </label>
@@ -75,11 +78,14 @@ const PillInput = ({
         className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-transparent focus:border-foreground"
         style={{ fontSize: '16px' }}
       />
+
       <label
-        className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
+        className="
+          absolute left-4 px-1 text-muted-foreground pointer-events-none transition-all duration-200
           top-0 -translate-y-1/2 text-[10px] bg-background
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:bg-transparent
-          peer-focus:top-0 peer-focus:text-[10px] peer-focus:bg-background"
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:bg-transparent
+          peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-[10px] peer-focus:bg-background
+        "
       >
         {label}
       </label>
