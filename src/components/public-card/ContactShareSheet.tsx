@@ -204,7 +204,7 @@ export function ContactShareSheet({
     return (
       <div className={`relative ${className}`}>
         <div className={`relative h-14 rounded-xl border ${isFocused ? 'border-primary' : 'border-border'} transition-colors`}>
-          {/* Floating label on border */}
+          {/* Floating label on border - FIXED: Always show when has value */}
           <div 
             className={`absolute -top-2 left-3 px-1 transition-all duration-200 ${
               showLabel 
@@ -221,8 +221,9 @@ export function ContactShareSheet({
             onChange={onChange}
             onFocus={() => setFocusedField(name)}
             onBlur={() => setFocusedField(null)}
-            placeholder={isFocused ? placeholder : ''}
-            className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl"
+            // FIXED: Show placeholder always (not just when focused)
+            placeholder={placeholder}
+            className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl placeholder:text-muted-foreground"
           />
         </div>
       </div>
@@ -241,35 +242,35 @@ export function ContactShareSheet({
         className="hidden"
       />
 
-      {/* FIRST + LAST NAME - CORRECT LABELS AND PLACEHOLDERS */}
+      {/* FIRST + LAST NAME */}
       <div className="grid grid-cols-2 gap-3">
         <BlinqInput
           label="First name"
           value={formData.firstName}
           onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
           name="firstName"
-          placeholder="Hello"  // This shows only when focused
+          placeholder="Hello"  // Shows always
         />
         <BlinqInput
           label="Last name"
           value={formData.lastName}
           onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
           name="lastName"
-          placeholder="Ji"  // This shows only when focused
+          placeholder="Ji"  // Shows always
         />
       </div>
 
-      {/* EMAIL - CORRECT LABEL AND PLACEHOLDER */}
+      {/* EMAIL */}
       <BlinqInput
         label="Email"
         value={formData.email}
         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
         type="email"
         name="email"
-        placeholder="your@email.com"  // This shows only when focused
+        placeholder="your@email.com"  // Shows always
       />
 
-      {/* PHONE NUMBER - CORRECT LABEL AND PLACEHOLDER */}
+      {/* PHONE NUMBER */}
       <div className="space-y-1">
         <div className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}>
           {/* Floating label on border for phone */}
@@ -305,8 +306,8 @@ export function ContactShareSheet({
               }
               onFocus={() => setFocusedField('phone')}
               onBlur={() => setFocusedField(null)}
-              placeholder={focusedField === 'phone' ? '87006 97970' : ''}  // This shows only when focused
-              className="flex-1 h-full px-4 text-base outline-none bg-transparent"
+              placeholder="87006 97970"  // Shows always
+              className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
             />
           </div>
         </div>
@@ -319,7 +320,7 @@ export function ContactShareSheet({
             value={formData.designation}
             onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
             placeholder="+ Job title"
-            className="w-full h-12 rounded-full border border-border text-sm px-4 focus:outline-none focus:border-primary"
+            className="w-full h-12 rounded-full border border-border text-sm px-4 focus:outline-none focus:border-primary placeholder:text-muted-foreground"
           />
         </div>
         <div className="relative">
@@ -327,7 +328,7 @@ export function ContactShareSheet({
             value={formData.company}
             onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
             placeholder="+ Company name"
-            className="w-full h-12 rounded-full border border-border text-sm px-4 focus:outline-none focus:border-primary"
+            className="w-full h-12 rounded-full border border-border text-sm px-4 focus:outline-none focus:border-primary placeholder:text-muted-foreground"
           />
         </div>
         <div className="relative">
@@ -346,7 +347,7 @@ export function ContactShareSheet({
               }))
             }
             placeholder="+ LinkedIn"
-            className="w-full h-12 rounded-full border border-border text-sm px-10 focus:outline-none focus:border-primary"
+            className="w-full h-12 rounded-full border border-border text-sm px-10 focus:outline-none focus:border-primary placeholder:text-muted-foreground"
           />
           <Linkedin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         </div>
@@ -371,23 +372,40 @@ export function ContactShareSheet({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[90dvh]">
-          {/* HEADER WITH SCAN BUTTON */}
+          {/* HEADER WITH SCAN BUTTON - FIXED: Better layout */}
           <DrawerHeader className="relative px-5 pt-5 pb-4 border-b">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                {ownerPhotoUrl && (
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                {ownerPhotoUrl ? (
                   <img
                     src={ownerPhotoUrl}
                     alt={ownerName}
-                    className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                    className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                   />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg font-semibold text-blue-600">
+                      {ownerName.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
                 )}
-                <h2 className="text-[16px] font-semibold text-foreground truncate">
-                  Share your contact information with {ownerName}
-                </h2>
+                <div className="min-w-0">
+                  <h2 className="text-[16px] font-semibold text-foreground leading-tight">
+                    Share your contact information
+                  </h2>
+                  <p className="text-sm text-muted-foreground truncate">
+                    with {ownerName}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-muted-foreground">
+                Fill in your details below
               </div>
               
-              <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="flex items-center gap-3">
                 {/* SCAN BUTTON */}
                 <button
                   onClick={handleScanBusinessCard}
@@ -420,22 +438,37 @@ export function ContactShareSheet({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" hideCloseButton>
-        {/* DESKTOP HEADER */}
+        {/* DESKTOP HEADER - FIXED: Better layout */}
         <div className="relative px-6 pt-6 pb-4 border-b">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              {ownerPhotoUrl && (
+              {ownerPhotoUrl ? (
                 <img
                   src={ownerPhotoUrl}
                   alt={ownerName}
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-12 h-12 rounded-full object-cover"
                 />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                  <span className="text-lg font-semibold text-blue-600">
+                    {ownerName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
               )}
               <div>
                 <h2 className="text-[16px] font-semibold text-foreground">
-                  Share your contact with {ownerName}
+                  Share your contact information
                 </h2>
+                <p className="text-sm text-muted-foreground">
+                  with {ownerName}
+                </p>
               </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-muted-foreground">
+              Fill in your details below
             </div>
             
             <div className="flex items-center gap-3">
