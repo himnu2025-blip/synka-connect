@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -50,7 +50,6 @@ export function ContactShareSheet({
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
     lastName: '',
@@ -60,27 +59,6 @@ export function ContactShareSheet({
     company: '',
     linkedin: '',
   });
-
-  // Handle keyboard visibility on mobile
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const handleResize = () => {
-      // Check if keyboard is visible (window height shrinks)
-      const isKeyboardVisible = window.visualViewport?.height < window.screen.height * 0.8;
-      setKeyboardVisible(isKeyboardVisible);
-    };
-
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleResize);
-    }
-
-    return () => {
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', handleResize);
-      }
-    };
-  }, [isMobile]);
 
   const normalizeLinkedInUrl = (value: string) => {
     let v = value.trim();
@@ -209,8 +187,7 @@ export function ContactShareSheet({
     type = 'text',
     placeholder = '',
     name,
-    className = '',
-    inputRef
+    className = ''
   }: {
     label: string;
     value: string;
@@ -219,7 +196,6 @@ export function ContactShareSheet({
     placeholder?: string;
     name: string;
     className?: string;
-    inputRef?: React.Ref<HTMLInputElement>;
   }) => {
     const isFocused = focusedField === name;
     const hasValue = value.length > 0;
@@ -240,20 +216,10 @@ export function ContactShareSheet({
           </div>
           
           <input
-            ref={inputRef}
             type={type}
             value={value}
             onChange={onChange}
-            onFocus={() => {
-              setFocusedField(name);
-              // Auto-focus on mobile for better UX
-              if (isMobile) {
-                setTimeout(() => {
-                  const input = inputRef?.current || document.querySelector(`[name="${name}"]`);
-                  input?.focus();
-                }, 100);
-              }
-            }}
+            onFocus={() => setFocusedField(name)}
             onBlur={() => setFocusedField(null)}
             placeholder={placeholder}
             className="w-full h-full px-4 text-base bg-transparent outline-none rounded-xl placeholder:text-muted-foreground"
@@ -265,7 +231,7 @@ export function ContactShareSheet({
   };
 
   const Content = (
-    <div className={`space-y-4 px-4 ${keyboardVisible ? 'pb-20' : ''}`}>
+    <div className="space-y-4 px-4 pb-8">
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -304,21 +270,9 @@ export function ContactShareSheet({
         placeholder="your@email.com"
       />
 
-      {/* PHONE NUMBER - Fixed to prevent gaps */}
+      {/* PHONE NUMBER - Clean and simple */}
       <div className="space-y-1">
-        <div 
-          className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}
-          onClick={(e) => {
-            // Handle first tap on mobile
-            if (isMobile && focusedField !== 'phone') {
-              setFocusedField('phone');
-              e.stopPropagation();
-              return;
-            }
-            // Second tap or desktop - focus input
-            phoneInputRef.current?.focus();
-          }}
-        >
+        <div className={`relative h-14 rounded-xl border ${focusedField === 'phone' ? 'border-primary' : 'border-border'} transition-colors`}>
           {/* Floating label on border for phone */}
           <div 
             className={`absolute -top-2 left-3 px-1 transition-all duration-200 ${
@@ -351,20 +305,11 @@ export function ContactShareSheet({
               onChange={(e) =>
                 setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
               }
-              onFocus={() => {
-                setFocusedField('phone');
-                // Prevent default scroll behavior on mobile
-                if (isMobile) {
-                  setTimeout(() => {
-                    window.scrollTo(0, 0);
-                  }, 100);
-                }
-              }}
+              onFocus={() => setFocusedField('phone')}
               onBlur={() => setFocusedField(null)}
               placeholder="87006 97970"
               className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
               inputMode="numeric"
-              // Add pattern for mobile keyboards
               pattern="[0-9]*"
             />
           </div>
@@ -474,14 +419,16 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90dvh] pb-8 overflow-hidden">
-          <DrawerHeader className="p-0">
-            <BlinqHeader />
-          </DrawerHeader>
-          
-          {/* NO BORDER LINE - JUST CLEAN SPACING LIKE BLINQ */}
-          <div className="overflow-y-auto flex-1">
-            {Content}
+        <DrawerContent className="pb-8">
+          {/* Simple Drawer without complex keyboard handling */}
+          <div className="max-h-[90vh] overflow-y-auto">
+            <DrawerHeader className="p-0 sticky top-0 bg-white z-10">
+              <BlinqHeader />
+            </DrawerHeader>
+            
+            <div className="pt-4">
+              {Content}
+            </div>
           </div>
         </DrawerContent>
       </Drawer>
@@ -493,7 +440,6 @@ export function ContactShareSheet({
       <DialogContent className="sm:max-w-md p-0 overflow-hidden" hideCloseButton>
         <BlinqHeader />
         
-        {/* NO BORDER LINE - JUST CLEAN SPACING LIKE BLINQ */}
         <div className="overflow-y-auto max-h-[60vh]">
           {Content}
         </div>
