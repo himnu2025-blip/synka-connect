@@ -374,8 +374,8 @@ export function ContactShareSheet({
         <DrawerContent className="max-h-[90dvh]">
           {/* HEADER - MATCHES BLINQ EXACTLY */}
           <DrawerHeader className="relative px-5 pt-5 pb-4 border-b">
-            {/* TOP RIGHT: SCAN + SKIP BUTTONS */}
-            <div className="flex justify-end gap-3 mb-3">
+            {/* TOP RIGHT: SCAN + SKIP BUTTONS - ON SAME LINE */}
+            <div className="flex justify-end gap-4 mb-4">
               <button
                 onClick={handleScanBusinessCard}
                 disabled={scanState === 'uploading' || scanState === 'processing'}
@@ -393,16 +393,22 @@ export function ContactShareSheet({
               </button>
             </div>
             
-            {/* TITLE - BLINQ STYLE */}
-            <div className="flex items-center gap-3">
-              {ownerPhotoUrl && (
+            {/* TITLE - BLINQ STYLE WITH LARGER PHOTO */}
+            <div className="flex items-center gap-4">
+              {ownerPhotoUrl ? (
                 <img
                   src={ownerPhotoUrl}
                   alt={ownerName}
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-14 h-14 rounded-full object-cover flex-shrink-0"
                 />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xl font-semibold text-blue-600">
+                    {ownerName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
               )}
-              <h2 className="text-[16px] font-semibold text-foreground">
+              <h2 className="text-[18px] font-semibold text-foreground leading-tight">
                 Share your contact information with {ownerName}
               </h2>
             </div>
@@ -421,8 +427,8 @@ export function ContactShareSheet({
       <DialogContent className="sm:max-w-md" hideCloseButton>
         {/* DESKTOP HEADER - MATCHES BLINQ EXACTLY */}
         <div className="relative px-6 pt-6 pb-4 border-b">
-          {/* TOP RIGHT: SCAN + SKIP BUTTONS */}
-          <div className="flex justify-end gap-3 mb-3">
+          {/* TOP RIGHT: SCAN + SKIP BUTTONS - ON SAME LINE */}
+          <div className="flex justify-end gap-4 mb-4">
             <button
               onClick={handleScanBusinessCard}
               disabled={scanState === 'uploading' || scanState === 'processing'}
@@ -440,16 +446,22 @@ export function ContactShareSheet({
             </button>
           </div>
           
-          {/* TITLE - BLINQ STYLE */}
-          <div className="flex items-center gap-3">
-            {ownerPhotoUrl && (
+          {/* TITLE - BLINQ STYLE WITH LARGER PHOTO */}
+          <div className="flex items-center gap-4">
+            {ownerPhotoUrl ? (
               <img
                 src={ownerPhotoUrl}
                 alt={ownerName}
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-14 h-14 rounded-full object-cover"
               />
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                <span className="text-xl font-semibold text-blue-600">
+                  {ownerName.charAt(0).toUpperCase()}
+                </span>
+              </div>
             )}
-            <h2 className="text-[16px] font-semibold text-foreground">
+            <h2 className="text-[18px] font-semibold text-foreground leading-tight">
               Share your contact information with {ownerName}
             </h2>
           </div>
