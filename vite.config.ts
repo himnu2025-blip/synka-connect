@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => ({
     dedupe: [
       "react",
       "react-dom",
+      "@tanstack/react-query",
       "@radix-ui/react-toast",
       "@radix-ui/react-dialog",
       "@radix-ui/react-dropdown-menu",
@@ -29,6 +30,7 @@ export default defineConfig(({ mode }) => ({
     include: [
       "react",
       "react-dom",
+      "@tanstack/react-query",
       "@radix-ui/react-toast",
       "@radix-ui/react-dialog",
       "@radix-ui/react-dropdown-menu",
