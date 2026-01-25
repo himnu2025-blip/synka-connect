@@ -272,10 +272,6 @@ export function ContactShareSheet({
         {/* PHONE FIELD */}
 <FloatingPhoneInput
   label="Phone number"
-  type="tel"
-  inputMode="numeric"
-  autoComplete="tel"
-  pattern="[0-9]*"
   value={formData.phone}
   onChange={(e) =>
     setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
