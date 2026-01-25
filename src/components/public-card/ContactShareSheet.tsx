@@ -31,6 +31,14 @@ const BlinqInput = ({
   inputMode?: 'text' | 'email' | 'tel' | 'numeric';
   autoComplete?: string;
 }) => {
+  // Prevent scroll jump on focus by using preventScroll
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Small delay to let drawer settle before any scroll adjustment
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  };
+
   return (
     <div className="relative h-14">
       <input
@@ -39,15 +47,16 @@ const BlinqInput = ({
         autoComplete={autoComplete}
         value={value}
         onChange={onChange}
+        onFocus={handleFocus}
         placeholder=" "
-        className="peer absolute inset-0 w-full h-full px-4 pt-5 pb-2 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
+        className="peer absolute inset-0 w-full h-full px-4 pt-5 pb-2 text-base bg-background outline-none rounded-xl border border-border focus:border-foreground transition-colors"
         style={{ fontSize: '16px' }}
       />
       <label
         className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
-          top-0 -translate-y-1/2 text-xs bg-background
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
-          peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background"
+          top-0 -translate-y-1/2 text-xs bg-background px-1
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
+          peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
       >
         {label}
       </label>
@@ -65,20 +74,27 @@ const PillInput = ({
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  };
+
   return (
     <div className="relative h-10">
       <input
         value={value}
         onChange={onChange}
+        onFocus={handleFocus}
         placeholder=" "
-        className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-transparent focus:border-foreground"
+        className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-background focus:border-foreground"
         style={{ fontSize: '16px' }}
       />
       <label
         className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
-          top-0 -translate-y-1/2 text-[10px] bg-background
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:bg-transparent
-          peer-focus:top-0 peer-focus:text-[10px] peer-focus:bg-background"
+          top-0 -translate-y-1/2 text-[10px] bg-background px-1
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
+          peer-focus:top-0 peer-focus:text-[10px] peer-focus:bg-background peer-focus:px-1"
       >
         {label}
       </label>
@@ -429,8 +445,13 @@ export function ContactShareSheet({
             onChange={(e) =>
               setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
             }
+            onFocus={(e) => {
+              setTimeout(() => {
+                e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 100);
+            }}
             placeholder="Phone number"
-            className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
+            className="flex-1 h-full px-4 text-base outline-none bg-background placeholder:text-muted-foreground"
             style={{ fontSize: '16px' }}
           />
         </div>
@@ -469,9 +490,9 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} handleOnly shouldScaleBackground={false}>
-        <DrawerContent className="flex flex-col max-h-[90vh]">
-          {/* Make entire drawer content scrollable with safe bottom padding */}
-          <div className="overflow-y-auto flex-1 pb-safe">
+        <DrawerContent className="flex flex-col max-h-[85dvh] bg-background">
+          {/* Scrollable content - use overscroll-contain to prevent scroll chaining */}
+          <div className="overflow-y-auto flex-1 overscroll-contain pb-safe">
             <BlinqHeader />
             {FormContent}
           </div>
