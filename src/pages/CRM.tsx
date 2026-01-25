@@ -141,7 +141,7 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
   const hasFocusedOnceRef = useRef(false);
 
   const editNameRef = useRef<HTMLInputElement | null>(null);
-  const drawerScrollRef = useRef<HTMLDivElement | null>(null);
+  
 
   // sync selectedContact into edit form when selectedContact or inline edit opens
   useEffect(() => {
@@ -171,14 +171,6 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
       }, 120);
     }
   }, [isEditOpen]);
-  useEffect(() => {
-  if (!isEditOpen && drawerScrollRef.current) {
-    // Force Radix to re-enable gestures
-    requestAnimationFrame(() => {
-      drawerScrollRef.current.style.pointerEvents = 'auto';
-    });
-  }
-}, [isEditOpen]);
 
   function updateEditField<K extends keyof typeof editForm>(key: K, value: typeof editForm[K]) {
     setEditForm(prev => ({ ...prev, [key]: value }));
@@ -308,13 +300,6 @@ useEffect(() => {
     setNotesHistory([]);
   }
 }, [selectedContact]);
-  useEffect(() => {
-  if (!isEditOpen && drawerScrollRef.current) {
-    requestAnimationFrame(() => {
-      drawerScrollRef.current.scrollTop = 0;
-    });
-  }
-}, [isEditOpen]);
 
 // Save note
 const saveNote = async () => {
@@ -2040,19 +2025,13 @@ if (!contacts && contactsLoading) {
           }, 0);
         }}
       >
-        <DrawerContent
-  className="h-[90vh] max-h-[90vh] rounded-t-3xl border-0 shadow-none pt-0 bg-background [&>div:first-child]:hidden overflow-hidden"
->
+        <DrawerContent className="max-h-[92vh] rounded-3xl border-0 shadow-none bg-background [&>div:first-child]:hidden overflow-y-auto">
   {/* ðŸŽ iOS Drag Handle */}
   <div className="flex justify-center mb-1 flex-shrink-0">
     <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
   </div>
           {selectedContact && (
-            <div className="flex flex-col h-full overflow-hidden animate-in slide-in-from-bottom duration-300 ease-out">
-              <div
-  ref={drawerScrollRef}
-  className="flex-1 overflow-y-auto overscroll-contain space-y-6 px-4 pb-6 scrollbar-hide"
->
+            <div className="space-y-6 px-4 pb-8">
               <DrawerHeader className="text-center relative pt-0 mt-0">
                 <ContactAvatar 
                   name={selectedContact.name}
@@ -2382,7 +2361,6 @@ if (!contacts && contactsLoading) {
 )}
   </>
 )}
-                </div>
             </div>
           )}
 <Dialog open={showNotesPopup} onOpenChange={setShowNotesPopup}>
