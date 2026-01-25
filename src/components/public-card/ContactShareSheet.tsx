@@ -418,8 +418,8 @@ export function ContactShareSheet({
               onChange={(e) => setCountryCode(e.target.value)}
               className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
             >
-              {COUNTRY_CODES.map(({ code, flag, country }) => (
-                <option key={code} value={code}>{code} {country}</option>
+              {COUNTRY_CODES.map(({ code, flag }) => (
+                <option key={code} value={code}>{flag} {code}</option>
               ))}
             </select>
           </div>
