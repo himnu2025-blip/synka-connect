@@ -8,7 +8,6 @@ import {
 import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
 } from '@/components/ui/drawer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -313,7 +312,7 @@ export function ContactShareSheet({
 
   // Form content rendered inline to prevent re-mount issues
   const FormContent = (
-    <div className="space-y-4 px-4">
+    <>
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -324,97 +323,100 @@ export function ContactShareSheet({
         className="hidden"
       />
 
-      {/* FIRST + LAST NAME */}
-      <div className="grid grid-cols-2 gap-3">
-        <BlinqInput
-          label="First name"
-          value={formData.firstName}
-          onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-        />
-        <BlinqInput
-          label="Last name"
-          value={formData.lastName}
-          onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-        />
-      </div>
-
-      {/* EMAIL - Wrapped in grid like name fields for layout stability */}
-      <div className="grid grid-cols-1">
-        <BlinqInput
-          label="Email"
-          value={formData.email}
-          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-        />
-      </div>
-
-      {/* PHONE NUMBER - Simple layout without floating label to avoid overlap */}
-      <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
-        {/* Country code selector */}
-        <div className="flex items-center gap-1.5 px-3 h-full border-r border-border shrink-0">
-          <span className="text-base">🇮🇳</span>
-          <select
-            value={countryCode}
-            onChange={(e) => setCountryCode(e.target.value)}
-            className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
-          >
-            <option value="+91">+91</option>
-            <option value="+1">+1</option>
-            <option value="+44">+44</option>
-            <option value="+61">+61</option>
-          </select>
+      {/* FORM FIELDS CONTAINER */}
+      <div className="space-y-4 px-4 pb-6">
+        {/* FIRST + LAST NAME */}
+        <div className="grid grid-cols-2 gap-3">
+          <BlinqInput
+            label="First name"
+            value={formData.firstName}
+            onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+          />
+          <BlinqInput
+            label="Last name"
+            value={formData.lastName}
+            onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+          />
         </div>
-        {/* Phone number input */}
-        <input
-          type="tel"
-          value={formData.phone}
-          onChange={(e) =>
-            setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-          }
-          placeholder="Phone number"
-          className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
-          style={{ fontSize: '16px' }}
-        />
+
+        {/* EMAIL - Wrapped in grid like name fields for layout stability */}
+        <div className="grid grid-cols-1">
+          <BlinqInput
+            label="Email"
+            value={formData.email}
+            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+          />
+        </div>
+
+        {/* PHONE NUMBER - Simple layout without floating label to avoid overlap */}
+        <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
+          {/* Country code selector */}
+          <div className="flex items-center gap-1.5 px-3 h-full border-r border-border shrink-0">
+            <span className="text-base">🇮🇳</span>
+            <select
+              value={countryCode}
+              onChange={(e) => setCountryCode(e.target.value)}
+              className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
+            >
+              <option value="+91">+91</option>
+              <option value="+1">+1</option>
+              <option value="+44">+44</option>
+              <option value="+61">+61</option>
+            </select>
+          </div>
+          {/* Phone number input */}
+          <input
+            type="tel"
+            value={formData.phone}
+            onChange={(e) =>
+              setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+            }
+            placeholder="Phone number"
+            className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
+            style={{ fontSize: '16px' }}
+          />
+        </div>
+
+        {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}
+        <div className="grid grid-cols-2 gap-2">
+          <PillInput
+            label="Job title"
+            value={formData.designation}
+            onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
+          />
+          <PillInput
+            label="Company name"
+            value={formData.company}
+            onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+          />
+        </div>
+
+        {/* SEND BUTTON WITH GRADIENT */}
+        <Button
+          onClick={handleSubmit}
+          disabled={submitting}
+          variant="gradient"
+          className="w-full h-14 rounded-xl text-white text-base font-medium mt-6 hover:opacity-90 transition-opacity"
+        >
+          {submitting ? 'Sending...' : 'Send'}
+        </Button>
+
+        <p className="text-[11px] text-center text-muted-foreground/70 mt-4">
+          We don't sell your contact details
+        </p>
       </div>
-
-      {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}
-      <div className="grid grid-cols-2 gap-2">
-        <PillInput
-          label="Job title"
-          value={formData.designation}
-          onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
-        />
-        <PillInput
-          label="Company name"
-          value={formData.company}
-          onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-        />
-      </div>
-
-      {/* SEND BUTTON WITH GRADIENT */}
-      <Button
-        onClick={handleSubmit}
-        disabled={submitting}
-        variant="gradient"
-        className="w-full h-14 rounded-xl text-white text-base font-medium mt-6 hover:opacity-90 transition-opacity"
-      >
-        {submitting ? 'Sending...' : 'Send'}
-      </Button>
-
-      <p className="text-[11px] text-center text-muted-foreground/70 mt-4">
-        We don't sell your contact details
-      </p>
-    </div>
+    </>
   );
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-        <DrawerContent className="max-h-[85dvh] flex flex-col">
-          <DrawerHeader className="p-0">
+        {/* REMOVED: DrawerHeader and fixed height */}
+        {/* CHANGED: Entire content scrolls, no nested scroll areas */}
+        <DrawerContent className="flex flex-col">
+          {/* Make entire drawer content scrollable */}
+          <div className="overflow-y-auto">
             <BlinqHeader />
-          </DrawerHeader>
-
-          <div className="flex-1 overflow-y-auto pt-2 pb-6">
             {FormContent}
           </div>
         </DrawerContent>
@@ -425,11 +427,9 @@ export function ContactShareSheet({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden" hideCloseButton>
+        {/* Desktop layout remains unchanged */}
         <BlinqHeader />
-        
-        <div className="pt-4 pb-6">
-          {FormContent}
-        </div>
+        {FormContent}
       </DialogContent>
     </Dialog>
   );
