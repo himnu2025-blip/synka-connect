@@ -31,14 +31,6 @@ const BlinqInput = ({
   inputMode?: 'text' | 'email' | 'tel' | 'numeric';
   autoComplete?: string;
 }) => {
-  // Prevent scroll jump on focus by using preventScroll
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Small delay to let drawer settle before any scroll adjustment
-    setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
-  };
-
   return (
     <div className="relative h-14">
       <input
@@ -47,7 +39,6 @@ const BlinqInput = ({
         autoComplete={autoComplete}
         value={value}
         onChange={onChange}
-        onFocus={handleFocus}
         placeholder=" "
         className="peer absolute inset-0 w-full h-full px-4 pt-5 pb-2 text-base bg-background outline-none rounded-xl border border-border focus:border-foreground transition-colors"
         style={{ fontSize: '16px' }}
@@ -74,18 +65,11 @@ const PillInput = ({
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
-  };
-
   return (
     <div className="relative h-10">
       <input
         value={value}
         onChange={onChange}
-        onFocus={handleFocus}
         placeholder=" "
         className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-background focus:border-foreground"
         style={{ fontSize: '16px' }}
@@ -420,11 +404,15 @@ export function ContactShareSheet({
         <div className="grid grid-cols-1">
           <BlinqInput
             label="Email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
             value={formData.email}
             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
           />
         </div>
 
+        {/* PHONE FIELD - With iOS keyboard optimization */}
         <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
           {/* Country code selector */}
           <div className="flex items-center px-3 h-full border-r border-border shrink-0">
@@ -441,15 +429,12 @@ export function ContactShareSheet({
           {/* Phone number input */}
           <input
             type="tel"
+            inputMode="numeric"
+            autoComplete="tel"
             value={formData.phone}
             onChange={(e) =>
               setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
             }
-            onFocus={(e) => {
-              setTimeout(() => {
-                e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }, 100);
-            }}
             placeholder="Phone number"
             className="flex-1 h-full px-4 text-base outline-none bg-background placeholder:text-muted-foreground"
             style={{ fontSize: '16px' }}
@@ -490,7 +475,8 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} handleOnly shouldScaleBackground={false}>
-        <DrawerContent className="flex flex-col max-h-[85dvh] bg-background">
+        {/* Fixed: Changed max-h-[85dvh] to h-[85vh] max-h-[85vh] */}
+        <DrawerContent className="flex flex-col h-[85vh] max-h-[85vh] bg-background">
           {/* Scrollable content - use overscroll-contain to prevent scroll chaining */}
           <div className="overflow-y-auto flex-1 overscroll-contain pb-safe">
             <BlinqHeader />
