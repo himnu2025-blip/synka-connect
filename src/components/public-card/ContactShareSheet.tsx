@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -44,6 +44,7 @@ export function ContactShareSheet({
   const [submitting, setSubmitting] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
+  const [vh, setVh] = useState<number>(window.innerHeight);
   
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
@@ -54,6 +55,41 @@ export function ContactShareSheet({
     company: '',
     linkedin: '',
   });
+
+  // Visual Viewport API for keyboard-safe height
+  useEffect(() => {
+    if (!isMobile || !open) return;
+
+    const updateHeight = () => {
+      // Use visualViewport.height if available, fallback to innerHeight
+      const height = window.visualViewport?.height || window.innerHeight;
+      setVh(height);
+    };
+
+    updateHeight();
+
+    // Listen to visual viewport changes (keyboard open/close)
+    window.visualViewport?.addEventListener('resize', updateHeight);
+    window.addEventListener('orientationchange', updateHeight);
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateHeight);
+      window.removeEventListener('orientationchange', updateHeight);
+    };
+  }, [isMobile, open]);
+
+  // Prevent body scroll when sheet is open
+  useEffect(() => {
+    if (!open) return;
+    
+    if (isMobile) {
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open, isMobile]);
 
   const handleSubmit = async () => {
     if (!formData.firstName.trim()) {
@@ -311,12 +347,15 @@ export function ContactShareSheet({
     if (!open) return null;
 
     return (
-      <div className="fixed inset-0 h-[100dvh] z-50 bg-background flex flex-col">
-  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
-    <BlinqHeader />
-    {FormContent}
-  </div>
-</div>
+      <div
+        className="fixed inset-0 z-50 bg-background flex flex-col"
+        style={{ height: vh }}
+      >
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+          <BlinqHeader />
+          {FormContent}
+        </div>
+      </div>
     );
   }
 
