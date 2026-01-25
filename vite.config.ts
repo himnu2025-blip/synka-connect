@@ -62,7 +62,9 @@ export default defineConfig(({ mode }) => ({
       "react/jsx-runtime",
       "react/jsx-dev-runtime",
       "@tanstack/react-query",
+      "@supabase/supabase-js",
     ],
+    exclude: [],
     // Force complete re-bundling to resolve duplicate React
     force: true,
     esbuildOptions: {
@@ -70,6 +72,7 @@ export default defineConfig(({ mode }) => ({
       define: {
         global: "globalThis",
       },
+      resolveExtensions: [".mjs", ".js", ".mts", ".ts", ".jsx", ".tsx", ".json"],
     },
   },
   build: {
