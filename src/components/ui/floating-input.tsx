@@ -1,56 +1,56 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-// Country codes for phone input
+// Country codes for phone input - no emojis for clean UI
 const COUNTRY_CODES = [
-  { code: '+91', flag: '🇮🇳' },
-  { code: '+1', flag: '🇺🇸' },
-  { code: '+44', flag: '🇬🇧' },
-  { code: '+61', flag: '🇦🇺' },
-  { code: '+971', flag: '🇦🇪' },
-  { code: '+966', flag: '🇸🇦' },
-  { code: '+65', flag: '🇸🇬' },
-  { code: '+81', flag: '🇯🇵' },
-  { code: '+86', flag: '🇨🇳' },
-  { code: '+49', flag: '🇩🇪' },
-  { code: '+33', flag: '🇫🇷' },
-  { code: '+39', flag: '🇮🇹' },
-  { code: '+34', flag: '🇪🇸' },
-  { code: '+7', flag: '🇷🇺' },
-  { code: '+55', flag: '🇧🇷' },
-  { code: '+52', flag: '🇲🇽' },
-  { code: '+27', flag: '🇿🇦' },
-  { code: '+82', flag: '🇰🇷' },
-  { code: '+60', flag: '🇲🇾' },
-  { code: '+66', flag: '🇹🇭' },
-  { code: '+84', flag: '🇻🇳' },
-  { code: '+62', flag: '🇮🇩' },
-  { code: '+63', flag: '🇵🇭' },
-  { code: '+92', flag: '🇵🇰' },
-  { code: '+880', flag: '🇧🇩' },
-  { code: '+94', flag: '🇱🇰' },
-  { code: '+977', flag: '🇳🇵' },
-  { code: '+64', flag: '🇳🇿' },
-  { code: '+41', flag: '🇨🇭' },
-  { code: '+31', flag: '🇳🇱' },
-  { code: '+46', flag: '🇸🇪' },
-  { code: '+47', flag: '🇳🇴' },
-  { code: '+45', flag: '🇩🇰' },
-  { code: '+358', flag: '🇫🇮' },
-  { code: '+48', flag: '🇵🇱' },
-  { code: '+43', flag: '🇦🇹' },
-  { code: '+32', flag: '🇧🇪' },
-  { code: '+353', flag: '🇮🇪' },
-  { code: '+351', flag: '🇵🇹' },
-  { code: '+30', flag: '🇬🇷' },
-  { code: '+852', flag: '🇭🇰' },
-  { code: '+886', flag: '🇹🇼' },
-  { code: '+90', flag: '🇹🇷' },
-  { code: '+972', flag: '🇮🇱' },
-  { code: '+974', flag: '🇶🇦' },
-  { code: '+968', flag: '🇴🇲' },
-  { code: '+973', flag: '🇧🇭' },
-  { code: '+965', flag: '🇰🇼' },
+  { code: '+91' },
+  { code: '+1' },
+  { code: '+44' },
+  { code: '+61' },
+  { code: '+971' },
+  { code: '+966' },
+  { code: '+65' },
+  { code: '+81' },
+  { code: '+86' },
+  { code: '+49' },
+  { code: '+33' },
+  { code: '+39' },
+  { code: '+34' },
+  { code: '+7' },
+  { code: '+55' },
+  { code: '+52' },
+  { code: '+27' },
+  { code: '+82' },
+  { code: '+60' },
+  { code: '+66' },
+  { code: '+84' },
+  { code: '+62' },
+  { code: '+63' },
+  { code: '+92' },
+  { code: '+880' },
+  { code: '+94' },
+  { code: '+977' },
+  { code: '+64' },
+  { code: '+41' },
+  { code: '+31' },
+  { code: '+46' },
+  { code: '+47' },
+  { code: '+45' },
+  { code: '+358' },
+  { code: '+48' },
+  { code: '+43' },
+  { code: '+32' },
+  { code: '+353' },
+  { code: '+351' },
+  { code: '+30' },
+  { code: '+852' },
+  { code: '+886' },
+  { code: '+90' },
+  { code: '+972' },
+  { code: '+974' },
+  { code: '+968' },
+  { code: '+973' },
+  { code: '+965' },
 ];
 
 export { COUNTRY_CODES };
@@ -95,6 +95,11 @@ export const FloatingInput = ({
         onBlur={onBlur}
         placeholder=" "
         disabled={disabled}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
+        data-form-type="other"
         className="peer w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors disabled:opacity-50"
         style={{ fontSize: '16px' }}
       />
@@ -153,6 +158,7 @@ export const FloatingPhoneInput = ({
             value={countryCode}
             onChange={(e) => onCountryCodeChange(e.target.value)}
             disabled={disabled}
+            autoComplete="off"
             className="bg-transparent text-sm outline-none cursor-pointer disabled:opacity-50 appearance-none font-medium"
             style={{ fontSize: '14px' }}
           >
@@ -177,6 +183,11 @@ export const FloatingPhoneInput = ({
           }}
           placeholder=" "
           disabled={disabled}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-form-type="other"
           className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none disabled:opacity-50"
           style={{ fontSize: '16px' }}
         />
