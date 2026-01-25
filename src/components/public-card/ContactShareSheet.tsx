@@ -411,11 +411,10 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-        {/* REMOVED: DrawerHeader and fixed height */}
-        {/* CHANGED: Entire content scrolls, no nested scroll areas */}
-        <DrawerContent className="flex flex-col">
-          {/* Make entire drawer content scrollable */}
-          <div className="overflow-y-auto">
+        {/* CHANGED: Remove all padding and background that might cause spacing */}
+        <DrawerContent className="p-0 bg-transparent rounded-t-[10px] overflow-hidden">
+          {/* CHANGED: Remove any additional wrapper, make content flush with edges */}
+          <div className="bg-background">
             <BlinqHeader />
             {FormContent}
           </div>
