@@ -310,18 +310,30 @@ export function ContactShareSheet({
     </form>
   );
 
-  if (isMobile) {
+  // 👇 HERE'S THE FALLBACK IMPLEMENTATION - Uncomment if drawer still has issues
+  // Option 1: Full-screen div fallback (most reliable for keyboard handling)
+  if (isMobile && open) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange} handleOnly shouldScaleBackground={false}>
-        <DrawerContent className="flex flex-col bg-background">
-          <div className="overflow-y-auto overscroll-contain">
-            <BlinqHeader />
-            {FormContent}
-          </div>
-        </DrawerContent>
-      </Drawer>
+      <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
+        <BlinqHeader />
+        {FormContent}
+      </div>
     );
   }
+
+  // Option 2: Modified Drawer (if you want to try the height-removed approach first)
+  // if (isMobile) {
+  //   return (
+  //     <Drawer open={open} onOpenChange={onOpenChange} handleOnly shouldScaleBackground={false}>
+  //       <DrawerContent className="flex flex-col bg-background">
+  //         <div className="overflow-y-auto overscroll-contain">
+  //           <BlinqHeader />
+  //           {FormContent}
+  //         </div>
+  //       </DrawerContent>
+  //     </Drawer>
+  //   );
+  // }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
