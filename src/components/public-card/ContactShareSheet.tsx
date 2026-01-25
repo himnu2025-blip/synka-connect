@@ -348,10 +348,13 @@ export function ContactShareSheet({
 
     return (
       <div
-        className="fixed inset-0 z-50 bg-background flex flex-col"
+        className="fixed inset-x-0 top-0 z-50 bg-background flex flex-col overflow-hidden"
         style={{ height: vh }}
       >
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+        <div 
+          className="flex-1 overflow-y-auto overscroll-none"
+          style={{ maxHeight: vh }}
+        >
           <BlinqHeader />
           {FormContent}
         </div>
