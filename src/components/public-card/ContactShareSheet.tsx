@@ -55,28 +55,6 @@ export function ContactShareSheet({
     linkedin: '',
   });
 
-  // Visual Viewport API for keyboard-safe height
-  useEffect(() => {
-    if (!isMobile || !open) return;
-
-    const updateHeight = () => {
-      // Use visualViewport.height if available, fallback to innerHeight
-      const height = window.visualViewport?.height || window.innerHeight;
-      setVh(height);
-    };
-
-    updateHeight();
-
-    // Listen to visual viewport changes (keyboard open/close)
-    window.visualViewport?.addEventListener('resize', updateHeight);
-    window.addEventListener('orientationchange', updateHeight);
-
-    return () => {
-      window.visualViewport?.removeEventListener('resize', updateHeight);
-      window.removeEventListener('orientationchange', updateHeight);
-    };
-  }, [isMobile, open]);
-
   // Prevent body scroll when sheet is open
   useEffect(() => {
     if (!open) return;
