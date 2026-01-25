@@ -2028,6 +2028,7 @@ if (!contacts && contactsLoading) {
       {/* Contact Detail Drawer */}
       <Drawer
         open={showContactDetail}
+        handleOnly={isEditOpen}
         onOpenChange={(val) => {
           // Use setTimeout to prevent state conflicts with child components
           setTimeout(() => {
@@ -2098,22 +2099,38 @@ if (!contacts && contactsLoading) {
 
               {/* --- Inline Edit Form inside Sheet --- */}
               {isEditOpen && selectedContact ? (
-                <div className="space-y-4">
+                <div className="space-y-4 pb-48">
                   <FloatingInput
                     label="Full name"
                     value={editForm.name}
                     onChange={(e) => updateEditField('name', e.target.value)}
                     inputRef={editNameRef}
+                    onFocus={(e) => {
+                      // Scroll input into view when keyboard opens on mobile
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 300);
+                    }}
                   />
                   <FloatingInput
                     label="Organization/Brand"
                     value={editForm.company}
                     onChange={(e) => updateEditField('company', e.target.value)}
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 300);
+                    }}
                   />
                   <FloatingInput
                     label="Role"
                     value={editForm.designation}
                     onChange={(e) => updateEditField('designation', e.target.value)}
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 300);
+                    }}
                   />
                   <FloatingPhoneInput
                     label="Mobile"
@@ -2127,12 +2144,22 @@ if (!contacts && contactsLoading) {
                       const number = extractPhoneNumber(editForm.phone);
                       updateEditField('phone', code + number);
                     }}
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 300);
+                    }}
                   />
                   <FloatingInput
                     label="Email"
                     value={editForm.email}
                     onChange={(e) => updateEditField('email', e.target.value)}
                     inputMode="email"
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 300);
+                    }}
                   />
                   <FloatingPhoneInput
                     label="WhatsApp"
@@ -2146,17 +2173,32 @@ if (!contacts && contactsLoading) {
                       const number = extractPhoneNumber(editForm.whatsapp);
                       updateEditField('whatsapp', code + number);
                     }}
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 300);
+                    }}
                   />
                   <FloatingInput
                     label="LinkedIn"
                     value={editForm.linkedin}
                     onChange={(e) => updateEditField('linkedin', e.target.value)}
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 300);
+                    }}
                   />
                   <FloatingInput
                     label="Website"
                     value={editForm.website}
                     onChange={(e) => updateEditField('website', e.target.value)}
                     inputMode="url"
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 300);
+                    }}
                   />
 
                   <div>
@@ -2166,6 +2208,11 @@ if (!contacts && contactsLoading) {
                       onChange={(e) => updateEditField('notes', e.target.value)}
                       placeholder="Add a new note..."
                       rows={3}
+                      onFocus={(e) => {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                      }}
                     />
                   </div>
 
