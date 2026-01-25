@@ -127,11 +127,16 @@ export const FloatingPhoneInput = ({
   disabled,
   className,
 }: FloatingPhoneInputProps) => {
+  const [isFocused, setIsFocused] = React.useState(false);
   const hasValue = value !== undefined && value !== null && value !== '';
+  const isFloating = hasValue || isFocused;
   
   return (
     <div className={cn("relative h-14", className)}>
-      <div className="flex items-center h-full rounded-xl border border-border focus-within:border-foreground transition-colors">
+      <div className={cn(
+        "flex items-center h-full rounded-xl border transition-colors",
+        isFocused ? "border-foreground" : "border-border"
+      )}>
         {/* Country code selector - compact */}
         <div className="flex items-center justify-center pl-3 pr-2 shrink-0 border-r border-border/50 h-full">
           <select
@@ -152,18 +157,20 @@ export const FloatingPhoneInput = ({
           inputMode="tel"
           value={value}
           onChange={onChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           placeholder=" "
           disabled={disabled}
-          className="peer flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none disabled:opacity-50"
+          className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none disabled:opacity-50"
           style={{ fontSize: '16px' }}
         />
       </div>
-      {/* Floating label - stable positioning with hasValue check */}
+      {/* Floating label - stable positioning with focus + hasValue check */}
       <label
         className={cn(
-          "absolute left-3 text-muted-foreground pointer-events-none transition-all duration-200",
-          hasValue
-            ? "top-0 -translate-y-1/2 text-xs bg-background px-1"
+          "absolute text-muted-foreground pointer-events-none transition-all duration-200",
+          isFloating
+            ? "left-3 top-0 -translate-y-1/2 text-xs bg-background px-1"
             : "left-[5.5rem] top-1/2 -translate-y-1/2 text-base bg-transparent px-0"
         )}
       >
