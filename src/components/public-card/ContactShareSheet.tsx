@@ -251,16 +251,9 @@ export function ContactShareSheet({
     </>
   );
 
-  // Form content using shared FloatingInput components
-  const FormContent = (
-    <form 
-      autoComplete="off" 
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSubmit();
-      }}
-      className="space-y-4 px-4 pb-4"
-    >
+  // Form fields only (no button)
+  const FormFields = (
+    <>
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -324,40 +317,47 @@ export function ContactShareSheet({
             onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
           />
         </div>
-
-        {/* SEND BUTTON */}
-        <Button
-          type="submit"
-          disabled={submitting}
-          variant="gradient"
-          className="w-full h-14 rounded-xl text-white text-base font-medium mt-6 hover:opacity-90 transition-opacity"
-        >
-          {submitting ? 'Sending...' : 'Send'}
-        </Button>
-
-        <p className="text-[11px] text-center text-muted-foreground/70 mt-2">
-          We don't sell your contact details
-        </p>
       </div>
-    </form>
+    </>
   );
 
-  // ✅ MOBILE — Fullscreen keyboard-safe layout
+  // Fixed bottom section with Send button
+  const FixedBottomSection = (
+    <div className="px-4 pb-4 pt-2 bg-background border-t border-border/50">
+      <Button
+        type="button"
+        onClick={handleSubmit}
+        disabled={submitting}
+        variant="gradient"
+        className="w-full h-14 rounded-xl text-white text-base font-medium hover:opacity-90 transition-opacity"
+      >
+        {submitting ? 'Sending...' : 'Send'}
+      </Button>
+      <p className="text-[11px] text-center text-muted-foreground/70 mt-2">
+        We don't sell your contact details
+      </p>
+    </div>
+  );
+
+  // ✅ MOBILE — Fullscreen keyboard-safe layout with fixed bottom button
   if (isMobile) {
     if (!open) return null;
 
     return (
       <div
-        className="fixed inset-x-0 top-0 z-50 bg-background flex flex-col overflow-hidden"
+        className="fixed inset-0 z-50 bg-background flex flex-col"
         style={{ height: vh }}
       >
-        <div 
-          className="flex-1 overflow-y-auto overscroll-none"
-          style={{ maxHeight: vh }}
-        >
+        {/* Scrollable content area */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-none">
           <BlinqHeader />
-          {FormContent}
+          <div className="px-4 pb-4 space-y-4">
+            {FormFields}
+          </div>
         </div>
+        
+        {/* Fixed bottom button - outside scroll area */}
+        {FixedBottomSection}
       </div>
     );
   }
@@ -367,7 +367,10 @@ export function ContactShareSheet({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden" hideCloseButton>
         <BlinqHeader />
-        {FormContent}
+        <div className="px-4 pb-4 space-y-4">
+          {FormFields}
+        </div>
+        {FixedBottomSection}
       </DialogContent>
     </Dialog>
   );
