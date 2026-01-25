@@ -270,15 +270,19 @@ export function ContactShareSheet({
         />
 
         {/* PHONE FIELD */}
-        <FloatingPhoneInput
-          label="Phone number"
-          value={formData.phone}
-          onChange={(e) =>
-            setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-          }
-          countryCode={countryCode}
-          onCountryCodeChange={setCountryCode}
-        />
+<FloatingPhoneInput
+  label="Phone number"
+  type="tel"
+  inputMode="numeric"
+  autoComplete="tel"
+  pattern="[0-9]*"
+  value={formData.phone}
+  onChange={(e) =>
+    setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+  }
+  countryCode={countryCode}
+  onCountryCodeChange={setCountryCode}
+/>
 
         {/* ROLE + COMPANY */}
         <div className="grid grid-cols-2 gap-3">
