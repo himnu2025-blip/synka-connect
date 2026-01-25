@@ -323,7 +323,7 @@ export function ContactShareSheet({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-background flex flex-col h-screen overflow-hidden">
       
       {/* Scroll area */}
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-none">
