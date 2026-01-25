@@ -411,8 +411,7 @@ export function ContactShareSheet({
 
         <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
           {/* Country code selector */}
-          <div className="flex items-center gap-1.5 px-3 h-full border-r border-border shrink-0">
-            <span className="text-base">{COUNTRY_CODES.find(c => c.code === countryCode)?.flag || '🇮🇳'}</span>
+          <div className="flex items-center px-3 h-full border-r border-border shrink-0">
             <select
               value={countryCode}
               onChange={(e) => setCountryCode(e.target.value)}
