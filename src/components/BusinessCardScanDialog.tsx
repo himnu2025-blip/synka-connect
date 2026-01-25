@@ -332,7 +332,7 @@ export function BusinessCardScanDialog({
             />
             <div className="grid grid-cols-2 gap-3">
               <FloatingInput
-                label="Organization/Brand"
+                label="Company Name"
                 value={scannedContact.company || ''}
                 onChange={(e) => setScannedContact(prev => ({ ...prev, company: e.target.value }))}
               />
