@@ -28,6 +28,7 @@ import { hapticFeedback } from '@/lib/haptics';
 import { FaWhatsapp } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { FloatingInput, FloatingPhoneInput, COUNTRY_CODES as PHONE_COUNTRY_CODES, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
 import { cn, getContrastTextColor, getSubtleBackground } from '@/lib/utils';
 import {
   Dialog,
@@ -2099,80 +2100,74 @@ if (!contacts && contactsLoading) {
               {isEditOpen && selectedContact ? (
                 <div className="space-y-4 p-4 border-b border-border/50 bg-muted/30 rounded-b-lg mx-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs">Full name</Label>
-                      <Input
-                        ref={editNameRef}
-                        value={editForm.name}
-                        onChange={(e) => updateEditField('name', e.target.value)}
-                        placeholder="Full name"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Organization/Brand</Label>
-                      <Input
-                        value={editForm.company}
-                        onChange={(e) => updateEditField('company', e.target.value)}
-                        placeholder="Organization/Brand"
-                      />
-                    </div>
+                    <FloatingInput
+                      label="Full name"
+                      value={editForm.name}
+                      onChange={(e) => updateEditField('name', e.target.value)}
+                      inputRef={editNameRef}
+                    />
+                    <FloatingInput
+                      label="Organization/Brand"
+                      value={editForm.company}
+                      onChange={(e) => updateEditField('company', e.target.value)}
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs">Role</Label>
-                      <Input
-                        value={editForm.designation}
-                        onChange={(e) => updateEditField('designation', e.target.value)}
-                        placeholder="Role"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Mobile</Label>
-                      <Input
-                        value={editForm.phone}
-                        onChange={(e) => updateEditField('phone', e.target.value)}
-                        placeholder="Mobile"
-                      />
-                    </div>
+                    <FloatingInput
+                      label="Role"
+                      value={editForm.designation}
+                      onChange={(e) => updateEditField('designation', e.target.value)}
+                    />
+                    <FloatingPhoneInput
+                      label="Mobile"
+                      value={extractPhoneNumber(editForm.phone)}
+                      onChange={(e) => {
+                        const code = getCountryCode(editForm.phone);
+                        updateEditField('phone', code + e.target.value);
+                      }}
+                      countryCode={getCountryCode(editForm.phone)}
+                      onCountryCodeChange={(code) => {
+                        const number = extractPhoneNumber(editForm.phone);
+                        updateEditField('phone', code + number);
+                      }}
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs">Email</Label>
-                      <Input
-                        value={editForm.email}
-                        onChange={(e) => updateEditField('email', e.target.value)}
-                        placeholder="Email"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">WhatsApp</Label>
-                      <Input
-                        value={editForm.whatsapp}
-                        onChange={(e) => updateEditField('whatsapp', e.target.value)}
-                        placeholder="WhatsApp"
-                      />
-                    </div>
+                    <FloatingInput
+                      label="Email"
+                      value={editForm.email}
+                      onChange={(e) => updateEditField('email', e.target.value)}
+                      inputMode="email"
+                    />
+                    <FloatingPhoneInput
+                      label="WhatsApp"
+                      value={extractPhoneNumber(editForm.whatsapp)}
+                      onChange={(e) => {
+                        const code = getCountryCode(editForm.whatsapp);
+                        updateEditField('whatsapp', code + e.target.value);
+                      }}
+                      countryCode={getCountryCode(editForm.whatsapp)}
+                      onCountryCodeChange={(code) => {
+                        const number = extractPhoneNumber(editForm.whatsapp);
+                        updateEditField('whatsapp', code + number);
+                      }}
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs">LinkedIn</Label>
-                      <Input
-                        value={editForm.linkedin}
-                        onChange={(e) => updateEditField('linkedin', e.target.value)}
-                        placeholder="LinkedIn"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Website</Label>
-                      <Input
-                        value={editForm.website}
-                        onChange={(e) => updateEditField('website', e.target.value)}
-                        placeholder="Website"
-                      />
-                    </div>
+                    <FloatingInput
+                      label="LinkedIn"
+                      value={editForm.linkedin}
+                      onChange={(e) => updateEditField('linkedin', e.target.value)}
+                    />
+                    <FloatingInput
+                      label="Website"
+                      value={editForm.website}
+                      onChange={(e) => updateEditField('website', e.target.value)}
+                      inputMode="url"
+                    />
                   </div>
 
                   <div>

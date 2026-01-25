@@ -23,133 +23,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-
-// Country codes for phone input
-const COUNTRY_CODES = [
-  { code: '+91', flag: '🇮🇳' },
-  { code: '+1', flag: '🇺🇸' },
-  { code: '+44', flag: '🇬🇧' },
-  { code: '+61', flag: '🇦🇺' },
-  { code: '+971', flag: '🇦🇪' },
-  { code: '+966', flag: '🇸🇦' },
-  { code: '+65', flag: '🇸🇬' },
-  { code: '+81', flag: '🇯🇵' },
-  { code: '+86', flag: '🇨🇳' },
-  { code: '+49', flag: '🇩🇪' },
-  { code: '+33', flag: '🇫🇷' },
-  { code: '+39', flag: '🇮🇹' },
-  { code: '+34', flag: '🇪🇸' },
-  { code: '+7', flag: '🇷🇺' },
-  { code: '+55', flag: '🇧🇷' },
-  { code: '+52', flag: '🇲🇽' },
-  { code: '+27', flag: '🇿🇦' },
-  { code: '+82', flag: '🇰🇷' },
-  { code: '+60', flag: '🇲🇾' },
-  { code: '+66', flag: '🇹🇭' },
-  { code: '+84', flag: '🇻🇳' },
-  { code: '+62', flag: '🇮🇩' },
-  { code: '+63', flag: '🇵🇭' },
-  { code: '+92', flag: '🇵🇰' },
-  { code: '+880', flag: '🇧🇩' },
-  { code: '+94', flag: '🇱🇰' },
-  { code: '+977', flag: '🇳🇵' },
-];
-
-// Floating label input component
-const FloatingInput = ({
-  label,
-  value,
-  onChange,
-  type = 'text',
-  inputMode,
-  disabled,
-}: {
-  label: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
-  inputMode?: 'text' | 'email' | 'tel' | 'numeric' | 'url';
-  disabled?: boolean;
-}) => {
-  return (
-    <div className="relative h-14">
-      <input
-        type={type}
-        inputMode={inputMode}
-        value={value}
-        onChange={onChange}
-        placeholder=" "
-        disabled={disabled}
-        className="peer absolute inset-0 w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors disabled:opacity-50 flex items-center"
-        style={{ fontSize: '16px', lineHeight: '56px' }}
-      />
-      <label
-        className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
-          top-0 -translate-y-1/2 text-xs bg-background px-1
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-          peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
-      >
-        {label}
-      </label>
-    </div>
-  );
-};
-
-// Floating label input with country code selector - compact premium design
-const FloatingPhoneInput = ({
-  label,
-  value,
-  onChange,
-  countryCode,
-  onCountryCodeChange,
-  disabled,
-}: {
-  label: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  countryCode: string;
-  onCountryCodeChange: (code: string) => void;
-  disabled?: boolean;
-}) => {
-  return (
-    <div className="relative h-14">
-      <div className="absolute inset-0 flex items-center rounded-xl border border-border focus-within:border-foreground transition-colors">
-        {/* Country code selector - compact */}
-        <div className="flex items-center justify-center pl-3 pr-2 shrink-0 border-r border-border/50 h-full">
-          <select
-            value={countryCode}
-            onChange={(e) => onCountryCodeChange(e.target.value)}
-            disabled={disabled}
-            className="bg-background text-xs outline-none cursor-pointer disabled:opacity-50 appearance-none"
-            style={{ fontSize: '13px' }}
-          >
-            {COUNTRY_CODES.map(({ code, flag }) => (
-              <option key={code} value={code} className="bg-background text-foreground">{flag} {code}</option>
-            ))}
-          </select>
-        </div>
-        {/* Phone input - vertically centered */}
-        <input
-          type="tel"
-          inputMode="tel"
-          value={value}
-          onChange={onChange}
-          placeholder=" "
-          disabled={disabled}
-          className="peer flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none disabled:opacity-50"
-          style={{ fontSize: '16px', textAlign: 'left' }}
-        />
-      </div>
-      {/* Floating label */}
-      <label
-        className={`absolute pointer-events-none transition-all duration-200 text-muted-foreground
-          ${value ? 'left-3 top-0 -translate-y-1/2 text-xs bg-background px-1' : 'left-[4.5rem] top-1/2 -translate-y-1/2 text-sm bg-transparent'}`}
-      >
-        {label}
-      </label>
-    </div>
-  );
-};
+import { FloatingInput, FloatingPhoneInput, COUNTRY_CODES, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
 import {
   Dialog,
   DialogContent,
@@ -1154,46 +1028,30 @@ useEffect(() => {
 
               <FloatingPhoneInput
                 label="Phone"
-                value={(() => {
-                  const phone = editData.phone || '';
-                  const matchedCode = COUNTRY_CODES.find(c => phone.startsWith(c.code));
-                  return matchedCode ? phone.slice(matchedCode.code.length) : phone;
-                })()}
+                value={extractPhoneNumber(editData.phone)}
                 onChange={(e) => {
-                  const phoneNumber = e.target.value;
-                  const matchedCode = COUNTRY_CODES.find(c => (editData.phone || '').startsWith(c.code));
-                  const currentCode = matchedCode?.code || '+91';
-                  setEditData(prev => ({ ...prev, phone: currentCode + phoneNumber }));
+                  const code = getCountryCode(editData.phone);
+                  setEditData(prev => ({ ...prev, phone: code + e.target.value }));
                 }}
-                countryCode={COUNTRY_CODES.find(c => (editData.phone || '').startsWith(c.code))?.code || '+91'}
+                countryCode={getCountryCode(editData.phone)}
                 onCountryCodeChange={(code) => {
-                  const phone = editData.phone || '';
-                  const matchedCode = COUNTRY_CODES.find(c => phone.startsWith(c.code));
-                  const phoneNumber = matchedCode ? phone.slice(matchedCode.code.length) : phone;
-                  setEditData(prev => ({ ...prev, phone: code + phoneNumber }));
+                  const number = extractPhoneNumber(editData.phone);
+                  setEditData(prev => ({ ...prev, phone: code + number }));
                 }}
                 disabled={isLoading}
               />
 
               <FloatingPhoneInput
                 label="WhatsApp"
-                value={(() => {
-                  const whatsapp = editData.whatsapp || '';
-                  const matchedCode = COUNTRY_CODES.find(c => whatsapp.startsWith(c.code));
-                  return matchedCode ? whatsapp.slice(matchedCode.code.length) : whatsapp;
-                })()}
+                value={extractPhoneNumber(editData.whatsapp)}
                 onChange={(e) => {
-                  const phoneNumber = e.target.value;
-                  const matchedCode = COUNTRY_CODES.find(c => (editData.whatsapp || '').startsWith(c.code));
-                  const currentCode = matchedCode?.code || '+91';
-                  setEditData(prev => ({ ...prev, whatsapp: currentCode + phoneNumber }));
+                  const code = getCountryCode(editData.whatsapp);
+                  setEditData(prev => ({ ...prev, whatsapp: code + e.target.value }));
                 }}
-                countryCode={COUNTRY_CODES.find(c => (editData.whatsapp || '').startsWith(c.code))?.code || '+91'}
+                countryCode={getCountryCode(editData.whatsapp)}
                 onCountryCodeChange={(code) => {
-                  const whatsapp = editData.whatsapp || '';
-                  const matchedCode = COUNTRY_CODES.find(c => whatsapp.startsWith(c.code));
-                  const phoneNumber = matchedCode ? whatsapp.slice(matchedCode.code.length) : whatsapp;
-                  setEditData(prev => ({ ...prev, whatsapp: code + phoneNumber }));
+                  const number = extractPhoneNumber(editData.whatsapp);
+                  setEditData(prev => ({ ...prev, whatsapp: code + number }));
                 }}
                 disabled={isLoading}
               />
