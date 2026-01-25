@@ -1668,79 +1668,61 @@ if (!contacts && contactsLoading) {
             <DialogTitle>Add Contact</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Name *</Label>
-              <Input
-                value={newContact.name}
-                onChange={(e) => setNewContact(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Full name"
+            <FloatingInput
+              label="Full name *"
+              value={newContact.name}
+              onChange={(e) => setNewContact(prev => ({ ...prev, name: e.target.value }))}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <FloatingInput
+                label="Organization/Brand"
+                value={newContact.company}
+                onChange={(e) => setNewContact(prev => ({ ...prev, company: e.target.value }))}
+              />
+              <FloatingInput
+                label="Role"
+                value={newContact.designation}
+                onChange={(e) => setNewContact(prev => ({ ...prev, designation: e.target.value }))}
+              />
+            </div>
+            <FloatingInput
+              label="Email"
+              type="email"
+              inputMode="email"
+              value={newContact.email}
+              onChange={(e) => setNewContact(prev => ({ ...prev, email: e.target.value }))}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <FloatingInput
+                label="Phone"
+                type="tel"
+                inputMode="tel"
+                value={newContact.phone}
+                onChange={(e) => setNewContact(prev => ({ ...prev, phone: e.target.value }))}
+              />
+              <FloatingInput
+                label="WhatsApp"
+                type="tel"
+                inputMode="tel"
+                value={newContact.whatsapp}
+                onChange={(e) => setNewContact(prev => ({ ...prev, whatsapp: e.target.value }))}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Organization/Brand</Label>
-                <Input
-                  value={newContact.company}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, company: e.target.value }))}
-                  placeholder="Organization/Brand"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Role</Label>
-                <Input
-                  value={newContact.designation}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, designation: e.target.value }))}
-                  placeholder="Role"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input
-                type="email"
-                value={newContact.email}
-                onChange={(e) => setNewContact(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="email@example.com"
+              <FloatingInput
+                label="LinkedIn"
+                value={newContact.linkedin}
+                onChange={(e) => setNewContact(prev => ({ ...prev, linkedin: e.target.value }))}
+              />
+              <FloatingInput
+                label="Website"
+                inputMode="url"
+                value={newContact.website}
+                onChange={(e) => setNewContact(prev => ({ ...prev, website: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Phone</Label>
-                <Input
-                  value={newContact.phone}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder="+1 234 567 890"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>WhatsApp</Label>
-                <Input
-                  value={newContact.whatsapp}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, whatsapp: e.target.value }))}
-                  placeholder="+1 234 567 890"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>LinkedIn</Label>
-                <Input
-                  value={newContact.linkedin}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, linkedin: e.target.value }))}
-                  placeholder="username"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Website</Label>
-                <Input
-                  value={newContact.website}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, website: e.target.value }))}
-                  placeholder="example.com"
-                />
-              </div>
-            </div>
             <div className="space-y-2">
-              <Label>Notes</Label>
+              <Label className="text-sm text-muted-foreground">Notes</Label>
               <Textarea
                 value={newContact.notes}
                 onChange={(e) => setNewContact(prev => ({ ...prev, notes: e.target.value }))}
@@ -1860,62 +1842,53 @@ if (!contacts && contactsLoading) {
             {scannedContact && (
               <div className="space-y-4">
                 <div className="p-4 rounded-lg bg-muted/50 border border-border">
-                  <p className="text-sm text-muted-foreground mb-3">Review extracted information:</p>
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <Label className="text-xs">Name</Label>
-                      <Input
-                        value={scannedContact.name || ''}
-                        onChange={(e) => setScannedContact((prev: any) => ({ ...prev, name: e.target.value }))}
+                  <p className="text-sm text-muted-foreground mb-4">Review extracted information:</p>
+                  <div className="space-y-4">
+                    <FloatingInput
+                      label="Name *"
+                      value={scannedContact.name || ''}
+                      onChange={(e) => setScannedContact((prev: any) => ({ ...prev, name: e.target.value }))}
+                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      <FloatingInput
+                        label="Company"
+                        value={scannedContact.company || ''}
+                        onChange={(e) => setScannedContact((prev: any) => ({ ...prev, company: e.target.value }))}
+                      />
+                      <FloatingInput
+                        label="Designation"
+                        value={scannedContact.designation || ''}
+                        onChange={(e) => setScannedContact((prev: any) => ({ ...prev, designation: e.target.value }))}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Company</Label>
-                        <Input
-                          value={scannedContact.company || ''}
-                          onChange={(e) => setScannedContact((prev: any) => ({ ...prev, company: e.target.value }))}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Designation</Label>
-                        <Input
-                          value={scannedContact.designation || ''}
-                          onChange={(e) => setScannedContact((prev: any) => ({ ...prev, designation: e.target.value }))}
-                        />
-                      </div>
+                      <FloatingInput
+                        label="Email"
+                        type="email"
+                        inputMode="email"
+                        value={scannedContact.email || ''}
+                        onChange={(e) => setScannedContact((prev: any) => ({ ...prev, email: e.target.value }))}
+                      />
+                      <FloatingInput
+                        label="Phone"
+                        type="tel"
+                        inputMode="tel"
+                        value={scannedContact.phone || ''}
+                        onChange={(e) => setScannedContact((prev: any) => ({ ...prev, phone: e.target.value }))}
+                      />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Email</Label>
-                        <Input
-                          value={scannedContact.email || ''}
-                          onChange={(e) => setScannedContact((prev: any) => ({ ...prev, email: e.target.value }))}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Phone</Label>
-                        <Input
-                          value={scannedContact.phone || ''}
-                          onChange={(e) => setScannedContact((prev: any) => ({ ...prev, phone: e.target.value }))}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Website</Label>
-                        <Input
-                          value={scannedContact.website || ''}
-                          onChange={(e) => setScannedContact((prev: any) => ({ ...prev, website: e.target.value }))}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">LinkedIn</Label>
-                        <Input
-                          value={scannedContact.linkedin || ''}
-                          onChange={(e) => setScannedContact((prev: any) => ({ ...prev, linkedin: e.target.value }))}
-                        />
-                      </div>
+                      <FloatingInput
+                        label="Website"
+                        inputMode="url"
+                        value={scannedContact.website || ''}
+                        onChange={(e) => setScannedContact((prev: any) => ({ ...prev, website: e.target.value }))}
+                      />
+                      <FloatingInput
+                        label="LinkedIn"
+                        value={scannedContact.linkedin || ''}
+                        onChange={(e) => setScannedContact((prev: any) => ({ ...prev, linkedin: e.target.value }))}
+                      />
                     </div>
                   </div>
                 </div>
