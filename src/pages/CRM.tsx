@@ -2025,13 +2025,13 @@ if (!contacts && contactsLoading) {
           }, 0);
         }}
       >
-        <DrawerContent className="max-h-[92vh] rounded-3xl border-0 shadow-none bg-background [&>div:first-child]:hidden overflow-y-auto">
+        <DrawerContent className="h-[85dvh] rounded-3xl border-0 shadow-none bg-background [&>div:first-child]:hidden flex flex-col">
   {/* ðŸŽ iOS Drag Handle */}
-  <div className="flex justify-center mb-1 flex-shrink-0">
+  <div className="flex justify-center py-3 flex-shrink-0">
     <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
   </div>
           {selectedContact && (
-            <div className="space-y-6 px-4 pb-8">
+            <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-8 space-y-6">
               <DrawerHeader className="text-center relative pt-0 mt-0">
                 <ContactAvatar 
                   name={selectedContact.name}
