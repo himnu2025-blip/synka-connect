@@ -21,9 +21,136 @@ import {
 import { FaWhatsapp } from 'react-icons/fa';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+
+// Country codes for phone input
+const COUNTRY_CODES = [
+  { code: '+91', flag: '🇮🇳' },
+  { code: '+1', flag: '🇺🇸' },
+  { code: '+44', flag: '🇬🇧' },
+  { code: '+61', flag: '🇦🇺' },
+  { code: '+971', flag: '🇦🇪' },
+  { code: '+966', flag: '🇸🇦' },
+  { code: '+65', flag: '🇸🇬' },
+  { code: '+81', flag: '🇯🇵' },
+  { code: '+86', flag: '🇨🇳' },
+  { code: '+49', flag: '🇩🇪' },
+  { code: '+33', flag: '🇫🇷' },
+  { code: '+39', flag: '🇮🇹' },
+  { code: '+34', flag: '🇪🇸' },
+  { code: '+7', flag: '🇷🇺' },
+  { code: '+55', flag: '🇧🇷' },
+  { code: '+52', flag: '🇲🇽' },
+  { code: '+27', flag: '🇿🇦' },
+  { code: '+82', flag: '🇰🇷' },
+  { code: '+60', flag: '🇲🇾' },
+  { code: '+66', flag: '🇹🇭' },
+  { code: '+84', flag: '🇻🇳' },
+  { code: '+62', flag: '🇮🇩' },
+  { code: '+63', flag: '🇵🇭' },
+  { code: '+92', flag: '🇵🇰' },
+  { code: '+880', flag: '🇧🇩' },
+  { code: '+94', flag: '🇱🇰' },
+  { code: '+977', flag: '🇳🇵' },
+];
+
+// Floating label input component
+const FloatingInput = ({
+  label,
+  value,
+  onChange,
+  type = 'text',
+  inputMode,
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+  inputMode?: 'text' | 'email' | 'tel' | 'numeric' | 'url';
+  disabled?: boolean;
+}) => {
+  return (
+    <div className="relative h-14">
+      <input
+        type={type}
+        inputMode={inputMode}
+        value={value}
+        onChange={onChange}
+        placeholder=" "
+        disabled={disabled}
+        className="peer absolute inset-0 w-full h-full px-4 pt-5 pb-2 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors disabled:opacity-50"
+        style={{ fontSize: '16px' }}
+      />
+      <label
+        className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
+          top-0 -translate-y-1/2 text-xs bg-background px-1
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
+          peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
+      >
+        {label}
+      </label>
+    </div>
+  );
+};
+
+// Floating label input with country code selector
+const FloatingPhoneInput = ({
+  label,
+  value,
+  onChange,
+  countryCode,
+  onCountryCodeChange,
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  countryCode: string;
+  onCountryCodeChange: (code: string) => void;
+  disabled?: boolean;
+}) => {
+  return (
+    <div className="relative h-14 flex">
+      {/* Country code selector */}
+      <div className="flex items-center h-full border border-r-0 border-border rounded-l-xl px-2 bg-transparent shrink-0">
+        <select
+          value={countryCode}
+          onChange={(e) => onCountryCodeChange(e.target.value)}
+          disabled={disabled}
+          className="bg-transparent text-sm outline-none cursor-pointer disabled:opacity-50"
+          style={{ fontSize: '14px' }}
+        >
+          {COUNTRY_CODES.map(({ code, flag }) => (
+            <option key={code} value={code}>{flag} {code}</option>
+          ))}
+        </select>
+      </div>
+      {/* Phone input */}
+      <div className="relative flex-1">
+        <input
+          type="tel"
+          inputMode="tel"
+          value={value}
+          onChange={onChange}
+          placeholder=" "
+          disabled={disabled}
+          className="peer w-full h-full px-4 pt-5 pb-2 text-base bg-transparent outline-none rounded-r-xl border border-l-0 border-border focus:border-foreground transition-colors disabled:opacity-50"
+          style={{ fontSize: '16px' }}
+        />
+        <label
+          className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
+            top-0 -translate-y-1/2 text-xs bg-background px-1
+            peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
+            peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
+        >
+          {label}
+        </label>
+      </div>
+    </div>
+  );
+};
 import {
   Dialog,
   DialogContent,
@@ -989,95 +1116,95 @@ useEffect(() => {
             </div>
             {/* Form Fields */}
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Name *</Label>
-                <Input
-                  value={editData.name}
+              <FloatingInput
+                label="Name *"
+                value={editData.name}
+                onChange={(e) =>
+                  setEditData(prev => ({ ...prev, name: e.target.value }))
+                }
+                disabled={isLoading}
+              />
+
+              <FloatingInput
+                label="Role *"
+                value={editData.designation}
+                onChange={(e) =>
+                  setEditData(prev => ({ ...prev, designation: e.target.value }))
+                }
+                disabled={isLoading}
+              />
+
+              <FloatingInput
+                label="Organization / Brand"
+                value={editData.company}
+                onChange={(e) =>
+                  setEditData(prev => ({ ...prev, company: e.target.value }))
+                }
+                disabled={isLoading}
+              />
+
+              <div className="grid grid-cols-2 gap-3">
+                <FloatingPhoneInput
+                  label="Phone"
+                  value={editData.phone?.replace(/^\+\d+/, '') || ''}
+                  onChange={(e) => {
+                    const phoneNumber = e.target.value;
+                    const currentCode = COUNTRY_CODES.find(c => editData.phone?.startsWith(c.code))?.code || '+91';
+                    setEditData(prev => ({ ...prev, phone: currentCode + phoneNumber }));
+                  }}
+                  countryCode={COUNTRY_CODES.find(c => editData.phone?.startsWith(c.code))?.code || '+91'}
+                  onCountryCodeChange={(code) => {
+                    const phoneNumber = editData.phone?.replace(/^\+\d+/, '') || '';
+                    setEditData(prev => ({ ...prev, phone: code + phoneNumber }));
+                  }}
+                  disabled={isLoading}
+                />
+                <FloatingInput
+                  label="Email"
+                  value={editData.email}
                   onChange={(e) =>
-                    setEditData(prev => ({ ...prev, name: e.target.value }))
+                    setEditData(prev => ({ ...prev, email: e.target.value }))
                   }
+                  inputMode="email"
                   disabled={isLoading}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Role *</Label>
-                <Input
-                  value={editData.designation}
+              <div className="grid grid-cols-2 gap-3">
+                <FloatingInput
+                  label="Website"
+                  value={editData.website}
                   onChange={(e) =>
-                    setEditData(prev => ({ ...prev, designation: e.target.value }))
+                    setEditData(prev => ({ ...prev, website: e.target.value }))
                   }
+                  inputMode="url"
+                  disabled={isLoading}
+                />
+                <FloatingPhoneInput
+                  label="WhatsApp"
+                  value={editData.whatsapp?.replace(/^\+\d+/, '') || ''}
+                  onChange={(e) => {
+                    const phoneNumber = e.target.value;
+                    const currentCode = COUNTRY_CODES.find(c => editData.whatsapp?.startsWith(c.code))?.code || '+91';
+                    setEditData(prev => ({ ...prev, whatsapp: currentCode + phoneNumber }));
+                  }}
+                  countryCode={COUNTRY_CODES.find(c => editData.whatsapp?.startsWith(c.code))?.code || '+91'}
+                  onCountryCodeChange={(code) => {
+                    const phoneNumber = editData.whatsapp?.replace(/^\+\d+/, '') || '';
+                    setEditData(prev => ({ ...prev, whatsapp: code + phoneNumber }));
+                  }}
                   disabled={isLoading}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Organization/Brand</Label>
-                <Input
-                  value={editData.company}
-                  onChange={(e) =>
-                    setEditData(prev => ({ ...prev, company: e.target.value }))
-                  }
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Phone</Label>
-                  <Input
-                    value={editData.phone}
-                    onChange={(e) =>
-                      setEditData(prev => ({ ...prev, phone: e.target.value }))
-                    }
-                    disabled={isLoading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input
-                    value={editData.email}
-                    onChange={(e) =>
-                      setEditData(prev => ({ ...prev, email: e.target.value }))
-                    }
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Website</Label>
-                  <Input
-                    value={editData.website}
-                    onChange={(e) =>
-                      setEditData(prev => ({ ...prev, website: e.target.value }))
-                    }
-                    disabled={isLoading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>WhatsApp</Label>
-                  <Input
-                    value={editData.whatsapp}
-                    onChange={(e) =>
-                      setEditData(prev => ({ ...prev, whatsapp: e.target.value }))
-                    }
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>LinkedIn Username</Label>
-                <Input
-                  value={editData.linkedin}
-                  onChange={(e) =>
-                    setEditData(prev => ({ ...prev, linkedin: e.target.value }))
-                  }
-                  disabled={isLoading}
-                />
-              </div>
+              <FloatingInput
+                label="LinkedIn Username"
+                value={editData.linkedin}
+                onChange={(e) =>
+                  setEditData(prev => ({ ...prev, linkedin: e.target.value }))
+                }
+                disabled={isLoading}
+              />
 
               {/* Social Links Editor */}
               <div className="space-y-2">
