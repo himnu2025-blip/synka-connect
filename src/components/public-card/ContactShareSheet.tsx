@@ -345,19 +345,38 @@ export function ContactShareSheet({
 
     return (
       <div
-        className="fixed inset-0 z-50 bg-background flex flex-col"
-        style={{ height: vh }}
+        className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden"
+        style={{ height: vh, maxHeight: vh, touchAction: 'none' }}
       >
         {/* Scrollable content area */}
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-none">
+        <div 
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
+          style={{ touchAction: 'pan-y' }}
+          onScroll={(e) => {
+            const target = e.currentTarget;
+            // Prevent over-scrolling at boundaries
+            if (target.scrollTop < 0) {
+              target.scrollTop = 0;
+            }
+            const maxScroll = target.scrollHeight - target.clientHeight;
+            if (target.scrollTop > maxScroll) {
+              target.scrollTop = maxScroll;
+            }
+          }}
+        >
           <BlinqHeader />
           <div className="px-4 pb-4 space-y-4">
             {FormFields}
           </div>
         </div>
         
-        {/* Fixed bottom button - outside scroll area */}
-        {FixedBottomSection}
+        {/* Fixed bottom button - outside scroll area, never scrolls */}
+        <div 
+          className="flex-shrink-0"
+          style={{ touchAction: 'none' }}
+        >
+          {FixedBottomSection}
+        </div>
       </div>
     );
   }
