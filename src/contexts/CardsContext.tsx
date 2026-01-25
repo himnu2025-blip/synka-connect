@@ -427,21 +427,73 @@ export function useCards() {
 }
 
 // Get default card by slug for public view (doesn't need context)
-export async function getDefaultCardBySlug(slug: string): Promise<Card | null> {
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('user_id')
-    .eq('slug', slug)
-    .maybeSingle();
+// Optimized: accepts optional user_id to skip redundant profile lookup
+export async function getDefaultCardBySlug(slug: string, userId?: string): Promise<Card | null> {
+  let targetUserId = userId;
+  
+  // Only fetch profile if user_id not provided
+  if (!targetUserId) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_id')
+      .eq('slug', slug)
+      .maybeSingle();
 
-  if (!profile) return null;
+    if (!profile) return null;
+    targetUserId = profile.user_id;
+  }
 
   const { data: card } = await supabase
     .from('cards')
     .select('*')
-    .eq('user_id', profile.user_id)
+    .eq('user_id', targetUserId)
     .eq('is_default', true)
     .maybeSingle();
 
   return card as Card | null;
+}
+
+// Fast combined query for public card view - single DB round trip
+export async function getPublicCardData(slug: string): Promise<{
+  profile: import('@/hooks/useProfile').Profile & import('@/hooks/useProfile').ProfileCompat | null;
+  card: Card | null;
+}> {
+  // Single query to get profile
+  const { data: profileData, error: profileError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (profileError || !profileData) {
+    return { profile: null, card: null };
+  }
+
+  // Map profile with compatibility fields
+  const profile = {
+    ...profileData,
+    name: profileData.full_name || '',
+    designation: profileData.designation || profileData.title || '',
+    company: profileData.company || '',
+    phone: profileData.phone || '',
+    email: profileData.email || '',
+    website: profileData.website || '',
+    whatsapp: profileData.whatsapp || '',
+    linkedin: profileData.linkedin || '',
+    about: profileData.about || '',
+    photo_url: profileData.photo_url || '',
+    logo_url: profileData.logo_url || '',
+    card_design: profileData.card_design || 'minimal',
+    public_slug: profileData.slug || '',
+  } as import('@/hooks/useProfile').Profile & import('@/hooks/useProfile').ProfileCompat;
+
+  // Get default card in parallel with profile mapping
+  const { data: cardData } = await supabase
+    .from('cards')
+    .select('*')
+    .eq('user_id', profileData.user_id)
+    .eq('is_default', true)
+    .maybeSingle();
+
+  return { profile, card: cardData as Card | null };
 }

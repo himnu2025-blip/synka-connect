@@ -17,8 +17,8 @@ import { Share } from '@capacitor/share';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
-import { getProfileBySlug, Profile, ProfileCompat } from '@/hooks/useProfile';
-import { getDefaultCardBySlug, Card } from '@/hooks/useCards';
+import { Profile, ProfileCompat } from '@/hooks/useProfile';
+import { getPublicCardData, Card } from '@/contexts/CardsContext';
 import { submitPublicContact } from '@/hooks/useContacts';
 import { logScanEvent, logContactSave } from '@/hooks/useAnalytics';
 import { useAuth } from '@/hooks/useAuth';
@@ -173,12 +173,9 @@ export default function PublicCard() {
     
     setLoading(true);
     
-    // Load profile for user_id
-    const profileData = await getProfileBySlug(slug);
+    // Single optimized query - fetches profile + card together
+    const { profile: profileData, card: cardData } = await getPublicCardData(slug);
     setProfile(profileData);
-    
-    // Load default card
-    const cardData = await getDefaultCardBySlug(slug);
     setCard(cardData);
     
     setLoading(false);
