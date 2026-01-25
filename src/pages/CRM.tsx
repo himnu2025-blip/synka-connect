@@ -2014,6 +2014,7 @@ if (!contacts && contactsLoading) {
       <Drawer
         open={showContactDetail}
         handleOnly={isEditOpen}
+        shouldScaleBackground={false}
         onOpenChange={(val) => {
           // Use setTimeout to prevent state conflicts with child components
           setTimeout(() => {
@@ -2025,13 +2026,13 @@ if (!contacts && contactsLoading) {
           }, 0);
         }}
       >
-        <DrawerContent className="h-[85dvh] rounded-3xl border-0 shadow-none bg-background [&>div:first-child]:hidden flex flex-col">
+        <DrawerContent className="max-h-[90vh] rounded-t-3xl border-0 shadow-none bg-background [&>div:first-child]:hidden">
   {/* ðŸŽ iOS Drag Handle */}
-  <div className="flex justify-center py-3 flex-shrink-0">
-    <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
-  </div>
+          <div className="flex justify-center py-3 sticky top-0 bg-background z-10">
+            <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
+          </div>
           {selectedContact && (
-            <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-8 space-y-6">
+            <div className="overflow-y-auto overscroll-contain px-4 pb-8 space-y-6">
               <DrawerHeader className="text-center relative pt-0 mt-0">
                 <ContactAvatar 
                   name={selectedContact.name}
@@ -2149,7 +2150,7 @@ if (!contacts && contactsLoading) {
                     />
                   </div>
 
-                  {editError && <div className="text-sm text-red-600">{editError}</div>}
+                  {editError && <div className="text-sm text-destructive">{editError}</div>}
                 </div>
               ) : null}
 {isEditOpen && (
