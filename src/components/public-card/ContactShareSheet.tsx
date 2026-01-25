@@ -468,18 +468,24 @@ export function ContactShareSheet({
   );
 
   if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={onOpenChange} repositionInputs={false} handleOnly>
-  <DrawerContent className="flex flex-col">
-    <div className="flex-1 overflow-y-auto p-0.5 -m-0.5">  {/* flex-1 + padding hack for full scroll */}
-      <BlinqHeader />
-      {FormContent}
-    </div>
-  </DrawerContent>
-</Drawer>
-    );
-  }
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
+      <DrawerContent className="flex flex-col max-h-[96vh]">
+        
+        {/* Scrollable area */}
+        <div className="flex-1 overflow-y-auto">
+          <BlinqHeader />
 
+          {/* KEYBOARD SAFE PADDING */}
+          <div className="pb-[env(safe-area-inset-bottom,24px)]">
+            {FormContent}
+          </div>
+        </div>
+
+      </DrawerContent>
+    </Drawer>
+  );
+}
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden" hideCloseButton>
