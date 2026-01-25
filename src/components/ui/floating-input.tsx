@@ -127,17 +127,19 @@ export const FloatingPhoneInput = ({
   disabled,
   className,
 }: FloatingPhoneInputProps) => {
+  const hasValue = value !== undefined && value !== null && value !== '';
+  
   return (
     <div className={cn("relative h-14", className)}>
-      <div className="absolute inset-0 flex items-center rounded-xl border border-border focus-within:border-foreground transition-colors">
+      <div className="flex items-center h-full rounded-xl border border-border focus-within:border-foreground transition-colors">
         {/* Country code selector - compact */}
         <div className="flex items-center justify-center pl-3 pr-2 shrink-0 border-r border-border/50 h-full">
           <select
             value={countryCode}
             onChange={(e) => onCountryCodeChange(e.target.value)}
             disabled={disabled}
-            className="bg-background text-xs outline-none cursor-pointer disabled:opacity-50 appearance-none"
-            style={{ fontSize: '13px' }}
+            className="bg-transparent text-sm outline-none cursor-pointer disabled:opacity-50 appearance-none"
+            style={{ fontSize: '14px' }}
           >
             {COUNTRY_CODES.map(({ code, flag }) => (
               <option key={code} value={code} className="bg-background text-foreground">{flag} {code}</option>
@@ -156,10 +158,14 @@ export const FloatingPhoneInput = ({
           style={{ fontSize: '16px' }}
         />
       </div>
-      {/* Floating label */}
+      {/* Floating label - stable positioning with hasValue check */}
       <label
-        className={`absolute pointer-events-none transition-all duration-200 text-muted-foreground
-          ${value ? 'left-3 top-0 -translate-y-1/2 text-xs bg-background px-1' : 'left-[4.5rem] top-1/2 -translate-y-1/2 text-sm bg-transparent'}`}
+        className={cn(
+          "absolute left-3 text-muted-foreground pointer-events-none transition-all duration-200",
+          hasValue
+            ? "top-0 -translate-y-1/2 text-xs bg-background px-1"
+            : "left-[5.5rem] top-1/2 -translate-y-1/2 text-base bg-transparent px-0"
+        )}
       >
         {label}
       </label>
