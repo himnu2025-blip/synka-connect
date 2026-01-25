@@ -147,17 +147,17 @@ export const FloatingPhoneInput = ({
         "flex items-center h-full rounded-xl border transition-colors",
         isFocused ? "border-foreground" : "border-border"
       )}>
-        {/* Country code selector - compact */}
-        <div className="flex items-center justify-center pl-3 pr-2 shrink-0 border-r border-border/50 h-full">
+        {/* Country code selector - compact, no emoji */}
+        <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
           <select
             value={countryCode}
             onChange={(e) => onCountryCodeChange(e.target.value)}
             disabled={disabled}
-            className="bg-transparent text-sm outline-none cursor-pointer disabled:opacity-50 appearance-none"
+            className="bg-transparent text-sm outline-none cursor-pointer disabled:opacity-50 appearance-none font-medium"
             style={{ fontSize: '14px' }}
           >
-            {COUNTRY_CODES.map(({ code, flag }) => (
-              <option key={code} value={code} className="bg-background text-foreground">{flag} {code}</option>
+            {COUNTRY_CODES.map(({ code }) => (
+              <option key={code} value={code} className="bg-background text-foreground">{code}</option>
             ))}
           </select>
         </div>
