@@ -311,12 +311,12 @@ export function ContactShareSheet({
     if (!open) return null;
 
     return (
-      <div className="fixed inset-0 z-50 bg-background flex flex-col">
-        <div className="flex-1 overflow-y-auto overscroll-contain">
-          <BlinqHeader />
-          {FormContent}
-        </div>
-      </div>
+      <div className="fixed inset-0 h-[100dvh] z-50 bg-background flex flex-col">
+  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+    <BlinqHeader />
+    {FormContent}
+  </div>
+</div>
     );
   }
 
