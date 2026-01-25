@@ -385,7 +385,7 @@ export function ContactShareSheet({
       />
 
       {/* FORM FIELDS CONTAINER */}
-      <div className="space-y-4 px-4 pb-4">
+      <div className="space-y-4 px-4 pb-6">
         {/* FIRST + LAST NAME */}
         <div className="grid grid-cols-2 gap-3">
           <BlinqInput
@@ -459,7 +459,7 @@ export function ContactShareSheet({
           {submitting ? 'Sending...' : 'Send'}
         </Button>
 
-        <p className="text-[11px] text-center text-muted-foreground/70 mt-2">
+        <p className="text-[11px] text-center text-muted-foreground/70 mt-4">
           We don't sell your contact details
         </p>
       </div>
