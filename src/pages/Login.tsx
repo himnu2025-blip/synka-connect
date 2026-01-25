@@ -3,9 +3,10 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { FloatingInput } from '@/components/ui/floating-input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Mail, ArrowRight, KeyRound, LogOut, Fingerprint, ScanFace } from 'lucide-react';
+import { ArrowRight, KeyRound, LogOut, Fingerprint, ScanFace } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { BrandLogo } from '@/components/BrandLogo';
@@ -840,23 +841,13 @@ export default function Login() {
           {/* Email Step */}
           {step === 'email' && (
             <form onSubmit={handleEmailSubmit} className="space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 h-12"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
+              <FloatingInput
+                label="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                inputMode="email"
+              />
 
               <Button 
                 type="submit" 
