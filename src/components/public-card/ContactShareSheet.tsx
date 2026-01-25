@@ -57,17 +57,16 @@ export function ContactShareSheet({
 
   // Prevent body scroll when sheet is open
   useEffect(() => {
-    if (!open) return;
-    
-    if (isMobile) {
-      document.body.style.overflow = 'hidden';
-    }
+  if (!open) return;
 
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [open, isMobile]);
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
 
+  return () => {
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+  };
+}, [open]);
   const handleSubmit = async () => {
     if (!formData.firstName.trim()) {
       toast({
@@ -316,47 +315,28 @@ export function ContactShareSheet({
     </div>
   );
 
-  // ✅ MOBILE — Fullscreen keyboard-safe layout with fixed bottom button
   if (isMobile) {
-    if (!open) return null;
+  if (!open) return null;
 
-    return (
-      <div
-        className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden"
-        style={{ height: vh, maxHeight: vh, touchAction: 'none' }}
-      >
-        {/* Scrollable content area */}
-        <div 
-          className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
-          style={{ touchAction: 'pan-y' }}
-          onScroll={(e) => {
-            const target = e.currentTarget;
-            // Prevent over-scrolling at boundaries
-            if (target.scrollTop < 0) {
-              target.scrollTop = 0;
-            }
-            const maxScroll = target.scrollHeight - target.clientHeight;
-            if (target.scrollTop > maxScroll) {
-              target.scrollTop = maxScroll;
-            }
-          }}
-        >
-          <BlinqHeader />
-          <div className="px-4 pb-4 space-y-4">
-            {FormFields}
-          </div>
-        </div>
-        
-        {/* Fixed bottom button - outside scroll area, never scrolls */}
-        <div 
-          className="flex-shrink-0"
-          style={{ touchAction: 'none' }}
-        >
-          {FixedBottomSection}
+  return (
+    <div className="fixed inset-0 z-50 bg-background flex flex-col h-[100dvh] overflow-hidden">
+      
+      {/* Scroll area */}
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-none">
+        <BlinqHeader />
+        <div className="px-4 pb-6 space-y-4">
+          {FormFields}
         </div>
       </div>
-    );
-  }
+
+      {/* Fixed bottom send button */}
+      <div className="shrink-0 bg-background border-t border-border/50 px-4 pt-2 pb-[calc(env(safe-area-inset-bottom)+16px)]">
+        {FixedBottomSection}
+      </div>
+
+    </div>
+  );
+}
 
   // ✅ DESKTOP — Dialog modal
   return (
