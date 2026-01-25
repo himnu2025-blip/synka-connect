@@ -373,7 +373,15 @@ export function ContactShareSheet({
 
   // Form content rendered inline to prevent re-mount issues
   const FormContent = (
-    <>
+    // WRAP ENTIRE FORM IN AUTOCOMPLETE="OFF" FORM TAG
+    <form 
+      autoComplete="off" 
+      onSubmit={(e) => {
+        e.preventDefault(); // Prevent default form submission
+        handleSubmit();
+      }}
+      className="space-y-4 px-4 pb-6"
+    >
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -384,19 +392,25 @@ export function ContactShareSheet({
         className="hidden"
       />
 
+      {/* HIDDEN TRAP FIELDS FOR CHROME AUTOFILL HACK */}
+      <input type="text" autoComplete="username" className="hidden" />
+      <input type="password" autoComplete="new-password" className="hidden" />
+
       {/* FORM FIELDS CONTAINER */}
-      <div className="space-y-4 px-4 pb-6">
-        {/* FIRST + LAST NAME */}
+      <div className="space-y-4">
+        {/* FIRST + LAST NAME - CHANGED NAMES */}
         <div className="grid grid-cols-2 gap-3">
           <BlinqInput
             label="First name"
             value={formData.firstName}
             onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+            autoComplete="off"
           />
           <BlinqInput
             label="Last name"
             value={formData.lastName}
             onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+            autoComplete="off"
           />
         </div>
 
@@ -406,7 +420,7 @@ export function ContactShareSheet({
             label="Email"
             type="email"
             inputMode="email"
-            autoComplete="email"
+            autoComplete="off"
             value={formData.email}
             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
           />
@@ -420,6 +434,7 @@ export function ContactShareSheet({
               value={countryCode}
               onChange={(e) => setCountryCode(e.target.value)}
               className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
+              autoComplete="off"
             >
               {COUNTRY_CODES.map(({ code }) => (
                 <option key={code} value={code}>{code}</option>
@@ -430,7 +445,7 @@ export function ContactShareSheet({
           <input
             type="tel"
             inputMode="numeric"
-            autoComplete="tel"
+            autoComplete="off"
             value={formData.phone}
             onChange={(e) =>
               setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
@@ -457,7 +472,7 @@ export function ContactShareSheet({
 
         {/* SEND BUTTON WITH GRADIENT */}
         <Button
-          onClick={handleSubmit}
+          type="submit"
           disabled={submitting}
           variant="gradient"
           className="w-full h-14 rounded-xl text-white text-base font-medium mt-6 hover:opacity-90 transition-opacity"
@@ -469,7 +484,7 @@ export function ContactShareSheet({
           We don't sell your contact details
         </p>
       </div>
-    </>
+    </form>
   );
 
   if (isMobile) {
