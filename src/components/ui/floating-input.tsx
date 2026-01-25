@@ -64,6 +64,8 @@ interface FloatingInputProps {
   disabled?: boolean;
   className?: string;
   inputRef?: React.RefObject<HTMLInputElement>;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
 // Floating label input component
@@ -76,6 +78,8 @@ export const FloatingInput = ({
   disabled,
   className,
   inputRef,
+  onFocus,
+  onBlur,
 }: FloatingInputProps) => {
   const hasValue = value !== undefined && value !== null && value !== '';
   
@@ -87,6 +91,8 @@ export const FloatingInput = ({
         inputMode={inputMode}
         value={value}
         onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
         placeholder=" "
         disabled={disabled}
         className="peer w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors disabled:opacity-50"
@@ -115,6 +121,8 @@ interface FloatingPhoneInputProps {
   onCountryCodeChange: (code: string) => void;
   disabled?: boolean;
   className?: string;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
 // Floating label input with country code selector
@@ -126,6 +134,8 @@ export const FloatingPhoneInput = ({
   onCountryCodeChange,
   disabled,
   className,
+  onFocus,
+  onBlur,
 }: FloatingPhoneInputProps) => {
   const [isFocused, setIsFocused] = React.useState(false);
   const hasValue = value !== undefined && value !== null && value !== '';
@@ -157,8 +167,14 @@ export const FloatingPhoneInput = ({
           inputMode="tel"
           value={value}
           onChange={onChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onFocus={(e) => {
+            setIsFocused(true);
+            onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setIsFocused(false);
+            onBlur?.(e);
+          }}
           placeholder=" "
           disabled={disabled}
           className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none disabled:opacity-50"
