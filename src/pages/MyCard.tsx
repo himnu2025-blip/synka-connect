@@ -95,7 +95,7 @@ const FloatingInput = ({
   );
 };
 
-// Floating label input with country code selector
+// Floating label input with country code selector - compact premium design
 const FloatingPhoneInput = ({
   label,
   value,
@@ -112,23 +112,23 @@ const FloatingPhoneInput = ({
   disabled?: boolean;
 }) => {
   return (
-    <div className="relative h-14 flex">
-      {/* Country code selector */}
-      <div className="flex items-center h-full border border-r-0 border-border rounded-l-xl px-2 bg-transparent shrink-0">
-        <select
-          value={countryCode}
-          onChange={(e) => onCountryCodeChange(e.target.value)}
-          disabled={disabled}
-          className="bg-transparent text-sm outline-none cursor-pointer disabled:opacity-50"
-          style={{ fontSize: '14px' }}
-        >
-          {COUNTRY_CODES.map(({ code, flag }) => (
-            <option key={code} value={code}>{flag} {code}</option>
-          ))}
-        </select>
-      </div>
-      {/* Phone input */}
-      <div className="relative flex-1">
+    <div className="relative h-14">
+      <div className="absolute inset-0 flex rounded-xl border border-border focus-within:border-foreground transition-colors">
+        {/* Country code selector - compact */}
+        <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50">
+          <select
+            value={countryCode}
+            onChange={(e) => onCountryCodeChange(e.target.value)}
+            disabled={disabled}
+            className="bg-background text-xs outline-none cursor-pointer disabled:opacity-50 appearance-none pr-1"
+            style={{ fontSize: '13px' }}
+          >
+            {COUNTRY_CODES.map(({ code, flag }) => (
+              <option key={code} value={code} className="bg-background text-foreground">{flag} {code}</option>
+            ))}
+          </select>
+        </div>
+        {/* Phone input */}
         <input
           type="tel"
           inputMode="tel"
@@ -136,18 +136,17 @@ const FloatingPhoneInput = ({
           onChange={onChange}
           placeholder=" "
           disabled={disabled}
-          className="peer w-full h-full px-4 pt-5 pb-2 text-base bg-transparent outline-none rounded-r-xl border border-l-0 border-border focus:border-foreground transition-colors disabled:opacity-50"
+          className="peer flex-1 min-w-0 px-3 text-base bg-transparent outline-none disabled:opacity-50 text-center"
           style={{ fontSize: '16px' }}
         />
-        <label
-          className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
-            top-0 -translate-y-1/2 text-xs bg-background px-1
-            peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-            peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
-        >
-          {label}
-        </label>
       </div>
+      {/* Floating label */}
+      <label
+        className={`absolute left-3 pointer-events-none transition-all duration-200 text-muted-foreground
+          ${value ? 'top-0 -translate-y-1/2 text-xs bg-background px-1' : 'top-1/2 -translate-y-1/2 text-sm bg-transparent px-0 pl-16'}`}
+      >
+        {label}
+      </label>
     </div>
   );
 };
