@@ -270,27 +270,19 @@ export function ContactShareSheet({
         />
 
         {/* PHONE FIELD */}
-<div className="space-y-2">
-  <label className="text-xs font-medium text-muted-foreground px-1">
-    Phone number
-  </label>
-
-  <div className="flex items-center gap-2 h-14 px-3 rounded-xl border border-input bg-background focus-within:ring-2 focus-within:ring-primary transition">
-    <span className="text-sm text-muted-foreground">{countryCode}</span>
-
-    <input
-      type="tel"
-      inputMode="numeric"
-      autoComplete="tel"
-      placeholder="Enter phone number"
-      value={formData.phone}
-      onChange={(e) =>
-        setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-      }
-      className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
-    />
-  </div>
-</div>
+<FloatingPhoneInput
+  label="Phone number"
+  type="tel"
+  inputMode="numeric"
+  autoComplete="tel"
+  pattern="[0-9]*"
+  value={formData.phone}
+  onChange={(e) =>
+    setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+  }
+  countryCode={countryCode}
+  onCountryCodeChange={setCountryCode}
+/>
 
         {/* ROLE + COMPANY */}
         <div className="grid grid-cols-2 gap-3">
