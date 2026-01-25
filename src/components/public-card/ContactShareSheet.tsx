@@ -165,13 +165,6 @@ export function ContactShareSheet({
     e.target.value = '';
   };
 
-  // Scroll input into view on focus (mobile keyboard handling)
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
-  };
-
   // Common header component for both mobile and desktop
   const BlinqHeader = () => (
     <>
@@ -258,13 +251,11 @@ export function ContactShareSheet({
             label="First name"
             value={formData.firstName}
             onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-            onFocus={handleFocus}
           />
           <FloatingInput
             label="Last name"
             value={formData.lastName}
             onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-            onFocus={handleFocus}
           />
         </div>
 
@@ -275,7 +266,6 @@ export function ContactShareSheet({
           inputMode="email"
           value={formData.email}
           onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-          onFocus={handleFocus}
         />
 
         {/* PHONE FIELD */}
@@ -287,7 +277,6 @@ export function ContactShareSheet({
           }
           countryCode={countryCode}
           onCountryCodeChange={setCountryCode}
-          onFocus={handleFocus}
         />
 
         {/* ROLE + COMPANY */}
@@ -296,13 +285,11 @@ export function ContactShareSheet({
             label="Role"
             value={formData.designation}
             onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
-            onFocus={handleFocus}
           />
           <FloatingInput
             label="Company"
             value={formData.company}
             onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-            onFocus={handleFocus}
           />
         </div>
 
@@ -326,8 +313,8 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} handleOnly shouldScaleBackground={false}>
-        <DrawerContent className="flex flex-col max-h-[90vh] bg-background">
-          <div className="overflow-y-auto flex-1 overscroll-contain pb-safe">
+        <DrawerContent className="flex flex-col h-[90vh] bg-background">
+          <div className="overflow-y-auto flex-1 overscroll-contain pb-safe scroll-pb-40">
             <BlinqHeader />
             {FormContent}
           </div>
