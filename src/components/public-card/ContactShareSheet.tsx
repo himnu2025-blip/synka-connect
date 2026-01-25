@@ -44,7 +44,6 @@ export function ContactShareSheet({
   const [submitting, setSubmitting] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
-  const [vh, setVh] = useState<number>(window.innerHeight);
   
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
