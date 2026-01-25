@@ -80,8 +80,8 @@ const FloatingInput = ({
         onChange={onChange}
         placeholder=" "
         disabled={disabled}
-        className="peer absolute inset-0 w-full h-full px-4 pt-5 pb-2 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors disabled:opacity-50"
-        style={{ fontSize: '16px' }}
+        className="peer absolute inset-0 w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors disabled:opacity-50 flex items-center"
+        style={{ fontSize: '16px', lineHeight: '56px' }}
       />
       <label
         className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
@@ -113,14 +113,14 @@ const FloatingPhoneInput = ({
 }) => {
   return (
     <div className="relative h-14">
-      <div className="absolute inset-0 flex rounded-xl border border-border focus-within:border-foreground transition-colors">
+      <div className="absolute inset-0 flex items-center rounded-xl border border-border focus-within:border-foreground transition-colors">
         {/* Country code selector - compact */}
-        <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50">
+        <div className="flex items-center justify-center pl-3 pr-2 shrink-0 border-r border-border/50 h-full">
           <select
             value={countryCode}
             onChange={(e) => onCountryCodeChange(e.target.value)}
             disabled={disabled}
-            className="bg-background text-xs outline-none cursor-pointer disabled:opacity-50 appearance-none pr-1"
+            className="bg-background text-xs outline-none cursor-pointer disabled:opacity-50 appearance-none"
             style={{ fontSize: '13px' }}
           >
             {COUNTRY_CODES.map(({ code, flag }) => (
@@ -128,7 +128,7 @@ const FloatingPhoneInput = ({
             ))}
           </select>
         </div>
-        {/* Phone input */}
+        {/* Phone input - vertically centered */}
         <input
           type="tel"
           inputMode="tel"
@@ -136,14 +136,14 @@ const FloatingPhoneInput = ({
           onChange={onChange}
           placeholder=" "
           disabled={disabled}
-          className="peer flex-1 min-w-0 px-3 text-base bg-transparent outline-none disabled:opacity-50 text-center"
-          style={{ fontSize: '16px' }}
+          className="peer flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none disabled:opacity-50"
+          style={{ fontSize: '16px', textAlign: 'left' }}
         />
       </div>
       {/* Floating label */}
       <label
-        className={`absolute left-3 pointer-events-none transition-all duration-200 text-muted-foreground
-          ${value ? 'top-0 -translate-y-1/2 text-xs bg-background px-1' : 'top-1/2 -translate-y-1/2 text-sm bg-transparent px-0 pl-16'}`}
+        className={`absolute pointer-events-none transition-all duration-200 text-muted-foreground
+          ${value ? 'left-3 top-0 -translate-y-1/2 text-xs bg-background px-1' : 'left-[4.5rem] top-1/2 -translate-y-1/2 text-sm bg-transparent'}`}
       >
         {label}
       </label>
@@ -1142,59 +1142,57 @@ useEffect(() => {
                 disabled={isLoading}
               />
 
-              <div className="grid grid-cols-2 gap-3">
-                <FloatingPhoneInput
-                  label="Phone"
-                  value={editData.phone?.replace(/^\+\d+/, '') || ''}
-                  onChange={(e) => {
-                    const phoneNumber = e.target.value;
-                    const currentCode = COUNTRY_CODES.find(c => editData.phone?.startsWith(c.code))?.code || '+91';
-                    setEditData(prev => ({ ...prev, phone: currentCode + phoneNumber }));
-                  }}
-                  countryCode={COUNTRY_CODES.find(c => editData.phone?.startsWith(c.code))?.code || '+91'}
-                  onCountryCodeChange={(code) => {
-                    const phoneNumber = editData.phone?.replace(/^\+\d+/, '') || '';
-                    setEditData(prev => ({ ...prev, phone: code + phoneNumber }));
-                  }}
-                  disabled={isLoading}
-                />
-                <FloatingInput
-                  label="Email"
-                  value={editData.email}
-                  onChange={(e) =>
-                    setEditData(prev => ({ ...prev, email: e.target.value }))
-                  }
-                  inputMode="email"
-                  disabled={isLoading}
-                />
-              </div>
+              <FloatingInput
+                label="Email"
+                value={editData.email}
+                onChange={(e) =>
+                  setEditData(prev => ({ ...prev, email: e.target.value }))
+                }
+                inputMode="email"
+                disabled={isLoading}
+              />
 
-              <div className="grid grid-cols-2 gap-3">
-                <FloatingInput
-                  label="Website"
-                  value={editData.website}
-                  onChange={(e) =>
-                    setEditData(prev => ({ ...prev, website: e.target.value }))
-                  }
-                  inputMode="url"
-                  disabled={isLoading}
-                />
-                <FloatingPhoneInput
-                  label="WhatsApp"
-                  value={editData.whatsapp?.replace(/^\+\d+/, '') || ''}
-                  onChange={(e) => {
-                    const phoneNumber = e.target.value;
-                    const currentCode = COUNTRY_CODES.find(c => editData.whatsapp?.startsWith(c.code))?.code || '+91';
-                    setEditData(prev => ({ ...prev, whatsapp: currentCode + phoneNumber }));
-                  }}
-                  countryCode={COUNTRY_CODES.find(c => editData.whatsapp?.startsWith(c.code))?.code || '+91'}
-                  onCountryCodeChange={(code) => {
-                    const phoneNumber = editData.whatsapp?.replace(/^\+\d+/, '') || '';
-                    setEditData(prev => ({ ...prev, whatsapp: code + phoneNumber }));
-                  }}
-                  disabled={isLoading}
-                />
-              </div>
+              <FloatingPhoneInput
+                label="Phone"
+                value={editData.phone?.replace(/^\+\d+/, '') || ''}
+                onChange={(e) => {
+                  const phoneNumber = e.target.value;
+                  const currentCode = COUNTRY_CODES.find(c => editData.phone?.startsWith(c.code))?.code || '+91';
+                  setEditData(prev => ({ ...prev, phone: currentCode + phoneNumber }));
+                }}
+                countryCode={COUNTRY_CODES.find(c => editData.phone?.startsWith(c.code))?.code || '+91'}
+                onCountryCodeChange={(code) => {
+                  const phoneNumber = editData.phone?.replace(/^\+\d+/, '') || '';
+                  setEditData(prev => ({ ...prev, phone: code + phoneNumber }));
+                }}
+                disabled={isLoading}
+              />
+
+              <FloatingPhoneInput
+                label="WhatsApp"
+                value={editData.whatsapp?.replace(/^\+\d+/, '') || ''}
+                onChange={(e) => {
+                  const phoneNumber = e.target.value;
+                  const currentCode = COUNTRY_CODES.find(c => editData.whatsapp?.startsWith(c.code))?.code || '+91';
+                  setEditData(prev => ({ ...prev, whatsapp: currentCode + phoneNumber }));
+                }}
+                countryCode={COUNTRY_CODES.find(c => editData.whatsapp?.startsWith(c.code))?.code || '+91'}
+                onCountryCodeChange={(code) => {
+                  const phoneNumber = editData.whatsapp?.replace(/^\+\d+/, '') || '';
+                  setEditData(prev => ({ ...prev, whatsapp: code + phoneNumber }));
+                }}
+                disabled={isLoading}
+              />
+
+              <FloatingInput
+                label="Website"
+                value={editData.website}
+                onChange={(e) =>
+                  setEditData(prev => ({ ...prev, website: e.target.value }))
+                }
+                inputMode="url"
+                disabled={isLoading}
+              />
 
               <FloatingInput
                 label="LinkedIn Username"
