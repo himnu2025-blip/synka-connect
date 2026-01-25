@@ -2098,7 +2098,7 @@ if (!contacts && contactsLoading) {
 
               {/* --- Inline Edit Form inside Sheet --- */}
               {isEditOpen && selectedContact ? (
-                <div className="space-y-3 p-4 border-b border-border/50 bg-muted/30 rounded-b-lg mx-4">
+                <div className="space-y-3 p-4 mx-4">
                   <FloatingInput
                     label="Full name"
                     value={editForm.name}
