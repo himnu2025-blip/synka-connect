@@ -12,138 +12,7 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-
-// Blinq-style input with border-floating label - defined outside component to prevent re-render focus loss
-// IMPORTANT: Default state is "has value" (label at top), CSS overrides when empty via peer-placeholder-shown
-// This eliminates race conditions between React state and CSS on first interaction
-const BlinqInput = ({
-  label,
-  value,
-  onChange,
-  type = 'text',
-  inputMode,
-  autoComplete,
-}: {
-  label: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
-  inputMode?: 'text' | 'email' | 'tel' | 'numeric';
-  autoComplete?: string;
-}) => {
-  return (
-    <div className="relative h-14">
-      <input
-        type={type}
-        inputMode={inputMode}
-        autoComplete={autoComplete}
-        value={value}
-        onChange={onChange}
-        placeholder=" "
-        className="peer absolute inset-0 w-full h-full px-4 pt-5 pb-2 text-base bg-background outline-none rounded-xl border border-border focus:border-foreground transition-colors"
-        style={{ fontSize: '16px' }}
-      />
-      <label
-        className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
-          top-0 -translate-y-1/2 text-xs bg-background px-1
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-          peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
-      >
-        {label}
-      </label>
-    </div>
-  );
-};
-
-// Phone input with country code selector and floating label
-const PhoneInput = ({
-  label,
-  value,
-  onChange,
-  countryCode,
-  onCountryCodeChange,
-  autoComplete,
-}: {
-  label: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  countryCode: string;
-  onCountryCodeChange: (code: string) => void;
-  autoComplete?: string;
-}) => {
-  return (
-    <div className="relative h-14">
-      <div className="absolute inset-0 flex items-center overflow-hidden rounded-xl border border-border focus-within:border-foreground transition-colors">
-        {/* Country code selector - clean without flags */}
-        <div className="flex items-center px-3 h-full border-r border-border shrink-0">
-          <select
-            value={countryCode}
-            onChange={(e) => onCountryCodeChange(e.target.value)}
-            className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer w-20"
-            autoComplete="off"
-          >
-            {COUNTRY_CODES.map(({ code }) => (
-              <option key={code} value={code}>
-                {code}
-              </option>
-            ))}
-          </select>
-        </div>
-        {/* Phone number input */}
-        <input
-          type="tel"
-          inputMode="numeric"
-          autoComplete={autoComplete}
-          value={value}
-          onChange={onChange}
-          placeholder=" "
-          className="peer flex-1 h-full px-4 text-base outline-none bg-background"
-          style={{ fontSize: '16px' }}
-        />
-        {/* Floating label */}
-        <label
-          className="absolute left-[calc(88px)] text-muted-foreground pointer-events-none transition-all duration-200
-            top-0 -translate-y-1/2 text-xs bg-background px-1
-            peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-            peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
-        >
-          {label}
-        </label>
-      </div>
-    </div>
-  );
-};
-
-// Pill input with floating label for Job Title and Company - same CSS-first pattern
-const PillInput = ({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) => {
-  return (
-    <div className="relative h-10">
-      <input
-        value={value}
-        onChange={onChange}
-        placeholder=" "
-        className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-background focus:border-foreground"
-        style={{ fontSize: '16px' }}
-      />
-      <label
-        className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
-          top-0 -translate-y-1/2 text-[10px] bg-background px-1
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-          peer-focus:top-0 peer-focus:text-[10px] peer-focus:bg-background peer-focus:px-1"
-      >
-        {label}
-      </label>
-    </div>
-  );
-};
+import { FloatingInput, FloatingPhoneInput, COUNTRY_CODES } from '@/components/ui/floating-input';
 
 interface ContactShareSheetProps {
   open: boolean;
@@ -165,67 +34,6 @@ export interface ContactFormData {
 }
 
 type ScanState = 'idle' | 'uploading' | 'processing' | 'success' | 'failed';
-
-// Comprehensive country codes list - clean without flags
-const COUNTRY_CODES = [
-  { code: '+91', country: 'India' },
-  { code: '+1', country: 'United States' },
-  { code: '+44', country: 'United Kingdom' },
-  { code: '+61', country: 'Australia' },
-  { code: '+971', country: 'UAE' },
-  { code: '+966', country: 'Saudi Arabia' },
-  { code: '+65', country: 'Singapore' },
-  { code: '+81', country: 'Japan' },
-  { code: '+86', country: 'China' },
-  { code: '+82', country: 'South Korea' },
-  { code: '+49', country: 'Germany' },
-  { code: '+33', country: 'France' },
-  { code: '+39', country: 'Italy' },
-  { code: '+34', country: 'Spain' },
-  { code: '+31', country: 'Netherlands' },
-  { code: '+41', country: 'Switzerland' },
-  { code: '+46', country: 'Sweden' },
-  { code: '+47', country: 'Norway' },
-  { code: '+45', country: 'Denmark' },
-  { code: '+358', country: 'Finland' },
-  { code: '+43', country: 'Austria' },
-  { code: '+32', country: 'Belgium' },
-  { code: '+48', country: 'Poland' },
-  { code: '+420', country: 'Czech Republic' },
-  { code: '+36', country: 'Hungary' },
-  { code: '+351', country: 'Portugal' },
-  { code: '+30', country: 'Greece' },
-  { code: '+353', country: 'Ireland' },
-  { code: '+7', country: 'Russia' },
-  { code: '+380', country: 'Ukraine' },
-  { code: '+90', country: 'Turkey' },
-  { code: '+972', country: 'Israel' },
-  { code: '+20', country: 'Egypt' },
-  { code: '+27', country: 'South Africa' },
-  { code: '+234', country: 'Nigeria' },
-  { code: '+254', country: 'Kenya' },
-  { code: '+55', country: 'Brazil' },
-  { code: '+52', country: 'Mexico' },
-  { code: '+54', country: 'Argentina' },
-  { code: '+57', country: 'Colombia' },
-  { code: '+56', country: 'Chile' },
-  { code: '+51', country: 'Peru' },
-  { code: '+58', country: 'Venezuela' },
-  { code: '+60', country: 'Malaysia' },
-  { code: '+62', country: 'Indonesia' },
-  { code: '+63', country: 'Philippines' },
-  { code: '+66', country: 'Thailand' },
-  { code: '+84', country: 'Vietnam' },
-  { code: '+92', country: 'Pakistan' },
-  { code: '+880', country: 'Bangladesh' },
-  { code: '+94', country: 'Sri Lanka' },
-  { code: '+977', country: 'Nepal' },
-  { code: '+64', country: 'New Zealand' },
-  { code: '+974', country: 'Qatar' },
-  { code: '+968', country: 'Oman' },
-  { code: '+973', country: 'Bahrain' },
-  { code: '+965', country: 'Kuwait' },
-];
 
 export function ContactShareSheet({
   open,
@@ -250,19 +58,6 @@ export function ContactShareSheet({
     company: '',
     linkedin: '',
   });
-
-  const normalizeLinkedInUrl = (value: string) => {
-    let v = value.trim();
-    if (!v) return '';
-    
-    v = v.replace(/^https?:\/\//, '');
-    
-    if (v.includes('linkedin.com')) {
-      return `https://${v}`;
-    }
-    
-    return `https://linkedin.com/in/${v}`;
-  };
 
   const handleSubmit = async () => {
     if (!formData.firstName.trim()) {
@@ -370,14 +165,19 @@ export function ContactShareSheet({
     e.target.value = '';
   };
 
+  // Scroll input into view on focus (mobile keyboard handling)
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  };
+
   // Common header component for both mobile and desktop
   const BlinqHeader = () => (
     <>
-      {/* EXACT BLINQ HEADER - NO BORDER AT BOTTOM */}
       <div className="px-4 pt-5 pb-4">
-        {/* SCAN & SKIP ROW - EXACTLY LIKE BLINQ */}
+        {/* SCAN & SKIP ROW */}
         <div className="flex justify-between items-center mb-5">
-          {/* Scan button aligned left like Blinq */}
           <button
             onClick={handleScanBusinessCard}
             disabled={scanState === 'uploading' || scanState === 'processing'}
@@ -387,7 +187,6 @@ export function ContactShareSheet({
             <span className="font-medium">Scan</span>
           </button>
           
-          {/* Skip button at top right with tight spacing */}
           <button
             onClick={handleSkip}
             className="text-sm font-semibold text-foreground hover:text-muted-foreground transition-colors"
@@ -396,9 +195,8 @@ export function ContactShareSheet({
           </button>
         </div>
         
-        {/* PROFILE AND TITLE - EXACTLY LIKE BLINQ */}
+        {/* PROFILE AND TITLE */}
         <div className="flex items-start gap-3">
-          {/* LARGE PROFILE PHOTO - EXACT SIZE AS BLINQ */}
           <div className="relative flex-shrink-0">
             {ownerPhotoUrl ? (
               <img
@@ -413,13 +211,11 @@ export function ContactShareSheet({
                 </span>
               </div>
             )}
-            {/* SHARE ICON BADGE - EXACTLY LIKE BLINQ */}
             <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-background rounded-full shadow-md flex items-center justify-center border border-border">
               <Send className="w-3.5 h-3.5 text-destructive" />
             </div>
           </div>
           
-          {/* TITLE TEXT - EXACT FONT AND SPACING AS BLINQ */}
           <div className="flex-1 min-w-0">
             <h2 className="text-[18px] font-bold text-foreground leading-tight -mt-0.5 break-words">
               Share your contact information with {ownerName}
@@ -430,16 +226,15 @@ export function ContactShareSheet({
     </>
   );
 
-  // Form content rendered inline to prevent re-mount issues
+  // Form content using shared FloatingInput components
   const FormContent = (
-    // WRAP ENTIRE FORM IN AUTOCOMPLETE="OFF" FORM TAG
     <form 
       autoComplete="off" 
       onSubmit={(e) => {
-        e.preventDefault(); // Prevent default form submission
+        e.preventDefault();
         handleSubmit();
       }}
-      className="space-y-4 px-4 pb-6"
+      className="space-y-4 px-4 pb-4"
     >
       {/* Hidden file input */}
       <input
@@ -455,38 +250,36 @@ export function ContactShareSheet({
       <input type="text" autoComplete="username" className="hidden" />
       <input type="password" autoComplete="new-password" className="hidden" />
 
-      {/* FORM FIELDS CONTAINER */}
+      {/* FORM FIELDS */}
       <div className="space-y-4">
-        {/* FIRST + LAST NAME - CHANGED NAMES */}
+        {/* FIRST + LAST NAME */}
         <div className="grid grid-cols-2 gap-3">
-          <BlinqInput
+          <FloatingInput
             label="First name"
             value={formData.firstName}
             onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-            autoComplete="off"
+            onFocus={handleFocus}
           />
-          <BlinqInput
+          <FloatingInput
             label="Last name"
             value={formData.lastName}
             onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-            autoComplete="off"
+            onFocus={handleFocus}
           />
         </div>
 
-        {/* EMAIL - Wrapped in grid like name fields for layout stability */}
-        <div className="grid grid-cols-1">
-          <BlinqInput
-            label="Email"
-            type="email"
-            inputMode="email"
-            autoComplete="off"
-            value={formData.email}
-            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-          />
-        </div>
+        {/* EMAIL */}
+        <FloatingInput
+          label="Email"
+          type="email"
+          inputMode="email"
+          value={formData.email}
+          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+          onFocus={handleFocus}
+        />
 
-        {/* PHONE FIELD - Using dedicated PhoneInput component */}
-        <PhoneInput
+        {/* PHONE FIELD */}
+        <FloatingPhoneInput
           label="Phone number"
           value={formData.phone}
           onChange={(e) =>
@@ -494,24 +287,26 @@ export function ContactShareSheet({
           }
           countryCode={countryCode}
           onCountryCodeChange={setCountryCode}
-          autoComplete="off"
+          onFocus={handleFocus}
         />
 
-        {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}
-        <div className="grid grid-cols-2 gap-2">
-          <PillInput
+        {/* ROLE + COMPANY */}
+        <div className="grid grid-cols-2 gap-3">
+          <FloatingInput
             label="Role"
             value={formData.designation}
             onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
+            onFocus={handleFocus}
           />
-          <PillInput
-            label="Company Name"
+          <FloatingInput
+            label="Company"
             value={formData.company}
             onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+            onFocus={handleFocus}
           />
         </div>
 
-        {/* SEND BUTTON WITH GRADIENT */}
+        {/* SEND BUTTON */}
         <Button
           type="submit"
           disabled={submitting}
@@ -521,7 +316,7 @@ export function ContactShareSheet({
           {submitting ? 'Sending...' : 'Send'}
         </Button>
 
-        <p className="text-[11px] text-center text-muted-foreground/70 mt-4">
+        <p className="text-[11px] text-center text-muted-foreground/70 mt-2">
           We don't sell your contact details
         </p>
       </div>
@@ -531,9 +326,7 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} handleOnly shouldScaleBackground={false}>
-        {/* Fixed: Changed max-h-[85dvh] to h-[85vh] max-h-[85vh] */}
-        <DrawerContent className="flex flex-col h-[85vh] max-h-[85vh] bg-background">
-          {/* Scrollable content - use overscroll-contain to prevent scroll chaining */}
+        <DrawerContent className="flex flex-col max-h-[90vh] bg-background">
           <div className="overflow-y-auto flex-1 overscroll-contain pb-safe">
             <BlinqHeader />
             {FormContent}
@@ -546,7 +339,6 @@ export function ContactShareSheet({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden" hideCloseButton>
-        {/* Desktop layout remains unchanged */}
         <BlinqHeader />
         {FormContent}
       </DialogContent>
