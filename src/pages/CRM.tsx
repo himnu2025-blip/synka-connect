@@ -2040,7 +2040,7 @@ if (!contacts && contactsLoading) {
         }}
       >
         <DrawerContent
-  className="h-[90vh] max-h-[90vh] rounded-t-3xl border-0 shadow-none pt-0 backdrop-blur-xl bg-background/90 [&>div:first-child]:hidden overflow-hidden"
+  className="h-[90vh] max-h-[90vh] rounded-t-3xl border-0 shadow-none pt-0 bg-background [&>div:first-child]:hidden overflow-hidden"
 >
   {/* ðŸŽ iOS Drag Handle */}
   <div className="flex justify-center mb-1 flex-shrink-0">
@@ -2098,7 +2098,7 @@ if (!contacts && contactsLoading) {
 
               {/* --- Inline Edit Form inside Sheet --- */}
               {isEditOpen && selectedContact ? (
-                <div className="space-y-3 p-4 mx-4">
+                <div className="space-y-4">
                   <FloatingInput
                     label="Full name"
                     value={editForm.name}
