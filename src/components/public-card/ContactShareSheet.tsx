@@ -468,17 +468,14 @@ export function ContactShareSheet({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-        {/* REMOVED: DrawerHeader and fixed height */}
-        {/* CHANGED: Entire content scrolls, no nested scroll areas */}
-        <DrawerContent className="flex flex-col">
-          {/* Make entire drawer content scrollable */}
-          <div className="overflow-y-auto">
-            <BlinqHeader />
-            {FormContent}
-          </div>
-        </DrawerContent>
-      </Drawer>
+      <Drawer open={open} onOpenChange={onOpenChange} repositionInputs={false} handleOnly>
+  <DrawerContent className="flex flex-col">
+    <div className="flex-1 overflow-y-auto p-0.5 -m-0.5">  {/* flex-1 + padding hack for full scroll */}
+      <BlinqHeader />
+      {FormContent}
+    </div>
+  </DrawerContent>
+</Drawer>
     );
   }
 
