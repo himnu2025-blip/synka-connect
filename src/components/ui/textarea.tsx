@@ -12,6 +12,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({ classNa
         className,
       )}
       ref={ref}
+      autoComplete="off"
+      autoCorrect="off"
+      spellCheck={false}
+      data-form-type="other"
       {...props}
     />
   );
