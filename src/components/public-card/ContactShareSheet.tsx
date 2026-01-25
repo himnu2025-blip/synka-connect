@@ -299,7 +299,7 @@ export function ContactShareSheet({
 
   // Fixed bottom section with Send button
   const FixedBottomSection = (
-    <div className="px-4 pb-4 pt-2 bg-background border-t border-border/50">
+    <div className="px-4 pb-4 pt-2">
       <Button
         type="button"
         onClick={handleSubmit}
@@ -324,7 +324,7 @@ export function ContactShareSheet({
       {/* Scroll area */}
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-none">
         <BlinqHeader />
-        <div className="px-4 pb-6 space-y-4">
+        <div className="px-4 space-y-4">
           {FormFields}
         </div>
       </div>
