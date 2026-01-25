@@ -425,6 +425,7 @@ export function ContactShareSheet({
           {/* Phone number input */}
           <input
             type="tel"
+            inputMode="tel"
             value={formData.phone}
             onChange={(e) =>
               setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
