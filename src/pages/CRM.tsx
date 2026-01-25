@@ -1692,22 +1692,32 @@ if (!contacts && contactsLoading) {
               value={newContact.email}
               onChange={(e) => setNewContact(prev => ({ ...prev, email: e.target.value }))}
             />
-            <div className="grid grid-cols-2 gap-4">
-              <FloatingInput
-                label="Phone"
-                type="tel"
-                inputMode="tel"
-                value={newContact.phone}
-                onChange={(e) => setNewContact(prev => ({ ...prev, phone: e.target.value }))}
-              />
-              <FloatingInput
-                label="WhatsApp"
-                type="tel"
-                inputMode="tel"
-                value={newContact.whatsapp}
-                onChange={(e) => setNewContact(prev => ({ ...prev, whatsapp: e.target.value }))}
-              />
-            </div>
+            <FloatingPhoneInput
+              label="Phone Number"
+              value={extractPhoneNumber(newContact.phone)}
+              onChange={(e) => {
+                const code = getCountryCode(newContact.phone);
+                setNewContact(prev => ({ ...prev, phone: code + e.target.value }));
+              }}
+              countryCode={getCountryCode(newContact.phone)}
+              onCountryCodeChange={(code) => {
+                const number = extractPhoneNumber(newContact.phone);
+                setNewContact(prev => ({ ...prev, phone: code + number }));
+              }}
+            />
+            <FloatingPhoneInput
+              label="WhatsApp"
+              value={extractPhoneNumber(newContact.whatsapp)}
+              onChange={(e) => {
+                const code = getCountryCode(newContact.whatsapp);
+                setNewContact(prev => ({ ...prev, whatsapp: code + e.target.value }));
+              }}
+              countryCode={getCountryCode(newContact.whatsapp)}
+              onCountryCodeChange={(code) => {
+                const number = extractPhoneNumber(newContact.whatsapp);
+                setNewContact(prev => ({ ...prev, whatsapp: code + number }));
+              }}
+            />
             <div className="grid grid-cols-2 gap-4">
               <FloatingInput
                 label="LinkedIn"
@@ -1861,22 +1871,26 @@ if (!contacts && contactsLoading) {
                         onChange={(e) => setScannedContact((prev: any) => ({ ...prev, designation: e.target.value }))}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <FloatingInput
-                        label="Email"
-                        type="email"
-                        inputMode="email"
-                        value={scannedContact.email || ''}
-                        onChange={(e) => setScannedContact((prev: any) => ({ ...prev, email: e.target.value }))}
-                      />
-                      <FloatingInput
-                        label="Phone"
-                        type="tel"
-                        inputMode="tel"
-                        value={scannedContact.phone || ''}
-                        onChange={(e) => setScannedContact((prev: any) => ({ ...prev, phone: e.target.value }))}
-                      />
-                    </div>
+                    <FloatingInput
+                      label="Email"
+                      type="email"
+                      inputMode="email"
+                      value={scannedContact.email || ''}
+                      onChange={(e) => setScannedContact((prev: any) => ({ ...prev, email: e.target.value }))}
+                    />
+                    <FloatingPhoneInput
+                      label="Phone Number"
+                      value={extractPhoneNumber(scannedContact.phone)}
+                      onChange={(e) => {
+                        const code = getCountryCode(scannedContact.phone);
+                        setScannedContact((prev: any) => ({ ...prev, phone: code + e.target.value }));
+                      }}
+                      countryCode={getCountryCode(scannedContact.phone)}
+                      onCountryCodeChange={(code) => {
+                        const number = extractPhoneNumber(scannedContact.phone);
+                        setScannedContact((prev: any) => ({ ...prev, phone: code + number }));
+                      }}
+                    />
                     <div className="grid grid-cols-2 gap-3">
                       <FloatingInput
                         label="Website"
@@ -2070,7 +2084,7 @@ if (!contacts && contactsLoading) {
                     onChange={(e) => updateEditField('designation', e.target.value)}
                   />
                   <FloatingPhoneInput
-                    label="Mobile"
+                    label="Phone Number"
                     value={extractPhoneNumber(editForm.phone)}
                     onChange={(e) => {
                       const code = getCountryCode(editForm.phone);
