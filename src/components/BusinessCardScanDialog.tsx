@@ -3,7 +3,7 @@ import { Camera, Upload, RotateCcw, Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import { FloatingInput } from '@/components/ui/floating-input';
+import { FloatingInput, FloatingPhoneInput, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
 import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 export interface ScannedContact {
@@ -349,22 +349,32 @@ export function BusinessCardScanDialog({
               value={scannedContact.email || ''}
               onChange={(e) => setScannedContact(prev => ({ ...prev, email: e.target.value }))}
             />
-            <div className="grid grid-cols-2 gap-3">
-              <FloatingInput
-                label="Phone"
-                type="tel"
-                inputMode="tel"
-                value={scannedContact.phone || ''}
-                onChange={(e) => setScannedContact(prev => ({ ...prev, phone: e.target.value }))}
-              />
-              <FloatingInput
-                label="WhatsApp"
-                type="tel"
-                inputMode="tel"
-                value={scannedContact.whatsapp || ''}
-                onChange={(e) => setScannedContact(prev => ({ ...prev, whatsapp: e.target.value }))}
-              />
-            </div>
+            <FloatingPhoneInput
+              label="Phone Number"
+              value={extractPhoneNumber(scannedContact.phone)}
+              onChange={(e) => {
+                const code = getCountryCode(scannedContact.phone);
+                setScannedContact(prev => ({ ...prev, phone: code + e.target.value }));
+              }}
+              countryCode={getCountryCode(scannedContact.phone)}
+              onCountryCodeChange={(code) => {
+                const number = extractPhoneNumber(scannedContact.phone);
+                setScannedContact(prev => ({ ...prev, phone: code + number }));
+              }}
+            />
+            <FloatingPhoneInput
+              label="WhatsApp"
+              value={extractPhoneNumber(scannedContact.whatsapp)}
+              onChange={(e) => {
+                const code = getCountryCode(scannedContact.whatsapp);
+                setScannedContact(prev => ({ ...prev, whatsapp: code + e.target.value }));
+              }}
+              countryCode={getCountryCode(scannedContact.whatsapp)}
+              onCountryCodeChange={(code) => {
+                const number = extractPhoneNumber(scannedContact.whatsapp);
+                setScannedContact(prev => ({ ...prev, whatsapp: code + number }));
+              }}
+            />
             <FloatingInput
               label="LinkedIn"
               value={scannedContact.linkedin || ''}
