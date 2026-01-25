@@ -77,6 +77,8 @@ export const FloatingInput = ({
   className,
   inputRef,
 }: FloatingInputProps) => {
+  const hasValue = value !== undefined && value !== null && value !== '';
+  
   return (
     <div className={cn("relative h-14", className)}>
       <input
@@ -87,14 +89,17 @@ export const FloatingInput = ({
         onChange={onChange}
         placeholder=" "
         disabled={disabled}
-        className="peer absolute inset-0 w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors disabled:opacity-50"
-        style={{ fontSize: '16px', lineHeight: '56px' }}
+        className="peer w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors disabled:opacity-50"
+        style={{ fontSize: '16px' }}
       />
       <label
-        className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
-          top-0 -translate-y-1/2 text-xs bg-background px-1
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-          peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
+        className={cn(
+          "absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200",
+          hasValue
+            ? "top-0 -translate-y-1/2 text-xs bg-background px-1"
+            : "top-1/2 -translate-y-1/2 text-base bg-transparent px-0",
+          "peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
+        )}
       >
         {label}
       </label>
