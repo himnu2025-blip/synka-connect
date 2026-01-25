@@ -313,12 +313,12 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} handleOnly shouldScaleBackground={false}>
-        <DrawerContent className="flex flex-col max-h-[90vh] bg-background">
-  <div className="overflow-y-auto flex-1 overscroll-contain pb-safe">
-    <BlinqHeader />
-    {FormContent}
-  </div>
-</DrawerContent>
+        <DrawerContent className="flex flex-col bg-background">
+          <div className="overflow-y-auto overscroll-contain">
+            <BlinqHeader />
+            {FormContent}
+          </div>
+        </DrawerContent>
       </Drawer>
     );
   }
