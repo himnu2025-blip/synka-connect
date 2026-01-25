@@ -55,6 +55,65 @@ const BlinqInput = ({
   );
 };
 
+// Phone input with country code selector and floating label
+const PhoneInput = ({
+  label,
+  value,
+  onChange,
+  countryCode,
+  onCountryCodeChange,
+  autoComplete,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  countryCode: string;
+  onCountryCodeChange: (code: string) => void;
+  autoComplete?: string;
+}) => {
+  return (
+    <div className="relative h-14">
+      <div className="absolute inset-0 flex items-center overflow-hidden rounded-xl border border-border focus-within:border-foreground transition-colors">
+        {/* Country code selector - clean without flags */}
+        <div className="flex items-center px-3 h-full border-r border-border shrink-0">
+          <select
+            value={countryCode}
+            onChange={(e) => onCountryCodeChange(e.target.value)}
+            className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer w-20"
+            autoComplete="off"
+          >
+            {COUNTRY_CODES.map(({ code }) => (
+              <option key={code} value={code}>
+                {code}
+              </option>
+            ))}
+          </select>
+        </div>
+        {/* Phone number input */}
+        <input
+          type="tel"
+          inputMode="numeric"
+          autoComplete={autoComplete}
+          value={value}
+          onChange={onChange}
+          placeholder=" "
+          className="peer flex-1 h-full px-4 text-base outline-none bg-background"
+          style={{ fontSize: '16px' }}
+        />
+        {/* Floating label */}
+        <label
+          className="absolute left-[calc(88px)] text-muted-foreground pointer-events-none transition-all duration-200
+            top-0 -translate-y-1/2 text-xs bg-background px-1
+            peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
+            peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
+        >
+          {label}
+        </label>
+      </div>
+    </div>
+  );
+};
+
 // Pill input with floating label for Job Title and Company - same CSS-first pattern
 const PillInput = ({
   label,
@@ -107,7 +166,7 @@ export interface ContactFormData {
 
 type ScanState = 'idle' | 'uploading' | 'processing' | 'success' | 'failed';
 
-// Comprehensive country codes list
+// Comprehensive country codes list - clean without flags
 const COUNTRY_CODES = [
   { code: '+91', country: 'India' },
   { code: '+1', country: 'United States' },
@@ -426,35 +485,17 @@ export function ContactShareSheet({
           />
         </div>
 
-        {/* PHONE FIELD - With iOS keyboard optimization */}
-        <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
-          {/* Country code selector */}
-          <div className="flex items-center px-3 h-full border-r border-border shrink-0">
-            <select
-              value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
-              className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
-              autoComplete="off"
-            >
-              {COUNTRY_CODES.map(({ code }) => (
-                <option key={code} value={code}>{code}</option>
-              ))}
-            </select>
-          </div>
-          {/* Phone number input */}
-          <input
-            type="tel"
-            inputMode="numeric"
-            autoComplete="off"
-            value={formData.phone}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-            }
-            placeholder="Phone number"
-            className="flex-1 h-full px-4 text-base outline-none bg-background placeholder:text-muted-foreground"
-            style={{ fontSize: '16px' }}
-          />
-        </div>
+        {/* PHONE FIELD - Using dedicated PhoneInput component */}
+        <PhoneInput
+          label="Phone number"
+          value={formData.phone}
+          onChange={(e) =>
+            setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+          }
+          countryCode={countryCode}
+          onCountryCodeChange={setCountryCode}
+          autoComplete="off"
+        />
 
         {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}
         <div className="grid grid-cols-2 gap-2">
