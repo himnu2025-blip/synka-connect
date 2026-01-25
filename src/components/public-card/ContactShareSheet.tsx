@@ -5,14 +5,10 @@ import {
   Dialog,
   DialogContent,
 } from '@/components/ui/dialog';
-import {
-  Drawer,
-  DrawerContent,
-} from '@/components/ui/drawer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { FloatingInput, FloatingPhoneInput, COUNTRY_CODES } from '@/components/ui/floating-input';
+import { FloatingInput, FloatingPhoneInput } from '@/components/ui/floating-input';
 
 interface ContactShareSheetProps {
   open: boolean;
@@ -310,31 +306,21 @@ export function ContactShareSheet({
     </form>
   );
 
-  // 👇 HERE'S THE FALLBACK IMPLEMENTATION - Uncomment if drawer still has issues
-  // Option 1: Full-screen div fallback (most reliable for keyboard handling)
-  if (isMobile && open) {
+  // ✅ MOBILE — Fullscreen keyboard-safe layout
+  if (isMobile) {
+    if (!open) return null;
+
     return (
-      <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
-        <BlinqHeader />
-        {FormContent}
+      <div className="fixed inset-0 z-50 bg-background flex flex-col">
+        <div className="flex-1 overflow-y-auto overscroll-contain">
+          <BlinqHeader />
+          {FormContent}
+        </div>
       </div>
     );
   }
 
-  // Option 2: Modified Drawer (if you want to try the height-removed approach first)
-  // if (isMobile) {
-  //   return (
-  //     <Drawer open={open} onOpenChange={onOpenChange} handleOnly shouldScaleBackground={false}>
-  //       <DrawerContent className="flex flex-col bg-background">
-  //         <div className="overflow-y-auto overscroll-contain">
-  //           <BlinqHeader />
-  //           {FormContent}
-  //         </div>
-  //       </DrawerContent>
-  //     </Drawer>
-  //   );
-  // }
-
+  // ✅ DESKTOP — Dialog modal
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden" hideCloseButton>
