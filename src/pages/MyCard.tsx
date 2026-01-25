@@ -1154,15 +1154,22 @@ useEffect(() => {
 
               <FloatingPhoneInput
                 label="Phone"
-                value={editData.phone?.replace(/^\+\d+/, '') || ''}
+                value={(() => {
+                  const phone = editData.phone || '';
+                  const matchedCode = COUNTRY_CODES.find(c => phone.startsWith(c.code));
+                  return matchedCode ? phone.slice(matchedCode.code.length) : phone;
+                })()}
                 onChange={(e) => {
                   const phoneNumber = e.target.value;
-                  const currentCode = COUNTRY_CODES.find(c => editData.phone?.startsWith(c.code))?.code || '+91';
+                  const matchedCode = COUNTRY_CODES.find(c => (editData.phone || '').startsWith(c.code));
+                  const currentCode = matchedCode?.code || '+91';
                   setEditData(prev => ({ ...prev, phone: currentCode + phoneNumber }));
                 }}
-                countryCode={COUNTRY_CODES.find(c => editData.phone?.startsWith(c.code))?.code || '+91'}
+                countryCode={COUNTRY_CODES.find(c => (editData.phone || '').startsWith(c.code))?.code || '+91'}
                 onCountryCodeChange={(code) => {
-                  const phoneNumber = editData.phone?.replace(/^\+\d+/, '') || '';
+                  const phone = editData.phone || '';
+                  const matchedCode = COUNTRY_CODES.find(c => phone.startsWith(c.code));
+                  const phoneNumber = matchedCode ? phone.slice(matchedCode.code.length) : phone;
                   setEditData(prev => ({ ...prev, phone: code + phoneNumber }));
                 }}
                 disabled={isLoading}
@@ -1170,15 +1177,22 @@ useEffect(() => {
 
               <FloatingPhoneInput
                 label="WhatsApp"
-                value={editData.whatsapp?.replace(/^\+\d+/, '') || ''}
+                value={(() => {
+                  const whatsapp = editData.whatsapp || '';
+                  const matchedCode = COUNTRY_CODES.find(c => whatsapp.startsWith(c.code));
+                  return matchedCode ? whatsapp.slice(matchedCode.code.length) : whatsapp;
+                })()}
                 onChange={(e) => {
                   const phoneNumber = e.target.value;
-                  const currentCode = COUNTRY_CODES.find(c => editData.whatsapp?.startsWith(c.code))?.code || '+91';
+                  const matchedCode = COUNTRY_CODES.find(c => (editData.whatsapp || '').startsWith(c.code));
+                  const currentCode = matchedCode?.code || '+91';
                   setEditData(prev => ({ ...prev, whatsapp: currentCode + phoneNumber }));
                 }}
-                countryCode={COUNTRY_CODES.find(c => editData.whatsapp?.startsWith(c.code))?.code || '+91'}
+                countryCode={COUNTRY_CODES.find(c => (editData.whatsapp || '').startsWith(c.code))?.code || '+91'}
                 onCountryCodeChange={(code) => {
-                  const phoneNumber = editData.whatsapp?.replace(/^\+\d+/, '') || '';
+                  const whatsapp = editData.whatsapp || '';
+                  const matchedCode = COUNTRY_CODES.find(c => whatsapp.startsWith(c.code));
+                  const phoneNumber = matchedCode ? whatsapp.slice(matchedCode.code.length) : whatsapp;
                   setEditData(prev => ({ ...prev, whatsapp: code + phoneNumber }));
                 }}
                 disabled={isLoading}
