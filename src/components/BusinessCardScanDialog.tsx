@@ -3,11 +3,9 @@ import { Camera, Upload, RotateCcw, Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { FloatingInput } from '@/components/ui/floating-input';
 import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 export interface ScannedContact {
   name?: string | null;
   company?: string | null;
@@ -326,75 +324,58 @@ export function BusinessCardScanDialog({
             </p>
           </div>
 
-          <div className="space-y-3 max-h-[400px] overflow-y-auto">
-            <div className="space-y-1.5">
-              <Label>Name *</Label>
-              <Input
-                value={scannedContact.name || ''}
-                onChange={(e) => setScannedContact(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Full name"
-              />
-            </div>
+          <div className="space-y-4 max-h-[400px] overflow-y-auto">
+            <FloatingInput
+              label="Name *"
+              value={scannedContact.name || ''}
+              onChange={(e) => setScannedContact(prev => ({ ...prev, name: e.target.value }))}
+            />
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Organization/Brand</Label>
-                <Input
-                  value={scannedContact.company || ''}
-                  onChange={(e) => setScannedContact(prev => ({ ...prev, company: e.target.value }))}
-                  placeholder="Organization/Brand"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Role</Label>
-                <Input
-                  value={scannedContact.designation || ''}
-                  onChange={(e) => setScannedContact(prev => ({ ...prev, designation: e.target.value }))}
-                  placeholder="Role"
-                />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Email</Label>
-              <Input
-                value={scannedContact.email || ''}
-                onChange={(e) => setScannedContact(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="email@example.com"
+              <FloatingInput
+                label="Organization/Brand"
+                value={scannedContact.company || ''}
+                onChange={(e) => setScannedContact(prev => ({ ...prev, company: e.target.value }))}
+              />
+              <FloatingInput
+                label="Role"
+                value={scannedContact.designation || ''}
+                onChange={(e) => setScannedContact(prev => ({ ...prev, designation: e.target.value }))}
               />
             </div>
+            <FloatingInput
+              label="Email"
+              type="email"
+              inputMode="email"
+              value={scannedContact.email || ''}
+              onChange={(e) => setScannedContact(prev => ({ ...prev, email: e.target.value }))}
+            />
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Phone</Label>
-                <Input
-                  value={scannedContact.phone || ''}
-                  onChange={(e) => setScannedContact(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder="+1 234 567 890"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>WhatsApp</Label>
-                <Input
-                  value={scannedContact.whatsapp || ''}
-                  onChange={(e) => setScannedContact(prev => ({ ...prev, whatsapp: e.target.value }))}
-                  placeholder="+1 234 567 890"
-                />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>LinkedIn</Label>
-              <Input
-                value={scannedContact.linkedin || ''}
-                onChange={(e) => setScannedContact(prev => ({ ...prev, linkedin: e.target.value }))}
-                placeholder="linkedin.com/in/username"
+              <FloatingInput
+                label="Phone"
+                type="tel"
+                inputMode="tel"
+                value={scannedContact.phone || ''}
+                onChange={(e) => setScannedContact(prev => ({ ...prev, phone: e.target.value }))}
+              />
+              <FloatingInput
+                label="WhatsApp"
+                type="tel"
+                inputMode="tel"
+                value={scannedContact.whatsapp || ''}
+                onChange={(e) => setScannedContact(prev => ({ ...prev, whatsapp: e.target.value }))}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label>Website</Label>
-              <Input
-                value={scannedContact.website || ''}
-                onChange={(e) => setScannedContact(prev => ({ ...prev, website: e.target.value }))}
-                placeholder="example.com"
-              />
-            </div>
+            <FloatingInput
+              label="LinkedIn"
+              value={scannedContact.linkedin || ''}
+              onChange={(e) => setScannedContact(prev => ({ ...prev, linkedin: e.target.value }))}
+            />
+            <FloatingInput
+              label="Website"
+              inputMode="url"
+              value={scannedContact.website || ''}
+              onChange={(e) => setScannedContact(prev => ({ ...prev, website: e.target.value }))}
+            />
           </div>
 
           <div className="flex gap-2 pt-2">
