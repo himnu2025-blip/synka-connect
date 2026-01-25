@@ -1,14 +1,90 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
 } from '@/components/ui/dialog';
+import {
+  Drawer,
+  DrawerContent,
+} from '@/components/ui/drawer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { FloatingInput, FloatingPhoneInput } from '@/components/ui/floating-input';
+
+// Blinq-style input with border-floating label - defined outside component to prevent re-render focus loss
+// IMPORTANT: Default state is "has value" (label at top), CSS overrides when empty via peer-placeholder-shown
+// This eliminates race conditions between React state and CSS on first interaction
+const BlinqInput = ({
+  label,
+  value,
+  onChange,
+  type = 'text',
+  inputMode,
+  autoComplete,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+  inputMode?: 'text' | 'email' | 'tel' | 'numeric';
+  autoComplete?: string;
+}) => {
+  return (
+    <div className="relative h-14">
+      <input
+        type={type}
+        inputMode={inputMode}
+        autoComplete={autoComplete}
+        value={value}
+        onChange={onChange}
+        placeholder=" "
+        className="peer absolute inset-0 w-full h-full px-4 pt-5 pb-2 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
+        style={{ fontSize: '16px' }}
+      />
+      <label
+        className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
+          top-0 -translate-y-1/2 text-xs bg-background
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
+          peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background"
+      >
+        {label}
+      </label>
+    </div>
+  );
+};
+
+// Pill input with floating label for Job Title and Company - same CSS-first pattern
+const PillInput = ({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => {
+  return (
+    <div className="relative h-10">
+      <input
+        value={value}
+        onChange={onChange}
+        placeholder=" "
+        className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-transparent focus:border-foreground"
+        style={{ fontSize: '16px' }}
+      />
+      <label
+        className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
+          top-0 -translate-y-1/2 text-[10px] bg-background
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:bg-transparent
+          peer-focus:top-0 peer-focus:text-[10px] peer-focus:bg-background"
+      >
+        {label}
+      </label>
+    </div>
+  );
+};
 
 interface ContactShareSheetProps {
   open: boolean;
@@ -30,6 +106,67 @@ export interface ContactFormData {
 }
 
 type ScanState = 'idle' | 'uploading' | 'processing' | 'success' | 'failed';
+
+// Comprehensive country codes list with flags
+const COUNTRY_CODES = [
+  { code: '+91', flag: '🇮🇳', country: 'India' },
+  { code: '+1', flag: '🇺🇸', country: 'United States' },
+  { code: '+44', flag: '🇬🇧', country: 'United Kingdom' },
+  { code: '+61', flag: '🇦🇺', country: 'Australia' },
+  { code: '+971', flag: '🇦🇪', country: 'UAE' },
+  { code: '+966', flag: '🇸🇦', country: 'Saudi Arabia' },
+  { code: '+65', flag: '🇸🇬', country: 'Singapore' },
+  { code: '+81', flag: '🇯🇵', country: 'Japan' },
+  { code: '+86', flag: '🇨🇳', country: 'China' },
+  { code: '+82', flag: '🇰🇷', country: 'South Korea' },
+  { code: '+49', flag: '🇩🇪', country: 'Germany' },
+  { code: '+33', flag: '🇫🇷', country: 'France' },
+  { code: '+39', flag: '🇮🇹', country: 'Italy' },
+  { code: '+34', flag: '🇪🇸', country: 'Spain' },
+  { code: '+31', flag: '🇳🇱', country: 'Netherlands' },
+  { code: '+41', flag: '🇨🇭', country: 'Switzerland' },
+  { code: '+46', flag: '🇸🇪', country: 'Sweden' },
+  { code: '+47', flag: '🇳🇴', country: 'Norway' },
+  { code: '+45', flag: '🇩🇰', country: 'Denmark' },
+  { code: '+358', flag: '🇫🇮', country: 'Finland' },
+  { code: '+43', flag: '🇦🇹', country: 'Austria' },
+  { code: '+32', flag: '🇧🇪', country: 'Belgium' },
+  { code: '+48', flag: '🇵🇱', country: 'Poland' },
+  { code: '+420', flag: '🇨🇿', country: 'Czech Republic' },
+  { code: '+36', flag: '🇭🇺', country: 'Hungary' },
+  { code: '+351', flag: '🇵🇹', country: 'Portugal' },
+  { code: '+30', flag: '🇬🇷', country: 'Greece' },
+  { code: '+353', flag: '🇮🇪', country: 'Ireland' },
+  { code: '+7', flag: '🇷🇺', country: 'Russia' },
+  { code: '+380', flag: '🇺🇦', country: 'Ukraine' },
+  { code: '+90', flag: '🇹🇷', country: 'Turkey' },
+  { code: '+972', flag: '🇮🇱', country: 'Israel' },
+  { code: '+20', flag: '🇪🇬', country: 'Egypt' },
+  { code: '+27', flag: '🇿🇦', country: 'South Africa' },
+  { code: '+234', flag: '🇳🇬', country: 'Nigeria' },
+  { code: '+254', flag: '🇰🇪', country: 'Kenya' },
+  { code: '+55', flag: '🇧🇷', country: 'Brazil' },
+  { code: '+52', flag: '🇲🇽', country: 'Mexico' },
+  { code: '+54', flag: '🇦🇷', country: 'Argentina' },
+  { code: '+57', flag: '🇨🇴', country: 'Colombia' },
+  { code: '+56', flag: '🇨🇱', country: 'Chile' },
+  { code: '+51', flag: '🇵🇪', country: 'Peru' },
+  { code: '+58', flag: '🇻🇪', country: 'Venezuela' },
+  { code: '+60', flag: '🇲🇾', country: 'Malaysia' },
+  { code: '+62', flag: '🇮🇩', country: 'Indonesia' },
+  { code: '+63', flag: '🇵🇭', country: 'Philippines' },
+  { code: '+66', flag: '🇹🇭', country: 'Thailand' },
+  { code: '+84', flag: '🇻🇳', country: 'Vietnam' },
+  { code: '+92', flag: '🇵🇰', country: 'Pakistan' },
+  { code: '+880', flag: '🇧🇩', country: 'Bangladesh' },
+  { code: '+94', flag: '🇱🇰', country: 'Sri Lanka' },
+  { code: '+977', flag: '🇳🇵', country: 'Nepal' },
+  { code: '+64', flag: '🇳🇿', country: 'New Zealand' },
+  { code: '+974', flag: '🇶🇦', country: 'Qatar' },
+  { code: '+968', flag: '🇴🇲', country: 'Oman' },
+  { code: '+973', flag: '🇧🇭', country: 'Bahrain' },
+  { code: '+965', flag: '🇰🇼', country: 'Kuwait' },
+];
 
 export function ContactShareSheet({
   open,
@@ -55,18 +192,19 @@ export function ContactShareSheet({
     linkedin: '',
   });
 
-  // Prevent body scroll when sheet is open
-  useEffect(() => {
-  if (!open) return;
-
-  document.documentElement.style.overflow = 'hidden';
-  document.body.style.overflow = 'hidden';
-
-  return () => {
-    document.documentElement.style.overflow = '';
-    document.body.style.overflow = '';
+  const normalizeLinkedInUrl = (value: string) => {
+    let v = value.trim();
+    if (!v) return '';
+    
+    v = v.replace(/^https?:\/\//, '');
+    
+    if (v.includes('linkedin.com')) {
+      return `https://${v}`;
+    }
+    
+    return `https://linkedin.com/in/${v}`;
   };
-}, [open]);
+
   const handleSubmit = async () => {
     if (!formData.firstName.trim()) {
       toast({
@@ -176,9 +314,11 @@ export function ContactShareSheet({
   // Common header component for both mobile and desktop
   const BlinqHeader = () => (
     <>
+      {/* EXACT BLINQ HEADER - NO BORDER AT BOTTOM */}
       <div className="px-4 pt-5 pb-4">
-        {/* SCAN & SKIP ROW */}
+        {/* SCAN & SKIP ROW - EXACTLY LIKE BLINQ */}
         <div className="flex justify-between items-center mb-5">
+          {/* Scan button aligned left like Blinq */}
           <button
             onClick={handleScanBusinessCard}
             disabled={scanState === 'uploading' || scanState === 'processing'}
@@ -188,6 +328,7 @@ export function ContactShareSheet({
             <span className="font-medium">Scan</span>
           </button>
           
+          {/* Skip button at top right with tight spacing */}
           <button
             onClick={handleSkip}
             className="text-sm font-semibold text-foreground hover:text-muted-foreground transition-colors"
@@ -196,8 +337,9 @@ export function ContactShareSheet({
           </button>
         </div>
         
-        {/* PROFILE AND TITLE */}
+        {/* PROFILE AND TITLE - EXACTLY LIKE BLINQ */}
         <div className="flex items-start gap-3">
+          {/* LARGE PROFILE PHOTO - EXACT SIZE AS BLINQ */}
           <div className="relative flex-shrink-0">
             {ownerPhotoUrl ? (
               <img
@@ -212,11 +354,13 @@ export function ContactShareSheet({
                 </span>
               </div>
             )}
+            {/* SHARE ICON BADGE - EXACTLY LIKE BLINQ */}
             <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-background rounded-full shadow-md flex items-center justify-center border border-border">
               <Send className="w-3.5 h-3.5 text-destructive" />
             </div>
           </div>
           
+          {/* TITLE TEXT - EXACT FONT AND SPACING AS BLINQ */}
           <div className="flex-1 min-w-0">
             <h2 className="text-[18px] font-bold text-foreground leading-tight -mt-0.5 break-words">
               Share your contact information with {ownerName}
@@ -227,8 +371,8 @@ export function ContactShareSheet({
     </>
   );
 
-  // Form fields only (no button)
-  const FormFields = (
+  // Form content rendered inline to prevent re-mount issues
+  const FormContent = (
     <>
       {/* Hidden file input */}
       <input
@@ -240,115 +384,110 @@ export function ContactShareSheet({
         className="hidden"
       />
 
-      {/* HIDDEN TRAP FIELDS FOR CHROME AUTOFILL HACK */}
-      <input type="text" autoComplete="username" className="hidden" />
-      <input type="password" autoComplete="new-password" className="hidden" />
-
-      {/* FORM FIELDS */}
-      <div className="space-y-4">
+      {/* FORM FIELDS CONTAINER */}
+      <div className="space-y-4 px-4 pb-6">
         {/* FIRST + LAST NAME */}
         <div className="grid grid-cols-2 gap-3">
-          <FloatingInput
+          <BlinqInput
             label="First name"
             value={formData.firstName}
             onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
           />
-          <FloatingInput
+          <BlinqInput
             label="Last name"
             value={formData.lastName}
             onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
           />
         </div>
 
-        {/* EMAIL */}
-        <FloatingInput
-          label="Email"
-          type="email"
-          inputMode="email"
-          value={formData.email}
-          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-        />
+        {/* EMAIL - Wrapped in grid like name fields for layout stability */}
+        <div className="grid grid-cols-1">
+          <BlinqInput
+            label="Email"
+            value={formData.email}
+            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+          />
+        </div>
 
-        {/* PHONE FIELD */}
-<FloatingPhoneInput
-  label="Phone number"
-  value={formData.phone}
-  onChange={(e) =>
-    setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-  }
-  countryCode={countryCode}
-  onCountryCodeChange={setCountryCode}
-/>
+        <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
+          {/* Country code selector */}
+          <div className="flex items-center px-3 h-full border-r border-border shrink-0">
+            <select
+              value={countryCode}
+              onChange={(e) => setCountryCode(e.target.value)}
+              className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
+            >
+              {COUNTRY_CODES.map(({ code, flag }) => (
+                <option key={code} value={code}>{flag} {code}</option>
+              ))}
+            </select>
+          </div>
+          {/* Phone number input */}
+          <input
+            type="tel"
+            value={formData.phone}
+            onChange={(e) =>
+              setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+            }
+            placeholder="Phone number"
+            className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
+            style={{ fontSize: '16px' }}
+          />
+        </div>
 
-        {/* ROLE + COMPANY */}
-        <div className="grid grid-cols-2 gap-3">
-          <FloatingInput
+        {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}
+        <div className="grid grid-cols-2 gap-2">
+          <PillInput
             label="Role"
             value={formData.designation}
             onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
           />
-          <FloatingInput
-            label="Company"
+          <PillInput
+            label="Company Name"
             value={formData.company}
             onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
           />
         </div>
+
+        {/* SEND BUTTON WITH GRADIENT */}
+        <Button
+          onClick={handleSubmit}
+          disabled={submitting}
+          variant="gradient"
+          className="w-full h-14 rounded-xl text-white text-base font-medium mt-6 hover:opacity-90 transition-opacity"
+        >
+          {submitting ? 'Sending...' : 'Send'}
+        </Button>
+
+        <p className="text-[11px] text-center text-muted-foreground/70 mt-4">
+          We don't sell your contact details
+        </p>
       </div>
     </>
   );
 
-  // Fixed bottom section with Send button
-  const FixedBottomSection = (
-    <div className="pb-4 pt-2">
-      <Button
-        type="button"
-        onClick={handleSubmit}
-        disabled={submitting}
-        variant="gradient"
-        className="w-full h-14 rounded-xl text-white text-base font-medium hover:opacity-90 transition-opacity"
-      >
-        {submitting ? 'Sending...' : 'Send'}
-      </Button>
-      <p className="text-[11px] text-center text-muted-foreground/70 mt-2">
-        We don't sell your contact details
-      </p>
-    </div>
-  );
-
   if (isMobile) {
-  if (!open) return null;
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
+        {/* REMOVED: DrawerHeader and fixed height */}
+        {/* CHANGED: Entire content scrolls, no nested scroll areas */}
+        <DrawerContent className="flex flex-col">
+          {/* Make entire drawer content scrollable */}
+          <div className="overflow-y-auto">
+            <BlinqHeader />
+            {FormContent}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
-  return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col h-screen overflow-hidden">
-      
-      {/* Scroll area */}
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-none">
-  <BlinqHeader />
-  <div className="px-4">
-    <div className="space-y-4 pb-2">
-      {FormFields}
-    </div>
-  </div>
-</div>
-
-      {/* Fixed bottom send button */}
-      <div className="shrink-0 bg-background border-t border-border/50 px-4 pt-2 pb-[calc(env(safe-area-inset-bottom)+16px)]">
-        {FixedBottomSection}
-      </div>
-
-    </div>
-  );
-}
-
-  // ✅ DESKTOP — Dialog modal
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden" hideCloseButton>
+        {/* Desktop layout remains unchanged */}
         <BlinqHeader />
-        <div className="px-4 pb-4 space-y-4">
-          {FormFields}
-        </div>
-        {FixedBottomSection}
+        {FormContent}
       </DialogContent>
     </Dialog>
   );
