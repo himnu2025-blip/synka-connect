@@ -29,6 +29,7 @@ import { CardImageSection, LayoutType } from '@/components/card/CardImageSection
 import { DocumentLinks } from '@/components/card/DocumentLinks';
 import { SocialLinkChip } from '@/components/card/SocialLinkChip';
 import { getPublicCardUrl } from '@/lib/publicUrls';
+import { saveContactToPhone } from '@/lib/nativeContacts';
 import { ContactShareSheet, ContactFormData } from '@/components/public-card/ContactShareSheet';
 import { ExchangeSuccessSheet } from '@/components/public-card/ExchangeSuccessSheet';
 import { hapticFeedback } from '@/lib/haptics';
@@ -454,29 +455,29 @@ export default function PublicCard() {
     navigator.vibrate?.(10);
     if (!displayData || !profile) return;
 
-    // 1. Download VCF silently in background
+    // Log the contact save event
     await logContactSave(profile.user_id, card?.id || null);
 
-    const vCard = `BEGIN:VCARD
-VERSION:3.0
-FN:${displayData.name}
-ORG:${displayData.company}
-TITLE:${displayData.designation}
-TEL;TYPE=CELL:${displayData.phone}
-EMAIL:${displayData.email}
-URL:${displayData.website ? `https://${displayData.website}` : ''}
-NOTE:${displayData.about}
-END:VCARD`;
+    // Use native contact save - opens "Add to Contacts" dialog on mobile
+    await saveContactToPhone({
+      name: displayData.name,
+      company: displayData.company,
+      designation: displayData.designation,
+      phone: displayData.phone,
+      email: displayData.email,
+      website: displayData.website,
+      whatsapp: displayData.whatsapp,
+      about: displayData.about,
+      photo_url: displayData.photo_url,
+    });
 
-    const blob = new Blob([vCard], { type: 'text/vcard' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${displayData.name.replace(/\s+/g, '_')}.vcf`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // Show success feedback
+    toast({
+      title: 'Contact ready to save!',
+      description: 'Add to your contacts from the dialog.',
+    });
 
-    // 2. Open contact share sheet
+    // Open contact share sheet
     setShowContactSheet(true);
   };
 
