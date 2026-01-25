@@ -1675,7 +1675,7 @@ if (!contacts && contactsLoading) {
             />
             <div className="grid grid-cols-2 gap-4">
               <FloatingInput
-                label="Organization/Brand"
+                label="Company Name"
                 value={newContact.company}
                 onChange={(e) => setNewContact(prev => ({ ...prev, company: e.target.value }))}
               />
@@ -1851,12 +1851,12 @@ if (!contacts && contactsLoading) {
                     />
                     <div className="grid grid-cols-2 gap-3">
                       <FloatingInput
-                        label="Company"
+                        label="Company Name"
                         value={scannedContact.company || ''}
                         onChange={(e) => setScannedContact((prev: any) => ({ ...prev, company: e.target.value }))}
                       />
                       <FloatingInput
-                        label="Designation"
+                        label="Role"
                         value={scannedContact.designation || ''}
                         onChange={(e) => setScannedContact((prev: any) => ({ ...prev, designation: e.target.value }))}
                       />
@@ -2060,7 +2060,7 @@ if (!contacts && contactsLoading) {
                     inputRef={editNameRef}
                   />
                   <FloatingInput
-                    label="Organization/Brand"
+                    label="Company Name"
                     value={editForm.company}
                     onChange={(e) => updateEditField('company', e.target.value)}
                   />

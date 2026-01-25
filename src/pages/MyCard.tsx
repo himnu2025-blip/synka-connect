@@ -1008,7 +1008,7 @@ useEffect(() => {
               />
 
               <FloatingInput
-                label="Organization / Brand"
+                label="Company Name"
                 value={editData.company}
                 onChange={(e) =>
                   setEditData(prev => ({ ...prev, company: e.target.value }))

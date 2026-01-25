@@ -438,12 +438,12 @@ export function ContactShareSheet({
         {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}
         <div className="grid grid-cols-2 gap-2">
           <PillInput
-            label="Job title"
+            label="Role"
             value={formData.designation}
             onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
           />
           <PillInput
-            label="Company name"
+            label="Company Name"
             value={formData.company}
             onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
           />
