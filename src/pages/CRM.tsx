@@ -2026,13 +2026,13 @@ if (!contacts && contactsLoading) {
           }, 0);
         }}
       >
-        <DrawerContent className="h-[85dvh] rounded-t-3xl border-0 shadow-none bg-background [&>div:first-child]:hidden flex flex-col">
+        <DrawerContent className="h-[85dvh] rounded-t-3xl border-0 shadow-none bg-background [&>div:first-child]:hidden flex flex-col overflow-hidden">
           {/* Drag Handle - fixed at top */}
           <div className="flex justify-center py-3 flex-shrink-0">
             <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
           </div>
           {selectedContact && (
-            <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-8 space-y-6">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 space-y-6">
               <DrawerHeader className="text-center relative p-0">
                 <ContactAvatar 
                   name={selectedContact.name}
@@ -2151,10 +2151,12 @@ if (!contacts && contactsLoading) {
                   </div>
 
                   {editError && <div className="text-sm text-destructive">{editError}</div>}
+                  {/* Spacer for bottom buttons */}
+                  <div className="h-20" />
                 </div>
               ) : null}
 {isEditOpen && (
-  <div className="border-t bg-background px-4 py-3 flex justify-between">
+  <div className="absolute bottom-0 left-0 right-0 border-t bg-background px-4 py-3 flex justify-between flex-shrink-0">
     <Button
       variant="destructive"
       onClick={() => {
@@ -2360,6 +2362,8 @@ if (!contacts && contactsLoading) {
     ))}
   </div>
 )}
+                {/* Bottom padding for scroll */}
+                <div className="h-8" />
   </>
 )}
             </div>
