@@ -161,11 +161,11 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
     }
   }, [selectedContact]);
 
-  // focus name input when inline edit opens
+  // focus name input when inline edit opens (without scrolling)
   useEffect(() => {
     if (isEditOpen) {
       setTimeout(() => {
-        editNameRef.current?.focus();
+        editNameRef.current?.focus({ preventScroll: true });
         const el = editNameRef.current as HTMLInputElement | null;
         if (el) el.setSelectionRange(el.value.length, el.value.length);
       }, 120);
