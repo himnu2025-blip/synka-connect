@@ -145,6 +145,40 @@ async function saveContactNative(contact: ContactData): Promise<boolean> {
 }
 
 /**
+ * Save contact using vCard via native Share API (for Capacitor Android)
+ */
+async function saveContactViaShareAPI(contact: ContactData): Promise<boolean> {
+  try {
+    const { Share } = await import('@capacitor/share');
+    const { Filesystem, Directory } = await import('@capacitor/filesystem');
+    
+    const vCard = generateVCard(contact);
+    const fileName = `${contact.name.replace(/[^a-zA-Z0-9]/g, '_')}.vcf`;
+    
+    // Write vCard to cache directory
+    const result = await Filesystem.writeFile({
+      path: fileName,
+      data: btoa(unescape(encodeURIComponent(vCard))), // Base64 encode
+      directory: Directory.Cache,
+    });
+    
+    console.log('vCard written to:', result.uri);
+    
+    // Share the file - this opens the native share sheet with "Add to Contacts" option
+    await Share.share({
+      title: `${contact.name} Contact`,
+      files: [result.uri],
+      dialogTitle: 'Save Contact',
+    });
+    
+    return true;
+  } catch (error) {
+    console.error('Share API vCard error:', error);
+    return false;
+  }
+}
+
+/**
  * Save contact using vCard - improved for mobile web
  */
 function saveContactViaVCard(contact: ContactData): void {
@@ -209,11 +243,18 @@ export async function saveContactToPhone(contact: ContactData): Promise<boolean>
     const success = await saveContactNative(contact);
     console.log('Native contact save result:', success);
     
-    // If native save failed (permission denied or error), fall back to vCard
+    // If native save failed (permission denied or error), fall back to Share API with vCard
     if (!success) {
-      console.log('Native save failed, falling back to vCard');
-      saveContactViaVCard(contact);
-      return true; // vCard triggers download
+      console.log('Native save failed, falling back to Share API vCard');
+      const shareSuccess = await saveContactViaShareAPI(contact);
+      console.log('Share API vCard result:', shareSuccess);
+      
+      // If Share API also failed, try web vCard as last resort
+      if (!shareSuccess) {
+        console.log('Share API failed, falling back to web vCard');
+        saveContactViaVCard(contact);
+      }
+      return true; // vCard flow triggered
     }
     
     return success;
