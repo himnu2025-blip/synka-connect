@@ -92,8 +92,10 @@ async function saveContactNative(contact: ContactData): Promise<boolean> {
     
     // Request permission first
     const permissionStatus = await Contacts.requestPermissions();
+    console.log('Contact permission status:', permissionStatus);
+    
     if (permissionStatus.contacts !== 'granted') {
-      console.log('Contact permission not granted');
+      console.log('Contact permission not granted, falling back to vCard');
       return false;
     }
 
@@ -108,8 +110,10 @@ async function saveContactNative(contact: ContactData): Promise<boolean> {
       urls.push(contact.website.startsWith('http') ? contact.website : `https://${contact.website}`);
     }
 
+    console.log('Creating contact with:', { givenName, familyName, company: contact.company });
+
     // Create contact object for Capacitor
-    await Contacts.createContact({
+    const result = await Contacts.createContact({
       contact: {
         name: {
           given: givenName,
@@ -132,6 +136,7 @@ async function saveContactNative(contact: ContactData): Promise<boolean> {
       },
     });
 
+    console.log('Contact created successfully:', result);
     return true;
   } catch (error) {
     console.error('Native contact save error:', error);
@@ -197,10 +202,20 @@ function saveContactViaVCard(contact: ContactData): void {
  * Returns true only after native save is confirmed, or after triggering vCard download
  */
 export async function saveContactToPhone(contact: ContactData): Promise<boolean> {
-  // For native apps, use Capacitor Contacts plugin which shows native "Add Contact" dialog
+  console.log('saveContactToPhone called, isNative:', Capacitor.isNativePlatform());
+  
+  // For native apps, try Capacitor Contacts plugin first
   if (Capacitor.isNativePlatform()) {
     const success = await saveContactNative(contact);
-    // Only return true if native save succeeded - this means user confirmed in native dialog
+    console.log('Native contact save result:', success);
+    
+    // If native save failed (permission denied or error), fall back to vCard
+    if (!success) {
+      console.log('Native save failed, falling back to vCard');
+      saveContactViaVCard(contact);
+      return true; // vCard triggers download
+    }
+    
     return success;
   }
   
