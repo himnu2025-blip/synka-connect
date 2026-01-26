@@ -457,10 +457,8 @@ export default function PublicCard() {
     // Haptic feedback
     await hapticFeedback.light();
 
-    // Log the contact save event
-    await logContactSave(profile.user_id, card?.id || null);
-
     // Use native contact save - opens "Add to Contacts" dialog on mobile
+    // This will wait for user to confirm save in native dialog (on native apps)
     const saved = await saveContactToPhone({
       name: displayData.name,
       company: displayData.company,
@@ -473,18 +471,27 @@ export default function PublicCard() {
       photo_url: displayData.photo_url,
     });
 
-    // Show success feedback
+    // Only proceed if contact was actually saved
     if (saved) {
+      // Log the contact save event only after confirmed save
+      await logContactSave(profile.user_id, card?.id || null);
+      
       toast({
         title: 'Contact saved!',
         description: 'Now share your details with them.',
       });
-    }
 
-    // Open contact share sheet after a small delay for UX flow
-    setTimeout(() => {
-      setShowContactSheet(true);
-    }, 300);
+      // Open contact share sheet after native save completes
+      setTimeout(() => {
+        setShowContactSheet(true);
+      }, 300);
+    } else {
+      // User cancelled native contact save
+      toast({
+        title: 'Contact not saved',
+        description: 'You can try again anytime.',
+      });
+    }
   };
 
   const shareCard = async () => {
