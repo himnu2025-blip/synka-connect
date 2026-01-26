@@ -1,5 +1,6 @@
 // Native contact save utilities
 import { Capacitor } from '@capacitor/core';
+import { hapticFeedback } from '@/lib/haptics';
 
 interface ContactData {
   name: string;
@@ -83,26 +84,42 @@ function generateVCard(contact: ContactData): string {
 }
 
 /**
- * Save contact using native Capacitor plugin (for native apps)
+ * Save contact using native Capacitor plugin (direct write to phone contacts)
+ * This provides the best UX - silent save without any download/share prompts
  */
 async function saveContactNative(contact: ContactData): Promise<boolean> {
   try {
     // Dynamically import to avoid issues on web
     const { Contacts, PhoneType, EmailType } = await import('@capacitor-community/contacts');
     
-    // Request permission first
+    // Request permission at runtime
     const permissionStatus = await Contacts.requestPermissions();
     console.log('Contact permission status:', permissionStatus);
     
     if (permissionStatus.contacts !== 'granted') {
-      console.log('Contact permission not granted, falling back to vCard');
+      console.log('Contact permission not granted');
       return false;
     }
 
-    // Parse name
+    // Parse name into first/last
     const nameParts = contact.name.trim().split(/\s+/);
-    const familyName = nameParts.length > 1 ? nameParts.pop() : undefined;
+    const familyName = nameParts.length > 1 ? nameParts.pop() : '';
     const givenName = nameParts.join(' ') || contact.name;
+
+    // Build phones array
+    const phones = [];
+    if (contact.phone) {
+      phones.push({ type: PhoneType.Mobile, number: contact.phone });
+    }
+    if (contact.whatsapp && contact.whatsapp !== contact.phone) {
+      phones.push({ type: PhoneType.Mobile, number: contact.whatsapp });
+    }
+
+    // Build emails array
+    const emails = [];
+    if (contact.email) {
+      emails.push({ type: EmailType.Work, address: contact.email });
+    }
 
     // Build URLs array
     const urls: string[] = [];
@@ -110,9 +127,9 @@ async function saveContactNative(contact: ContactData): Promise<boolean> {
       urls.push(contact.website.startsWith('http') ? contact.website : `https://${contact.website}`);
     }
 
-    console.log('Creating contact with:', { givenName, familyName, company: contact.company });
+    console.log('Creating contact:', { givenName, familyName, company: contact.company });
 
-    // Create contact object for Capacitor
+    // Create contact using v7 API structure
     const result = await Contacts.createContact({
       contact: {
         name: {
@@ -123,20 +140,18 @@ async function saveContactNative(contact: ContactData): Promise<boolean> {
           company: contact.company,
           jobTitle: contact.designation || undefined,
         } : undefined,
-        phones: contact.phone ? [{
-          type: PhoneType.Mobile,
-          number: contact.phone,
-        }] : undefined,
-        emails: contact.email ? [{
-          type: EmailType.Work,
-          address: contact.email,
-        }] : undefined,
+        phones: phones.length > 0 ? phones : undefined,
+        emails: emails.length > 0 ? emails : undefined,
         urls: urls.length > 0 ? urls : undefined,
         note: contact.about || undefined,
       },
     });
 
     console.log('Contact created successfully:', result);
+    
+    // Haptic feedback for success
+    await hapticFeedback.success();
+    
     return true;
   } catch (error) {
     console.error('Native contact save error:', error);
@@ -145,7 +160,7 @@ async function saveContactNative(contact: ContactData): Promise<boolean> {
 }
 
 /**
- * Save contact using vCard via native Share API (for Capacitor Android)
+ * Save contact using vCard via native Share API (for Capacitor Android fallback)
  */
 async function saveContactViaShareAPI(contact: ContactData): Promise<boolean> {
   try {
@@ -155,22 +170,23 @@ async function saveContactViaShareAPI(contact: ContactData): Promise<boolean> {
     const vCard = generateVCard(contact);
     const fileName = `${contact.name.replace(/[^a-zA-Z0-9]/g, '_')}.vcf`;
     
-    // Write vCard to cache directory
+    // Write vCard to cache directory (base64 encoded)
     const result = await Filesystem.writeFile({
       path: fileName,
-      data: btoa(unescape(encodeURIComponent(vCard))), // Base64 encode
+      data: btoa(unescape(encodeURIComponent(vCard))),
       directory: Directory.Cache,
     });
     
     console.log('vCard written to:', result.uri);
     
-    // Share the file - this opens the native share sheet with "Add to Contacts" option
+    // Share the file - opens native share sheet with "Add to Contacts" option
     await Share.share({
       title: `${contact.name} Contact`,
       files: [result.uri],
       dialogTitle: 'Save Contact',
     });
     
+    await hapticFeedback.light();
     return true;
   } catch (error) {
     console.error('Share API vCard error:', error);
@@ -179,7 +195,7 @@ async function saveContactViaShareAPI(contact: ContactData): Promise<boolean> {
 }
 
 /**
- * Save contact using vCard - improved for mobile web
+ * Save contact using vCard download - web fallback
  */
 function saveContactViaVCard(contact: ContactData): void {
   const vCard = generateVCard(contact);
@@ -195,19 +211,17 @@ function saveContactViaVCard(contact: ContactData): void {
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
-      // Create hidden link and click it
       const link = document.createElement('a');
       link.href = dataUrl;
       link.download = fileName;
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
-      // Small delay before cleanup
       setTimeout(() => document.body.removeChild(link), 100);
     };
     reader.readAsDataURL(blob);
   } else if (isAndroid) {
-    // Android - use blob URL for better handling
+    // Android - use blob URL
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -215,7 +229,6 @@ function saveContactViaVCard(contact: ContactData): void {
     link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
-    // Cleanup after a delay
     setTimeout(() => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
@@ -233,37 +246,45 @@ function saveContactViaVCard(contact: ContactData): void {
 
 /**
  * Main function to save contact - automatically picks best method
- * Returns true only after native save is confirmed, or after triggering vCard download
+ * 
+ * Flow:
+ * 1️⃣ Try direct contact save (silent, no download) - BEST UX
+ * 2️⃣ If permission denied / error → Share API vCard  
+ * 3️⃣ If Share fails → Web download vCard
+ * 
+ * Returns: { success: boolean, method: 'native' | 'share' | 'vcard' }
  */
-export async function saveContactToPhone(contact: ContactData): Promise<boolean> {
+export async function saveContactToPhone(contact: ContactData): Promise<{ success: boolean; method: string }> {
   console.log('saveContactToPhone called, isNative:', Capacitor.isNativePlatform());
   
-  // For native apps, try Capacitor Contacts plugin first
+  // For native apps, try direct contact write first
   if (Capacitor.isNativePlatform()) {
-    const success = await saveContactNative(contact);
-    console.log('Native contact save result:', success);
+    // Step 1: Try native direct save (best UX - silent, instant)
+    const nativeSuccess = await saveContactNative(contact);
+    console.log('Native contact save result:', nativeSuccess);
     
-    // If native save failed (permission denied or error), fall back to Share API with vCard
-    if (!success) {
-      console.log('Native save failed, falling back to Share API vCard');
-      const shareSuccess = await saveContactViaShareAPI(contact);
-      console.log('Share API vCard result:', shareSuccess);
-      
-      // If Share API also failed, try web vCard as last resort
-      if (!shareSuccess) {
-        console.log('Share API failed, falling back to web vCard');
-        saveContactViaVCard(contact);
-      }
-      return true; // vCard flow triggered
+    if (nativeSuccess) {
+      return { success: true, method: 'native' };
     }
     
-    return success;
+    // Step 2: Native failed, try Share API with vCard
+    console.log('Native save failed, trying Share API vCard');
+    const shareSuccess = await saveContactViaShareAPI(contact);
+    console.log('Share API vCard result:', shareSuccess);
+    
+    if (shareSuccess) {
+      return { success: true, method: 'share' };
+    }
+    
+    // Step 3: Share also failed, use web vCard download as last resort
+    console.log('Share API failed, using web vCard download');
+    saveContactViaVCard(contact);
+    return { success: true, method: 'vcard' };
   }
   
   // For mobile web, use vCard method which triggers native contact picker
   saveContactViaVCard(contact);
-  // vCard method always triggers download, return true
-  return true;
+  return { success: true, method: 'vcard' };
 }
 
 /**
