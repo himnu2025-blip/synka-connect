@@ -194,17 +194,19 @@ function saveContactViaVCard(contact: ContactData): void {
 
 /**
  * Main function to save contact - automatically picks best method
+ * Returns true only after native save is confirmed, or after triggering vCard download
  */
 export async function saveContactToPhone(contact: ContactData): Promise<boolean> {
-  // Try native Capacitor method first for native apps
+  // For native apps, use Capacitor Contacts plugin which shows native "Add Contact" dialog
   if (Capacitor.isNativePlatform()) {
     const success = await saveContactNative(contact);
-    if (success) return true;
-    // Fall through to vCard method if native fails
+    // Only return true if native save succeeded - this means user confirmed in native dialog
+    return success;
   }
   
-  // Use vCard method for web or as fallback
+  // For mobile web, use vCard method which triggers native contact picker
   saveContactViaVCard(contact);
+  // vCard method always triggers download, return true
   return true;
 }
 

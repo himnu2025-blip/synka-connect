@@ -235,9 +235,12 @@ export function ContactShareSheet({
 
     setSubmitting(true);
     try {
+      // Only include country code if phone number is not empty
+      const phoneValue = formData.phone.trim() ? `${countryCode}${formData.phone.trim()}` : '';
+      
       await onSubmit({
         ...formData,
-        phone: `${countryCode}${formData.phone}`,
+        phone: phoneValue,
       });
       onOpenChange(false);
       setFormData({
