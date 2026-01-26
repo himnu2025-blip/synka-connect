@@ -167,9 +167,33 @@ export function MobileLanding({
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, delay: 0.25 }}
-        className="mt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
+        className="mt-3"
       >
         <MobileFeaturesCarousel />
+      </motion.div>
+
+      {/* ===== NFC CARD PROMO ===== */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.35 }}
+        className="px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
+      >
+        <button
+          onClick={() => handleNavigate('/order-nfc-card')}
+          className="w-full overflow-hidden rounded-2xl shadow-lg active:scale-[0.98] transition-transform"
+        >
+          <img
+            src="/images/card/metal-nfc-business-cards.jpeg"
+            alt="Order premium metal NFC business cards"
+            className="w-full h-auto object-cover"
+          />
+          <div className="bg-gradient-to-r from-primary to-primary/80 py-3 px-4 text-center">
+            <span className="text-primary-foreground font-semibold text-sm">
+              Order NFC Card →
+            </span>
+          </div>
+        </button>
       </motion.div>
 
       {/* ===== CHAT ===== */}
