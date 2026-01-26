@@ -458,8 +458,8 @@ export default function PublicCard() {
     await hapticFeedback.light();
 
     // Use native contact save - opens "Add to Contacts" dialog on mobile
-    // This will wait for user to confirm save in native dialog (on native apps)
-    const saved = await saveContactToPhone({
+    // Flow: 1) Try native direct save, 2) Share API vCard, 3) Web vCard download
+    const result = await saveContactToPhone({
       name: displayData.name,
       company: displayData.company,
       designation: displayData.designation,
@@ -471,25 +471,41 @@ export default function PublicCard() {
       photo_url: displayData.photo_url,
     });
 
-    // Only proceed if contact was actually saved
-    if (saved) {
-      // Log the contact save event only after confirmed save
+    // Show appropriate toast based on save method
+    if (result.success) {
+      // Log the contact save event
       await logContactSave(profile.user_id, card?.id || null);
       
-      toast({
-        title: 'Contact saved!',
-        description: 'Now share your details with them.',
-      });
+      if (result.method === 'native') {
+        // Direct save - best UX, instant success
+        toast({
+          title: '✓ Contact saved!',
+          description: 'Now share your details with them.',
+          className: 'animate-fade-in',
+        });
+      } else if (result.method === 'share') {
+        // Share API - user will see share sheet
+        toast({
+          title: 'Contact ready to save',
+          description: 'Tap "Add to Contacts" in the share menu.',
+        });
+      } else {
+        // vCard download - web fallback
+        toast({
+          title: 'Contact downloaded',
+          description: 'Open the .vcf file to add to contacts.',
+        });
+      }
 
-      // Open contact share sheet after native save completes
+      // Open contact share sheet after save completes
       setTimeout(() => {
         setShowContactSheet(true);
       }, 300);
     } else {
-      // User cancelled native contact save
       toast({
         title: 'Contact not saved',
         description: 'You can try again anytime.',
+        variant: 'destructive',
       });
     }
   };
