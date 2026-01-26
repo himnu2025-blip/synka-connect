@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -181,6 +181,19 @@ export function ContactShareSheet({
   const [submitting, setSubmitting] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
+  useEffect(() => {
+  const vv = window.visualViewport;
+  if (!vv) return;
+
+  const handleResize = () => {
+    document.body.style.height = vv.height + 'px';
+  };
+
+  vv.addEventListener('resize', handleResize);
+  handleResize();
+
+  return () => vv.removeEventListener('resize', handleResize);
+}, []);
   
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
