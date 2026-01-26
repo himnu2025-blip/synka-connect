@@ -470,13 +470,18 @@ export function ContactShareSheet({
   if (isMobile) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-      <DrawerContent className="flex flex-col h-[100dvh] max-h-[100dvh]">
-        <div className="flex-1 overflow-y-auto overscroll-contain">
+      <DrawerContent className="flex flex-col max-h-[96vh]">
+        
+        {/* Scrollable area */}
+        <div className="flex-1 overflow-y-auto">
           <BlinqHeader />
+
+          {/* KEYBOARD SAFE PADDING */}
           <div className="pb-[env(safe-area-inset-bottom,24px)]">
             {FormContent}
           </div>
         </div>
+
       </DrawerContent>
     </Drawer>
   );
@@ -490,4 +495,4 @@ export function ContactShareSheet({
       </DialogContent>
     </Dialog>
   );
-            }
+}
