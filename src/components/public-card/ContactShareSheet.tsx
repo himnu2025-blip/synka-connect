@@ -185,14 +185,20 @@ export function ContactShareSheet({
   const vv = window.visualViewport;
   if (!vv) return;
 
-  const handleResize = () => {
-    document.body.style.height = vv.height + 'px';
+  const handleViewportChange = () => {
+    // If viewport height increases, keyboard likely closed
+    const keyboardClosed = vv.height > window.innerHeight * 0.85;
+
+    if (keyboardClosed) {
+      const active = document.activeElement as HTMLElement | null;
+      if (active && active.tagName === 'INPUT') {
+        active.blur(); // Force blur so layout resets
+      }
+    }
   };
 
-  vv.addEventListener('resize', handleResize);
-  handleResize();
-
-  return () => vv.removeEventListener('resize', handleResize);
+  vv.addEventListener('resize', handleViewportChange);
+  return () => vv.removeEventListener('resize', handleViewportChange);
 }, []);
   
   const [formData, setFormData] = useState<ContactFormData>({
