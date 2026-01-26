@@ -6,9 +6,9 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   // Deep linking configuration
   server: {
-    // For development with hot reload (comment out for production builds)
-    // url: 'https://6e8935e5-98c5-41f9-8825-fee54b2dc734.lovableproject.com?forceHideBadge=true',
-    // cleartext: true,
+    // For development with hot reload - enable this to see live changes
+    url: 'https://f179cf0b-9d7d-4683-9a9f-315f6ad3e5bb.lovableproject.com?forceHideBadge=true',
+    cleartext: true,
   },
   plugins: {
   // App plugin for deep linking
