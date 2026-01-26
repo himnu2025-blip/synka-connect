@@ -476,24 +476,27 @@ export default function PublicCard() {
       // Log the contact save event
       await logContactSave(profile.user_id, card?.id || null);
       
+      const firstName = displayData.name.split(' ')[0];
+      
       if (result.method === 'native') {
         // Direct save - best UX, instant success
         toast({
-          title: '✓ Contact saved!',
+          title: `✓ ${firstName}'s contact saved!`,
           description: 'Now share your details with them.',
           className: 'animate-fade-in',
         });
       } else if (result.method === 'share') {
         // Share API - user will see share sheet
         toast({
-          title: 'Contact ready to save',
-          description: 'Tap "Add to Contacts" in the share menu.',
+          title: `Save ${firstName}'s contact`,
+          description: 'Tap "Add to Contacts" in the menu.',
         });
       } else {
         // vCard download - web fallback
         toast({
-          title: 'Contact downloaded',
-          description: 'Open the .vcf file to add to contacts.',
+          title: `📥 ${firstName}'s contact downloaded`,
+          description: `Tap the downloaded file to add ${firstName} to your contacts.`,
+          duration: 6000, // Longer duration for instruction
         });
       }
 
