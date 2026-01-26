@@ -473,7 +473,7 @@ export function ContactShareSheet({
       <DrawerContent className="flex flex-col h-[100dvh] max-h-[100dvh]">
         <div className="flex-1 overflow-y-auto overscroll-contain">
           <BlinqHeader />
-          <div className="pb-[max(env(safe-area-inset-bottom),80px)]">
+          <div className="pb-[env(safe-area-inset-bottom,24px)]">
             {FormContent}
           </div>
         </div>
