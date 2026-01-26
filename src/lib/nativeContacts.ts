@@ -140,52 +140,56 @@ async function saveContactNative(contact: ContactData): Promise<boolean> {
 }
 
 /**
- * Save contact using vCard data URL (opens native contact picker on mobile web)
+ * Save contact using vCard - improved for mobile web
  */
 function saveContactViaVCard(contact: ContactData): void {
   const vCard = generateVCard(contact);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  const fileName = `${contact.name.replace(/[^a-zA-Z0-9]/g, '_')}.vcf`;
   
-  // Create a Blob and URL
+  // Create blob
   const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
   
-  // Try using data URL approach for better mobile support
-  const reader = new FileReader();
-  reader.onload = () => {
-    const dataUrl = reader.result as string;
-    
-    // On iOS Safari, window.open with data URL triggers native contact save
-    // On Android Chrome, it might download or open contacts app
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isAndroid = /Android/.test(navigator.userAgent);
-    
-    if (isIOS || isAndroid) {
-      // Create a temporary link and click it
+  if (isIOS) {
+    // iOS Safari - use data URL approach which triggers native contact picker
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      // Create hidden link and click it
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `${contact.name.replace(/\s+/g, '_')}.vcf`;
-      
-      // For iOS, try opening in new window first
-      if (isIOS) {
-        // iOS Safari handles vcf files natively when opened
-        window.location.href = dataUrl;
-      } else {
-        // Android - trigger download which opens with Contacts app
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    } else {
-      // Desktop fallback - regular download
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${contact.name.replace(/\s+/g, '_')}.vcf`;
-      a.click();
+      link.download = fileName;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      // Small delay before cleanup
+      setTimeout(() => document.body.removeChild(link), 100);
+    };
+    reader.readAsDataURL(blob);
+  } else if (isAndroid) {
+    // Android - use blob URL for better handling
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    // Cleanup after a delay
+    setTimeout(() => {
+      document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    }
-  };
-  
-  reader.readAsDataURL(blob);
+    }, 100);
+  } else {
+    // Desktop fallback
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 }
 
 /**

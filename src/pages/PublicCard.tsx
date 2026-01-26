@@ -452,14 +452,16 @@ export default function PublicCard() {
 
   // Save contact and open share sheet (for non-Synka users)
   const saveContactAndShare = async () => {
-    navigator.vibrate?.(10);
     if (!displayData || !profile) return;
+    
+    // Haptic feedback
+    await hapticFeedback.light();
 
     // Log the contact save event
     await logContactSave(profile.user_id, card?.id || null);
 
     // Use native contact save - opens "Add to Contacts" dialog on mobile
-    await saveContactToPhone({
+    const saved = await saveContactToPhone({
       name: displayData.name,
       company: displayData.company,
       designation: displayData.designation,
@@ -472,13 +474,17 @@ export default function PublicCard() {
     });
 
     // Show success feedback
-    toast({
-      title: 'Contact ready to save!',
-      description: 'Add to your contacts from the dialog.',
-    });
+    if (saved) {
+      toast({
+        title: 'Contact saved!',
+        description: 'Now share your details with them.',
+      });
+    }
 
-    // Open contact share sheet
-    setShowContactSheet(true);
+    // Open contact share sheet after a small delay for UX flow
+    setTimeout(() => {
+      setShowContactSheet(true);
+    }, 300);
   };
 
   const shareCard = async () => {
