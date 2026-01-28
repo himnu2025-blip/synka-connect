@@ -657,7 +657,7 @@ export default function PublicCard() {
                 icon={Globe} 
                 label="Website" 
                 value="Visit Website" 
-                href={displayData.website.startsWith('http') ? displayData.website : `https://${displayData.website}`} 
+                href={displayData.website} 
               />
             )}
             {displayData.whatsapp && (
@@ -679,7 +679,7 @@ export default function PublicCard() {
                 icon={Linkedin} 
                 label="LinkedIn" 
                 value="Connect on LinkedIn" 
-                href={displayData.linkedin.startsWith('http') ? displayData.linkedin : `https://linkedin.com/in/${displayData.linkedin}`} 
+                href={displayData.linkedin.startsWith('http') ? displayData.linkedin : `https://www.linkedin.com/in/${displayData.linkedin}`} 
                 iconClass="text-foreground/80 group-hover:text-blue-600" 
               />
             )}

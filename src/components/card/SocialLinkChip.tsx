@@ -46,15 +46,49 @@ const platformLabels: Record<string, string> = {
   calendly: 'Book a meeting',
 };
 
+/**
+ * Construct full URL from stored value (username/handle/path)
+ * DB stores: username only for social, full URL for calendly
+ */
+const getFullUrl = (platform: string, value: string): string => {
+  if (!value) return '';
+  
+  // If already a full URL (calendly or legacy data), use as-is
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    return value;
+  }
+
+  switch (platform) {
+    case 'instagram':
+      return `https://www.instagram.com/${value}`;
+    case 'twitter':
+      return `https://x.com/${value}`;
+    case 'facebook':
+      return `https://www.facebook.com/${value}`;
+    case 'youtube':
+      // Handle both @handle and channel/ID formats
+      if (value.startsWith('@') || value.startsWith('channel/')) {
+        return `https://www.youtube.com/${value}`;
+      }
+      return `https://www.youtube.com/@${value}`;
+    case 'calendly':
+      // Calendly should already be full URL, but fallback
+      return `https://calendly.com/${value}`;
+    default:
+      return value;
+  }
+};
+
 export function SocialLinkChip({ platform, url, className }: SocialLinkChipProps) {
   if (!url) return null;
 
   const Icon = SocialIcons[platform];
   const label = platformLabels[platform];
+  const fullUrl = getFullUrl(platform, url);
 
   return (
     <a
-      href={url}
+      href={fullUrl}
       target="_blank"
       rel="noopener noreferrer"
       className="group block"

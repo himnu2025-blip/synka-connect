@@ -206,10 +206,42 @@ export const normalizeSocialLink = (platform: SocialPlatform, input: string): No
 };
 
 /**
- * Get URL for normalized social link (for storage)
+ * Get normalized URL for social link
+ * For storage in DB, use the username extractors in inputValidation.ts instead
  */
 export const getSocialUrl = (platform: SocialPlatform, input: string): string => {
   return normalizeSocialLink(platform, input).url;
+};
+
+/**
+ * Construct full URL from stored username/handle
+ * Use this when rendering links from DB data
+ */
+export const buildSocialUrl = (platform: SocialPlatform, storedValue: string): string => {
+  if (!storedValue) return '';
+  
+  // If already a full URL, return as-is
+  if (storedValue.startsWith('http://') || storedValue.startsWith('https://')) {
+    return storedValue;
+  }
+
+  switch (platform) {
+    case 'instagram':
+      return `https://www.instagram.com/${storedValue}`;
+    case 'twitter':
+      return `https://x.com/${storedValue}`;
+    case 'facebook':
+      return `https://www.facebook.com/${storedValue}`;
+    case 'youtube':
+      if (storedValue.startsWith('@') || storedValue.startsWith('channel/')) {
+        return `https://www.youtube.com/${storedValue}`;
+      }
+      return `https://www.youtube.com/@${storedValue}`;
+    case 'calendly':
+      return `https://calendly.com/${storedValue}`;
+    default:
+      return storedValue;
+  }
 };
 
 /**
