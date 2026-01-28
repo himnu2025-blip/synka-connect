@@ -464,7 +464,7 @@ export function CardImageSection({
         </div>
       ) : (
         <>
-          {/* BLUR — bigger via scale, NOT padding */}
+          {/* BLUR BACKGROUND (BIGGER) */}
           <img
             src={photoUrl}
             aria-hidden
@@ -472,12 +472,14 @@ export function CardImageSection({
             style={{ objectPosition: facePosition }}
           />
 
-          {/* FOREGROUND IMAGE — NO PADDING */}
-          <img
-            src={photoUrl}
-            alt={name}
-            className="relative z-10 w-full h-auto object-contain rounded-3xl"
-          />
+          {/* FOREGROUND IMAGE WRAPPER — CREATES SPACE FOR BLUR */}
+          <div className="relative z-10 p-6">
+            <img
+              src={photoUrl}
+              alt={name}
+              className="w-full h-auto object-contain rounded-2xl shadow-2xl"
+            />
+          </div>
 
           {/* TEXT */}
           <div className="absolute bottom-4 left-0 right-0 px-6 text-center z-20 pointer-events-none">
