@@ -455,12 +455,7 @@ export function CardImageSection({
    ===================================================== */
   if (layout === 'photo-only') {
   return (
-    <div
-      className={cn(
-        'relative w-full rounded-3xl overflow-hidden',
-        className
-      )}
-    >
+    <div className={cn('relative w-full rounded-3xl overflow-hidden', className)}>
       {!photoUrl ? (
         <div className="w-full h-80 flex items-center justify-center bg-muted">
           <span className="text-4xl font-bold text-muted-foreground">
@@ -469,29 +464,24 @@ export function CardImageSection({
         </div>
       ) : (
         <>
-          {/* IMAGE WRAPPER — HEIGHT COMES FROM IMAGE */}
-          <div className="relative w-full">
-            
-            {/* BLUR LAYER — SAME SIZE AS IMAGE */}
-            <img
-              src={photoUrl}
-              aria-hidden
-              className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60"
-              style={{ objectPosition: facePosition }}
-            />
+          {/* BLUR BACKGROUND (BIGGER) */}
+          <img
+            src={photoUrl}
+            aria-hidden
+            className="absolute inset-0 w-full h-full object-cover blur-3xl scale-125 opacity-60"
+            style={{ objectPosition: facePosition }}
+          />
 
-            {/* MAIN IMAGE — DEFINES HEIGHT */}
+          {/* FOREGROUND IMAGE WRAPPER — CREATES SPACE FOR BLUR */}
+          <div className="relative z-10 p-6">
             <img
               src={photoUrl}
               alt={name}
-              className="relative z-10 w-full h-auto object-contain"
-              onLoad={() => {
-                if (!photoLoaded) setInternalPhotoLoaded(true);
-              }}
+              className="w-full h-auto object-contain rounded-2xl shadow-2xl"
             />
           </div>
 
-          {/* TEXT OVERLAY */}
+          {/* TEXT */}
           <div className="absolute bottom-4 left-0 right-0 px-6 text-center z-20 pointer-events-none">
             <h2 className="text-xl font-semibold text-white drop-shadow-md">
               {name}
