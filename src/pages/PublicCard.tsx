@@ -627,19 +627,23 @@ export default function PublicCard() {
               logoY={card?.logo_y}
             />
 
-            <div className="text-center mt-4 space-y-1">
-              <h2 className="text-[22px] font-semibold tracking-tight text-foreground">{displayData.name}</h2>
-              {displayData.designation && (
-                <p className="text-[14.5px] font-normal text-muted-foreground leading-tight">
-                  {displayData.designation}
-                </p>
-              )}
-              {displayData.company && (
-                <p className="text-[13.5px] text-muted-foreground/70 leading-tight">
-                  {displayData.company}
-                </p>
-              )}
-            </div>
+            {(card?.layout as LayoutType) !== 'photo-only' && (
+  <div className="text-center mt-4 space-y-1">
+    <h2 className="text-[22px] font-semibold tracking-tight text-foreground">
+      {displayData.name}
+    </h2>
+    {displayData.designation && (
+      <p className="text-[14.5px] font-normal text-muted-foreground leading-tight">
+        {displayData.designation}
+      </p>
+    )}
+    {displayData.company && (
+      <p className="text-[13.5px] text-muted-foreground/70 leading-tight">
+        {displayData.company}
+      </p>
+    )}
+  </div>
+)}
           </div>
 
           <div className="mx-6 h-px bg-gradient-to-r from-transparent via-border/40 to-transparent" />
