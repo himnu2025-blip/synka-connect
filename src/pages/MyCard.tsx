@@ -713,7 +713,12 @@ useEffect(() => {
 
       {/* Profile Card View */}
       <div className="bg-card/95 backdrop-blur-xl rounded-3xl border border-border/40 shadow-[0_20px_40px_rgba(0,0,0,0.06)] overflow-hidden">
-        <div className="relative pt-0 pb-4 flex flex-col items-center">
+        <div
+  className={cn(
+    "relative pt-0 flex flex-col items-center",
+    currentLayout !== 'photo-only' && "pb-4"
+  )}
+>
           {cardReady ? (
   <CardImageSection
     layout={currentLayout}
