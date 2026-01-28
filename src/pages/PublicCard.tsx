@@ -653,7 +653,12 @@ export default function PublicCard() {
               <ContactRow icon={Mail} label="Email" value={displayData.email} href={`mailto:${displayData.email}`} />
             )}
             {displayData.website && (
-              <ContactRow icon={Globe} label="Website" value="Visit Website" href={`https://${displayData.website}`} />
+              <ContactRow 
+                icon={Globe} 
+                label="Website" 
+                value="Visit Website" 
+                href={displayData.website.startsWith('http') ? displayData.website : `https://${displayData.website}`} 
+              />
             )}
             {displayData.whatsapp && (
               <ContactRow
@@ -674,7 +679,7 @@ export default function PublicCard() {
                 icon={Linkedin} 
                 label="LinkedIn" 
                 value="Connect on LinkedIn" 
-                href={`https://linkedin.com/in/${displayData.linkedin}`} 
+                href={displayData.linkedin.startsWith('http') ? displayData.linkedin : `https://linkedin.com/in/${displayData.linkedin}`} 
                 iconClass="text-foreground/80 group-hover:text-blue-600" 
               />
             )}
