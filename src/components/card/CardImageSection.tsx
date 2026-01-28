@@ -529,11 +529,11 @@ export function CardImageSection({
   if (layout === 'logo-only') {
     return (
       <div
-        className={cn(
-          'w-full bg-white flex justify-center pt-4 pb-2',
-          className
-        )}
-      >
+  className={cn(
+    'w-full rounded-3xl overflow-hidden bg-background flex justify-center pt-6 pb-4',
+    className
+  )}
+>
         {/* ✅ FIX: Show initials ONLY when no photoUrl */}
         {!photoUrl ? (
           <div className="w-36 h-36 rounded-3xl bg-muted flex items-center justify-center">
