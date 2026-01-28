@@ -530,7 +530,7 @@ export function CardImageSection({
     return (
       <div
   className={cn(
-    'w-full rounded-3xl overflow-hidden bg-background flex justify-center pt-6 pb-4',
+    'w-full rounded-3xl overflow-hidden bg-transparent flex justify-center pt-6 pb-4',
     className
   )}
 >
@@ -575,11 +575,11 @@ export function CardImageSection({
   if (layout === 'color' && themeColor) {
     return (
       <div
-        className={cn(
-          'w-full bg-white flex justify-center pt-4 pb-2',
-          className
-        )}
-      >
+  className={cn(
+    'w-full rounded-3xl overflow-hidden bg-transparent flex justify-center pt-6 pb-4',
+    className
+  )}
+>
         <div
           className="w-36 h-36 rounded-3xl flex items-center justify-center shadow-lg"
           style={{ backgroundColor: themeColor }}
