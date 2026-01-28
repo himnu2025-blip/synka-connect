@@ -2,6 +2,20 @@
  * Input validation and normalization utilities for contact forms
  */
 
+// ==================== HELPER ====================
+/**
+ * Clean common artifacts and extract username from URL or handle
+ */
+const cleanInput = (input: string): string => {
+  if (!input) return '';
+  return input
+    .trim()
+    .replace(/[\u200B-\u200D\uFEFF]/g, '') // Zero-width chars
+    .replace(/\s+/g, '') // Remove all whitespace
+    .replace(/^@/, '') // Remove leading @
+    .replace(/\/+$/, ''); // Remove trailing slashes
+};
+
 // ==================== EMAIL ====================
 export const isValidEmail = (email: string): boolean => {
   if (!email || !email.trim()) return true; // Empty is valid (optional field)
@@ -183,15 +197,122 @@ export const parseLinkedIn = (input: string): LinkedInResult => {
   };
 };
 
+/**
+ * Normalize LinkedIn to username only (for clean DB storage)
+ * PublicCard will construct the full URL
+ */
 export const normalizeLinkedIn = (input: string): string => {
   const result = parseLinkedIn(input);
-  return result.fullUrl;
+  return result.username; // Return username only, not full URL
+};
+
+/**
+ * Get LinkedIn type (personal vs company) for proper URL construction
+ */
+export const getLinkedInType = (input: string): LinkedInType => {
+  return parseLinkedIn(input).type;
 };
 
 export const isValidLinkedIn = (input: string): boolean => {
   if (!input || !input.trim()) return true; // Empty is valid
   const result = parseLinkedIn(input);
   return result.username.length > 0;
+};
+
+// ==================== SOCIAL MEDIA NORMALIZATION ====================
+/**
+ * Normalize Instagram input to username only
+ * Handles: @synka.in | synka.in | instagram.com/synka.in | https://www.instagram.com/synka.in
+ * Returns: synka.in (username only)
+ */
+export const normalizeInstagram = (input: string): string => {
+  const cleaned = cleanInput(input);
+  if (!cleaned) return '';
+
+  // Extract username from full URL if present
+  const urlMatch = cleaned.match(/(?:https?:\/\/)?(?:www\.)?instagram\.com\/([^\/\?#]+)/i);
+  if (urlMatch) return urlMatch[1];
+
+  // Return as username
+  return cleaned;
+};
+
+/**
+ * Normalize Twitter/X input to username only
+ * Handles: @synka | twitter.com/synka | x.com/synka | https://x.com/synka
+ * Returns: synka (username only)
+ */
+export const normalizeTwitter = (input: string): string => {
+  const cleaned = cleanInput(input);
+  if (!cleaned) return '';
+
+  // Extract username from full URL if present
+  const urlMatch = cleaned.match(/(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/([^\/\?#]+)/i);
+  if (urlMatch) return urlMatch[1];
+
+  // Return as username
+  return cleaned;
+};
+
+/**
+ * Normalize Facebook input to page/username only
+ * Handles: synka | facebook.com/synka | fb.com/synka | https://www.facebook.com/synka
+ * Returns: synka (page name only)
+ */
+export const normalizeFacebook = (input: string): string => {
+  const cleaned = cleanInput(input);
+  if (!cleaned) return '';
+
+  // Extract page from full URL if present
+  const urlMatch = cleaned.match(/(?:https?:\/\/)?(?:www\.)?(?:facebook\.com|fb\.com)\/([^\/\?#]+)/i);
+  if (urlMatch) return urlMatch[1];
+
+  // Return as page name
+  return cleaned;
+};
+
+/**
+ * Normalize YouTube input to handle/channel only
+ * Handles: @handle | youtube.com/@handle | youtube.com/channel/ID
+ * Returns: @handle or channel/ID (for URL construction)
+ */
+export const normalizeYouTube = (input: string): string => {
+  const cleaned = cleanInput(input);
+  if (!cleaned) return '';
+
+  // Extract from full URL
+  const handleMatch = cleaned.match(/(?:https?:\/\/)?(?:www\.)?youtube\.com\/(@[^\/\?#]+)/i);
+  if (handleMatch) return handleMatch[1];
+
+  const channelMatch = cleaned.match(/(?:https?:\/\/)?(?:www\.)?youtube\.com\/channel\/([^\/\?#]+)/i);
+  if (channelMatch) return `channel/${channelMatch[1]}`;
+
+  // If starts with @, keep it
+  if (cleaned.startsWith('@') || input.trim().startsWith('@')) {
+    return cleaned.startsWith('@') ? cleaned : `@${cleaned}`;
+  }
+
+  // Assume it's a handle without @
+  return `@${cleaned}`;
+};
+
+/**
+ * Normalize Calendly input to full URL
+ * Handles: nitesh | calendly.com/nitesh | https://calendly.com/nitesh
+ * Returns: https://calendly.com/nitesh (full URL for direct use)
+ */
+export const normalizeCalendly = (input: string): string => {
+  const cleaned = cleanInput(input);
+  if (!cleaned) return '';
+
+  // If already a full URL, normalize it
+  const urlMatch = cleaned.match(/(?:https?:\/\/)?(?:www\.)?calendly\.com\/([^#]+)/i);
+  if (urlMatch) {
+    return `https://calendly.com/${urlMatch[1]}`;
+  }
+
+  // Assume it's just a username/path
+  return `https://calendly.com/${cleaned}`;
 };
 
 // ==================== VALIDATION HELPER ====================
@@ -241,5 +362,24 @@ export const normalizeContactData = (data: {
     whatsapp: data.whatsapp ? normalizePhone(data.whatsapp) : data.whatsapp,
     website: data.website ? normalizeWebsite(data.website) : data.website,
     linkedin: data.linkedin ? normalizeLinkedIn(data.linkedin) : data.linkedin,
+  };
+};
+
+/**
+ * Normalize all social media fields for clean DB storage
+ */
+export const normalizeSocialData = (data: {
+  instagram?: string;
+  twitter?: string;
+  facebook?: string;
+  youtube?: string;
+  calendly?: string;
+}): typeof data => {
+  return {
+    instagram: data.instagram ? normalizeInstagram(data.instagram) : '',
+    twitter: data.twitter ? normalizeTwitter(data.twitter) : '',
+    facebook: data.facebook ? normalizeFacebook(data.facebook) : '',
+    youtube: data.youtube ? normalizeYouTube(data.youtube) : '',
+    calendly: data.calendly ? normalizeCalendly(data.calendly) : '',
   };
 };

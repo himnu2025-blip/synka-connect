@@ -50,6 +50,7 @@ import { getPublicCardUrl, getPublicBaseUrl } from '@/lib/publicUrls';
 import {
   validateContactForm,
   normalizeContactData,
+  normalizeSocialData,
   isValidEmail,
   isValidPhone,
   isValidWebsite,
@@ -90,7 +91,7 @@ function ContactRow({ icon: Icon, value, href, iconClass }: ContactRowProps) {
   );
 }
 
-// WhatsApp link helper (works even without country code)
+// WhatsApp link helper - uses wa.me for consistency
 const getWhatsappLink = (rawNumber: string) => {
   const digits = rawNumber.replace(/\D/g, '');
 
@@ -98,7 +99,7 @@ const getWhatsappLink = (rawNumber: string) => {
   const numberWithCountry =
     digits.length === 10 ? `91${digits}` : digits;
 
-  return `https://api.whatsapp.com/send?phone=${numberWithCountry}`;
+  return `https://wa.me/${numberWithCountry}`;
 };
 
 export default function MyCard() {
@@ -308,7 +309,16 @@ useEffect(() => {
       ...normalizedFields,
     };
 
-    setEditData(normalized);
+    // Normalize social media fields (extract usernames, clean URLs)
+    const normalizedSocial = normalizeSocialData({
+      instagram: normalized.instagram,
+      twitter: normalized.twitter,
+      facebook: normalized.facebook,
+      youtube: normalized.youtube,
+      calendly: normalized.calendly,
+    });
+
+    setEditData({ ...normalized, ...normalizedSocial });
 
     const { error } = await updateCard(activeCard.id, {
       full_name: normalized.name,
@@ -316,19 +326,19 @@ useEffect(() => {
       company: normalized.company,
       phone: normalized.phone,
       email: normalized.email,
-      website: normalized.website,
+      website: normalized.website, // Already normalized with https://
       whatsapp: normalized.whatsapp,
-      linkedin: normalized.linkedin,
+      linkedin: normalized.linkedin, // Now username only
       about: normalized.about,
       photo_url: normalized.photo_url,
       logo_url: normalized.logo_url,
       layout: currentLayout,
       card_design: currentThemeColor ?? null,
-      instagram: normalized.instagram || null,
-      youtube: normalized.youtube || null,
-      twitter: normalized.twitter || null,
-      facebook: normalized.facebook || null,
-      calendly: normalized.calendly || null,
+      instagram: normalizedSocial.instagram || null, // Username only
+      youtube: normalizedSocial.youtube || null, // @handle or channel/ID
+      twitter: normalizedSocial.twitter || null, // Username only
+      facebook: normalizedSocial.facebook || null, // Page name only
+      calendly: normalizedSocial.calendly || null, // Full URL
     } as any);
 
     if (error) {
