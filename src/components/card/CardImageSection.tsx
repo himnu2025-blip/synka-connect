@@ -454,74 +454,64 @@ export function CardImageSection({
    6. PORTRAIT — HERO CARD WITH BLUR FILL (APPLE STYLE)
    ===================================================== */
   if (layout === 'photo-only') {
-    return (
-      <div
-        className={cn(
-          'relative w-full aspect-[3/4] sm:aspect-[4/5] rounded-3xl overflow-hidden bg-muted',
-          'transition-all duration-300 ease-out',
-          className
-        )}
-      >
-        {/* ✅ FIX: Show initials ONLY when no photoUrl */}
-        {!photoUrl ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-4xl font-bold text-muted-foreground">
-              {getInitials(name)}
-            </span>
-          </div>
-        ) : (
-          <>
-            {/* BLURRED BACKGROUND */}
+  return (
+    <div
+      className={cn(
+        'relative w-full rounded-3xl overflow-hidden',
+        className
+      )}
+    >
+      {!photoUrl ? (
+        <div className="w-full h-80 flex items-center justify-center bg-muted">
+          <span className="text-4xl font-bold text-muted-foreground">
+            {getInitials(name)}
+          </span>
+        </div>
+      ) : (
+        <>
+          {/* IMAGE WRAPPER — HEIGHT COMES FROM IMAGE */}
+          <div className="relative w-full">
+            
+            {/* BLUR LAYER — SAME SIZE AS IMAGE */}
             <img
               src={photoUrl}
               aria-hidden
-              className={cn(
-                "absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-70 transition-all duration-300 ease-out transition-opacity duration-300",
-                !photoLoaded && "opacity-0"
-              )}
+              className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60"
+              style={{ objectPosition: facePosition }}
             />
 
-            {/* SHARP PHOTO - FADES IN when loaded */}
-            <div className="absolute inset-0 flex items-center justify-center p-4">
-              <img
-                src={photoUrl}
-                alt={name}
-                className={cn(
-                  "max-h-full max-w-full object-contain rounded-2xl shadow-xl transition-all duration-300 ease-out transition-opacity duration-300",
-                  !photoLoaded && "opacity-0"
-                )}
-                onLoad={() => {
-                  // Backup loading trigger
-                  if (!photoLoaded) {
-                    setInternalPhotoLoaded(true);
-                  }
-                }}
-              />
-            </div>
+            {/* MAIN IMAGE — DEFINES HEIGHT */}
+            <img
+              src={photoUrl}
+              alt={name}
+              className="relative z-10 w-full h-auto object-contain"
+              onLoad={() => {
+                if (!photoLoaded) setInternalPhotoLoaded(true);
+              }}
+            />
+          </div>
 
-            {/* TEXT */}
-            <div className="absolute bottom-4 left-0 right-0 px-6 text-center pointer-events-none z-20 transition-all duration-300 ease-out">
-              <h2 className="text-xl font-semibold text-white drop-shadow-md">
-                {name}
-              </h2>
-
-              {designation && (
-                <p className="text-sm text-white/90 mt-1 drop-shadow-sm">
-                  {designation}
-                </p>
-              )}
-
-              {company && (
-                <p className="text-xs text-white/80 mt-0.5 drop-shadow-sm">
-                  {company}
-                </p>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-    );
-  }
+          {/* TEXT OVERLAY */}
+          <div className="absolute bottom-4 left-0 right-0 px-6 text-center z-20 pointer-events-none">
+            <h2 className="text-xl font-semibold text-white drop-shadow-md">
+              {name}
+            </h2>
+            {designation && (
+              <p className="text-sm text-white/90 mt-1 drop-shadow-sm">
+                {designation}
+              </p>
+            )}
+            {company && (
+              <p className="text-xs text-white/80 mt-0.5 drop-shadow-sm">
+                {company}
+              </p>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
   
   /* =====================================================
    7. CORPORATE — CENTER PHOTO WITH SMART POSITIONING
