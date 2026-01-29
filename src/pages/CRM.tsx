@@ -163,32 +163,7 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
       });
     }
   }, [selectedContact]);
-
-  useEffect(() => {
-  if (!isEditOpen) return;
-
-  const handler = (e: any) => {
-    setTimeout(() => {
-      e.target.scrollIntoView({ block: "center", behavior: "smooth" });
-    }, 250);
-  };
-
-  const els = document.querySelectorAll("input, textarea");
-  els.forEach(el => el.addEventListener("focus", handler));
-
-  return () => els.forEach(el => el.removeEventListener("focus", handler));
-}, [isEditOpen]);
-
-  // focus name input when inline edit opens (without scrolling)
-  useEffect(() => {
-    if (isEditOpen) {
-      setTimeout(() => {
-        editNameRef.current?.focus({ preventScroll: true });
-        const el = editNameRef.current as HTMLInputElement | null;
-        if (el) el.setSelectionRange(el.value.length, el.value.length);
-      }, 120);
-    }
-  }, [isEditOpen]);
+  
 
   function updateEditField<K extends keyof typeof editForm>(key: K, value: typeof editForm[K]) {
     setEditForm(prev => ({ ...prev, [key]: value }));
@@ -2047,7 +2022,7 @@ if (!contacts && contactsLoading) {
             <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
           </div>
           {selectedContact && (
-            <div className="px-4 pb-6 space-y-6 overflow-y-auto h-[calc(100dvh-48px)] overscroll-contain scroll-smooth">
+            <div className="px-4 pb-6 space-y-6 overflow-y-auto h-[calc(100dvh-48px)] overscroll-contain scroll-auto">
               <DrawerHeader className="text-center relative p-0">
                 <ContactAvatar 
                   name={selectedContact.name}
