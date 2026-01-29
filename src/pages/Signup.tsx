@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FloatingInput, FloatingPhoneInput, COUNTRY_CODES } from '@/components/ui/floating-input';
+import { FloatingInput, FloatingPhoneInput, FloatingNameInput, combineNames, COUNTRY_CODES } from '@/components/ui/floating-input';
 import { Label } from '@/components/ui/label';
 import { ArrowRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -30,7 +30,8 @@ export default function Signup() {
   const { sendOtp, verifyOtp, setPin, checkPinExists, signInWithGoogle, signInWithLinkedIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState<string | null>(null);
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [mobile, setMobile] = useState('');
   const [countryCode, setCountryCode] = useState('+91');
   const [email, setEmail] = useState(state?.email || '');
@@ -102,15 +103,15 @@ export default function Signup() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const trimmedName = name.trim();
+    const trimmedName = combineNames(firstName, lastName);
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedMobile = mobile.trim();
     
     // Validate all mandatory fields
-    if (!trimmedName) {
+    if (!firstName.trim()) {
       toast({
-        title: 'Name required',
-        description: 'Please enter your full name.',
+        title: 'First name required',
+        description: 'Please enter your first name.',
         variant: 'destructive',
       });
       return;
@@ -218,7 +219,7 @@ export default function Signup() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        const trimmedName = name.trim();
+        const trimmedName = combineNames(firstName, lastName);
         const normalizedMobile = mobile.trim();
         
         // 1. Update user metadata first
@@ -337,7 +338,7 @@ export default function Signup() {
       supabase.functions.invoke('welcome-email', {
         body: { 
           email: email.trim().toLowerCase(), 
-          name: name.trim() 
+          name: combineNames(firstName, lastName)
         }
       }).catch((err) => {
         console.error('Welcome email error:', err);
@@ -399,10 +400,11 @@ export default function Signup() {
           {step === 'details' && (
             <form onSubmit={handleSignup} className="space-y-5">
               <div className="space-y-4">
-                <FloatingInput
-                  label="Full Name *"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                <FloatingNameInput
+                  firstName={firstName}
+                  lastName={lastName}
+                  onFirstNameChange={setFirstName}
+                  onLastNameChange={setLastName}
                 />
 
                 <FloatingPhoneInput
