@@ -2047,7 +2047,7 @@ if (!contacts && contactsLoading) {
             <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
           </div>
           {selectedContact && (
-            <div className="px-4 pb-6 space-y-6 overflow-y-auto max-h-[calc(90dvh-48px)] overscroll-contain scroll-smooth">
+            <div className="px-4 pb-28 md:pb-6 space-y-6 overflow-y-auto max-h-[calc(90dvh-48px)] overscroll-contain scroll-smooth">
               <DrawerHeader className="text-center relative p-0">
                 <ContactAvatar 
                   name={selectedContact.name}
