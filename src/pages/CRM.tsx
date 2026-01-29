@@ -2026,13 +2026,13 @@ if (!contacts && contactsLoading) {
           }, 0);
         }}
       >
-        <DrawerContent className="rounded-t-3xl border-0 shadow-none bg-background max-h-[90vh] [&>div:first-child]:hidden">
+        <DrawerContent className="rounded-t-3xl border-0 shadow-none bg-background max-h-[90dvh] [&>div:first-child]:hidden">
           {/* Drag Handle */}
           <div className="flex justify-center py-3">
             <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
           </div>
           {selectedContact && (
-            <div className="px-4 pb-6 space-y-6 overflow-y-auto max-h-[calc(90vh-48px)] overscroll-contain scroll-smooth">
+            <div className="px-4 pb-6 space-y-6 overflow-y-auto max-h-[calc(90dvh-48px)] overscroll-contain scroll-smooth">
               <DrawerHeader className="text-center relative p-0">
                 <ContactAvatar 
                   name={selectedContact.name}
