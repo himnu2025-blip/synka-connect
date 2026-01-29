@@ -23,7 +23,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { FloatingInput, FloatingPhoneInput, COUNTRY_CODES, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
+import { FloatingInput, FloatingPhoneInput, FloatingNameInput, splitFullName, combineNames, COUNTRY_CODES, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
 import {
   Dialog,
   DialogContent,
@@ -114,7 +114,8 @@ export default function MyCard() {
   const [currentLayout, setCurrentLayout] = useState<LayoutType>('photo-logo');
   const [currentThemeColor, setCurrentThemeColor] = useState<string | null>(null);
   const [editData, setEditData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     designation: '',
     company: '',
     phone: '',
@@ -199,9 +200,13 @@ useEffect(() => {
       return;
     }
 
-    // Calculate next data
+    // Calculate next data with split name
+    const fullName = activeCard?.full_name || profile?.full_name || '';
+    const { firstName, lastName } = splitFullName(fullName);
+    
     const nextData = {
-      name: activeCard?.full_name || profile?.full_name || '',
+      firstName,
+      lastName,
       designation: activeCard?.designation || '',
       company: activeCard?.company || '',
       phone: activeCard?.phone || profile?.phone || '',
@@ -321,7 +326,7 @@ useEffect(() => {
     setEditData({ ...normalized, ...normalizedSocial });
 
     const { error } = await updateCard(activeCard.id, {
-      full_name: normalized.name,
+      full_name: combineNames(normalized.firstName, normalized.lastName),
       designation: normalized.designation,
       company: normalized.company,
       phone: normalized.phone,
@@ -489,7 +494,7 @@ useEffect(() => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-about', {
         body: {
-          name: editData.name,
+          name: combineNames(editData.firstName, editData.lastName),
           company: editData.company,
           designation: editData.designation,
           email: editData.email,
@@ -1004,11 +1009,14 @@ useEffect(() => {
             </div>
             {/* Form Fields */}
             <div className="space-y-4">
-              <FloatingInput
-                label="Name *"
-                value={editData.name}
-                onChange={(e) =>
-                  setEditData(prev => ({ ...prev, name: e.target.value }))
+              <FloatingNameInput
+                firstName={editData.firstName}
+                lastName={editData.lastName}
+                onFirstNameChange={(val) =>
+                  setEditData(prev => ({ ...prev, firstName: val }))
+                }
+                onLastNameChange={(val) =>
+                  setEditData(prev => ({ ...prev, lastName: val }))
                 }
                 disabled={isLoading}
               />

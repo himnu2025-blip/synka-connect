@@ -28,7 +28,7 @@ import { hapticFeedback } from '@/lib/haptics';
 import { FaWhatsapp } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FloatingInput, FloatingPhoneInput, COUNTRY_CODES as PHONE_COUNTRY_CODES, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
+import { FloatingInput, FloatingPhoneInput, FloatingNameInput, splitFullName, combineNames, COUNTRY_CODES as PHONE_COUNTRY_CODES, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
 import { cn, getContrastTextColor, getSubtleBackground } from '@/lib/utils';
 import {
   Dialog,
@@ -125,7 +125,8 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
   // Inline edit form state
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     company: '',
     designation: '',
     phone: '',
@@ -146,8 +147,10 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
   // sync selectedContact into edit form when selectedContact or inline edit opens
   useEffect(() => {
     if (selectedContact) {
+      const { firstName, lastName } = splitFullName(selectedContact.name || '');
       setEditForm({
-        name: selectedContact.name || '',
+        firstName,
+        lastName,
         company: selectedContact.company || '',
         designation: selectedContact.designation || '',
         phone: selectedContact.phone || '',
@@ -179,8 +182,8 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
   // save edited contact using useContacts.updateContact
   async function saveEditedContact() {
     if (!selectedContact?.id) return;
-    if (!editForm.name?.trim()) {
-      setEditError('Name is required');
+    if (!editForm.firstName?.trim()) {
+      setEditError('First name is required');
       return;
     }
 
@@ -214,7 +217,7 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
       });
 
       const updates: any = {
-        name: editForm.name,
+        name: combineNames(editForm.firstName, editForm.lastName),
         company: editForm.company || null,
         designation: editForm.designation || null,
         phone: normalizedFields.phone || null,
@@ -380,7 +383,8 @@ const saveNote = async () => {
 
   // New contact form
   const [newContact, setNewContact] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     company: '',
     designation: '',
     email: '',
@@ -810,8 +814,8 @@ const getAvatarText = () => {
     setShowTagSelector(true);
   };
   const handleAddContact = async () => {
-    if (!newContact.name.trim()) {
-      toast({ title: 'Name is required', variant: 'destructive' });
+    if (!newContact.firstName.trim()) {
+      toast({ title: 'First name is required', variant: 'destructive' });
       return;
     }
 
@@ -845,7 +849,10 @@ const getAvatarText = () => {
     const eventIds = activeEvents.map(e => e.id);
 
     const { error } = await createContact({
-      ...newContact,
+      name: combineNames(newContact.firstName, newContact.lastName),
+      company: newContact.company,
+      designation: newContact.designation,
+      notes: newContact.notes,
       ...normalizedFields,
       phone: normalizedFields.phone || normalizedFields.whatsapp || null,
       whatsapp: normalizedFields.whatsapp || normalizedFields.phone || null,
@@ -855,7 +862,7 @@ const getAvatarText = () => {
       toast({ title: 'Error creating contact', variant: 'destructive' });
     } else {
       setShowAddContact(false);
-      setNewContact({ name: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '', notes: '' });
+      setNewContact({ firstName: '', lastName: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '', notes: '' });
       toast({ title: 'Contact added!' });
     }
   };
@@ -995,7 +1002,9 @@ const getAvatarText = () => {
           .some(([, value]) => value !== null && value !== undefined && value !== '');
         
         if (hasData) {
-          setScannedContact(contact);
+          // Split name into firstName/lastName
+          const { firstName, lastName } = splitFullName(contact.name || '');
+          setScannedContact({ ...contact, firstName, lastName });
           const sourceMsg = contact.source === 'qr' ? ' (from QR)' : 
                            contact.source === 'mixed' ? ' (QR + text)' : '';
           toast({ 
@@ -1003,7 +1012,7 @@ const getAvatarText = () => {
             description: 'Review the extracted information.' 
           });
         } else {
-          setScannedContact({ name: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '' });
+          setScannedContact({ firstName: '', lastName: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '' });
           toast({ 
             title: "Couldn't read this card clearly", 
             description: 'Please fill in the details manually.',
@@ -1011,7 +1020,7 @@ const getAvatarText = () => {
           });
         }
       } else {
-        setScannedContact({ name: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '' });
+        setScannedContact({ firstName: '', lastName: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '' });
         toast({ 
           title: "Couldn't read this card", 
           description: 'Please fill in manually.',
@@ -1020,7 +1029,7 @@ const getAvatarText = () => {
       }
     } catch (error) {
       console.error('Scan error:', error);
-      setScannedContact({ name: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '' });
+      setScannedContact({ firstName: '', lastName: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '' });
       toast({ 
         title: "Couldn't read this card", 
         description: 'Please fill in manually.',
@@ -1038,10 +1047,12 @@ const getAvatarText = () => {
   };
 
   const saveScannedContact = async () => {
-    if (!scannedContact?.name) {
-      toast({ title: 'Name is required', variant: 'destructive' });
+    if (!scannedContact?.firstName?.trim()) {
+      toast({ title: 'First name is required', variant: 'destructive' });
       return;
     }
+
+    const fullName = combineNames(scannedContact.firstName || '', scannedContact.lastName || '');
 
     // Validate fields
     const validation = validateContactForm({
@@ -1069,7 +1080,7 @@ const getAvatarText = () => {
     const eventIds = activeEvents.map(e => e.id);
 
     const { error } = await createContact({
-      name: scannedContact.name,
+      name: fullName,
       company: scannedContact.company || null,
       designation: scannedContact.designation || null,
       email: normalizedFields.email || null,
@@ -1668,10 +1679,11 @@ if (!contacts && contactsLoading) {
             <DialogTitle>Add Contact</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <FloatingInput
-              label="Full name *"
-              value={newContact.name}
-              onChange={(e) => setNewContact(prev => ({ ...prev, name: e.target.value }))}
+            <FloatingNameInput
+              firstName={newContact.firstName}
+              lastName={newContact.lastName}
+              onFirstNameChange={(val) => setNewContact(prev => ({ ...prev, firstName: val }))}
+              onLastNameChange={(val) => setNewContact(prev => ({ ...prev, lastName: val }))}
             />
             <div className="grid grid-cols-2 gap-4">
               <FloatingInput
@@ -1854,10 +1866,11 @@ if (!contacts && contactsLoading) {
                 <div className="p-4 rounded-lg bg-muted/50 border border-border">
                   <p className="text-sm text-muted-foreground mb-4">Review extracted information:</p>
                   <div className="space-y-4">
-                    <FloatingInput
-                      label="Name *"
-                      value={scannedContact.name || ''}
-                      onChange={(e) => setScannedContact((prev: any) => ({ ...prev, name: e.target.value }))}
+                    <FloatingNameInput
+                      firstName={scannedContact.firstName || ''}
+                      lastName={scannedContact.lastName || ''}
+                      onFirstNameChange={(val) => setScannedContact((prev: any) => ({ ...prev, firstName: val }))}
+                      onLastNameChange={(val) => setScannedContact((prev: any) => ({ ...prev, lastName: val }))}
                     />
                     <div className="grid grid-cols-2 gap-3">
                       <FloatingInput
@@ -2067,11 +2080,11 @@ if (!contacts && contactsLoading) {
               {/* --- Inline Edit Form inside Sheet --- */}
               {isEditOpen && selectedContact ? (
                 <div className="space-y-4">
-                  <FloatingInput
-                    label="Full name"
-                    value={editForm.name}
-                    onChange={(e) => updateEditField('name', e.target.value)}
-                    inputRef={editNameRef}
+                  <FloatingNameInput
+                    firstName={editForm.firstName}
+                    lastName={editForm.lastName}
+                    onFirstNameChange={(val) => updateEditField('firstName', val)}
+                    onLastNameChange={(val) => updateEditField('lastName', val)}
                   />
                   <FloatingInput
                     label="Company Name"
@@ -2176,8 +2189,10 @@ if (!contacts && contactsLoading) {
           editNameRef.current?.blur();
           setIsEditOpen(false);
           if (selectedContact) {
+            const { firstName, lastName } = splitFullName(selectedContact.name || '');
             setEditForm({
-              name: selectedContact.name || '',
+              firstName,
+              lastName,
               company: selectedContact.company || '',
               designation: selectedContact.designation || '',
               phone: selectedContact.phone || '',

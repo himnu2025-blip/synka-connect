@@ -3,11 +3,13 @@ import { Camera, Upload, RotateCcw, Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import { FloatingInput, FloatingPhoneInput, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
+import { FloatingInput, FloatingPhoneInput, FloatingNameInput, splitFullName, combineNames, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
 import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 export interface ScannedContact {
-  name?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  name?: string | null; // legacy - used for internal processing
   company?: string | null;
   designation?: string | null;
   email?: string | null;
@@ -164,7 +166,9 @@ export function BusinessCardScanDialog({
           .some(([, value]) => value !== null && value !== undefined && value !== '');
         
         if (hasData) {
-          setScannedContact(contact);
+          // Split name into firstName/lastName
+          const { firstName, lastName } = splitFullName(contact.name || '');
+          setScannedContact({ ...contact, firstName, lastName });
           const sourceMsg = contact.source === 'qr' ? ' (from QR)' : 
                            contact.source === 'mixed' ? ' (QR + text)' : '';
           toast({ 
@@ -172,7 +176,7 @@ export function BusinessCardScanDialog({
             description: 'Review the extracted info.' 
           });
         } else {
-          setScannedContact({ name: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '' });
+          setScannedContact({ firstName: '', lastName: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '' });
           toast({ 
             title: "Couldn't read this card clearly", 
             description: 'Please fill in the details manually.',
@@ -180,7 +184,7 @@ export function BusinessCardScanDialog({
           });
         }
       } else {
-        setScannedContact({ name: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '' });
+        setScannedContact({ firstName: '', lastName: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '' });
         toast({ 
           title: "Couldn't read this card", 
           description: 'Please fill in manually.',
@@ -189,7 +193,7 @@ export function BusinessCardScanDialog({
       }
     } catch (error) {
       console.error('Scan error:', error);
-      setScannedContact({ name: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '' });
+      setScannedContact({ firstName: '', lastName: '', company: '', designation: '', email: '', phone: '', whatsapp: '', linkedin: '', website: '' });
       toast({ 
         title: "Couldn't read this card", 
         description: 'Please fill in manually.',
@@ -207,14 +211,20 @@ export function BusinessCardScanDialog({
   };
 
   const handleSave = async () => {
-    if (!scannedContact?.name) {
-      toast({ title: 'Name is required', variant: 'destructive' });
+    if (!scannedContact?.firstName?.trim()) {
+      toast({ title: 'First name is required', variant: 'destructive' });
       return;
     }
 
+    // Combine names for the save callback
+    const contactToSave = {
+      ...scannedContact,
+      name: combineNames(scannedContact.firstName || '', scannedContact.lastName || ''),
+    };
+
     setIsSaving(true);
     try {
-      await onSave(scannedContact);
+      await onSave(contactToSave);
       onOpenChange(false);
       resetScan();
     } catch (error) {
@@ -325,10 +335,11 @@ export function BusinessCardScanDialog({
           </div>
 
           <div className="space-y-4 max-h-[400px] overflow-y-auto">
-            <FloatingInput
-              label="Name *"
-              value={scannedContact.name || ''}
-              onChange={(e) => setScannedContact(prev => ({ ...prev, name: e.target.value }))}
+            <FloatingNameInput
+              firstName={scannedContact.firstName || ''}
+              lastName={scannedContact.lastName || ''}
+              onFirstNameChange={(val) => setScannedContact(prev => ({ ...prev, firstName: val }))}
+              onLastNameChange={(val) => setScannedContact(prev => ({ ...prev, lastName: val }))}
             />
             <div className="grid grid-cols-2 gap-3">
               <FloatingInput

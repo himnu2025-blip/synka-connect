@@ -118,6 +118,60 @@ export const FloatingInput = ({
   );
 };
 
+// Helper to split full name into first and last
+export const splitFullName = (fullName: string): { firstName: string; lastName: string } => {
+  const trimmed = (fullName || '').trim();
+  const parts = trimmed.split(/\s+/);
+  if (parts.length === 0) return { firstName: '', lastName: '' };
+  if (parts.length === 1) return { firstName: parts[0], lastName: '' };
+  return { firstName: parts[0], lastName: parts.slice(1).join(' ') };
+};
+
+// Helper to combine first and last into full name
+export const combineNames = (firstName: string, lastName: string): string => {
+  const first = (firstName || '').trim();
+  const last = (lastName || '').trim();
+  return [first, last].filter(Boolean).join(' ');
+};
+
+interface FloatingNameInputProps {
+  firstName: string;
+  lastName: string;
+  onFirstNameChange: (value: string) => void;
+  onLastNameChange: (value: string) => void;
+  disabled?: boolean;
+  className?: string;
+  firstNameRequired?: boolean;
+}
+
+// Split name input with First Name and Last Name in a grid
+export const FloatingNameInput = ({
+  firstName,
+  lastName,
+  onFirstNameChange,
+  onLastNameChange,
+  disabled,
+  className,
+  firstNameRequired = true,
+}: FloatingNameInputProps) => {
+  return (
+    <div className={cn("grid grid-cols-2 gap-3", className)}>
+      <FloatingInput
+        label={firstNameRequired ? "First Name *" : "First Name"}
+        value={firstName}
+        onChange={(e) => onFirstNameChange(e.target.value)}
+        disabled={disabled}
+      />
+      <FloatingInput
+        label="Last Name"
+        value={lastName}
+        onChange={(e) => onLastNameChange(e.target.value)}
+        disabled={disabled}
+      />
+    </div>
+  );
+};
+
 interface FloatingPhoneInputProps {
   label: string;
   value: string;
