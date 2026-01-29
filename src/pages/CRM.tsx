@@ -146,7 +146,7 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
 
   // sync selectedContact into edit form when selectedContact or inline edit opens
   useEffect(() => {
-    if (selectedContact) {
+    if (selectedContact && !isEditOpen) {
       const { firstName, lastName } = splitFullName(selectedContact.name || '');
       setEditForm({
         firstName,
@@ -162,7 +162,7 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
         tags: selectedContact.tags?.map(t => t.id) || [],
       });
     }
-  }, [selectedContact]);
+  }, [selectedContact, isEditOpen]);
   
 
   function updateEditField<K extends keyof typeof editForm>(key: K, value: typeof editForm[K]) {
@@ -247,12 +247,8 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
       // Clear the notes field after saving
       setEditForm(prev => ({ ...prev, notes: '' }));
 
-      editNameRef.current?.blur();
-      
-      // Use setTimeout to ensure state is properly reset
-      setTimeout(() => {
-        setIsEditOpen(false);
-      }, 0);
+      // FIX: Set edit mode to false first, then blur after state change
+      setIsEditOpen(false);
       
       toast({ title: 'Contact updated' });
     } catch (err: any) {
@@ -391,20 +387,22 @@ const saveNote = async () => {
       navigate('/login');
     }
   }, [user, authLoading, navigate]);
-useEffect(() => {
-  const returning = localStorage.getItem(RETURNING_FROM_INTERACTION_KEY);
 
-  // Skip resetting contacts once when returning from call/email/whatsapp
-  if (returning) {
-    localStorage.removeItem(RETURNING_FROM_INTERACTION_KEY);
-    return;
-  }
+  // FIX: Remove stringify comparison
+  useEffect(() => {
+    const returning = localStorage.getItem(RETURNING_FROM_INTERACTION_KEY);
 
-  // Only update if contacts changed (prevents flash when same data)
-  if (JSON.stringify(contacts) !== JSON.stringify(localContacts)) {
-    setLocalContacts(contacts);
-  }
-}, [contacts]);
+    // Skip resetting contacts once when returning from call/email/whatsapp
+    if (returning) {
+      localStorage.removeItem(RETURNING_FROM_INTERACTION_KEY);
+      return;
+    }
+
+    // FIX: Direct comparison instead of stringify
+    if (contacts !== localContacts) {
+      setLocalContacts(contacts);
+    }
+  }, [contacts]);
 
   // Check for pending interaction on mount and visibility change
   const checkPendingInteraction = useCallback(() => {
@@ -1101,7 +1099,10 @@ const getAvatarText = () => {
   const handleTagToggle = async (contactId: string, tagId: string) => {
   const isTagged = localContactTags.includes(tagId);
 
-  // 1ï¸âƒ£ Update popup immediately
+  // FIX: Store previous state before updating
+  const prevTags = localContactTags;
+
+  // 1. Update popup immediately
   const updatedLocalTags = isTagged
     ? localContactTags.filter(id => id !== tagId)
     : [...localContactTags, tagId];
@@ -1109,14 +1110,14 @@ const getAvatarText = () => {
   setLocalContactTags(updatedLocalTags);
 
   try {
-    // 2ï¸âƒ£ Save to DB
+    // 2. Save to DB
     if (isTagged) {
       await removeTagFromContact(contactId, tagId);
     } else {
       await addTagToContact(contactId, tagId);
     }
 
-    // 3ï¸âƒ£ ðŸ”¥ Update selectedContact (contact popup)
+    // 3. Update selectedContact (contact popup)
     if (selectedContact?.id === contactId) {
       const updatedTags = updatedLocalTags
         .map(id => tags.find(t => t.id === id))
@@ -1128,7 +1129,7 @@ const getAvatarText = () => {
       }));
     }
 
-    // 4ï¸âƒ£ ðŸ”¥ Update localContacts (CRM list)
+    // 4. Update localContacts (CRM list)
     setLocalContacts(prev =>
       prev.map(c =>
         c.id === contactId
@@ -1143,14 +1144,19 @@ const getAvatarText = () => {
     );
 
   } catch (err) {
-    setLocalContactTags(localContactTags);
+    // FIX: Restore previous state on error
+    setLocalContactTags(prevTags);
     toast({ title: "Failed to update tag", variant: "destructive" });
   }
 };
+
 const handleEventToggle = async (contactId: string, eventId: string) => {
   const isLinked = localContactEvents.includes(eventId);
 
-  // 1ï¸âƒ£ Update popup immediately
+  // FIX: Store previous state before updating
+  const prevEvents = localContactEvents;
+
+  // 1. Update popup immediately
   const updatedLocalEvents = isLinked
     ? localContactEvents.filter(id => id !== eventId)
     : [...localContactEvents, eventId];
@@ -1158,7 +1164,7 @@ const handleEventToggle = async (contactId: string, eventId: string) => {
   setLocalContactEvents(updatedLocalEvents);
 
   try {
-    // 2ï¸âƒ£ Update DB
+    // 2. Update DB
     if (isLinked) {
       await supabase
         .from("contact_events")
@@ -1169,7 +1175,7 @@ const handleEventToggle = async (contactId: string, eventId: string) => {
       await addEventToContact(contactId, eventId);
     }
 
-    // 3ï¸âƒ£ Update selectedContact instantly (contact popup)
+    // 3. Update selectedContact instantly (contact popup)
     if (selectedContact?.id === contactId) {
       const updatedEvents = updatedLocalEvents
         .map(id => events.find(e => e.id === id))
@@ -1181,7 +1187,7 @@ const handleEventToggle = async (contactId: string, eventId: string) => {
       }));
     }
 
-    // 4ï¸âƒ£ Update CRM list
+    // 4. Update CRM list
     setLocalContacts(prev =>
       prev.map(c =>
         c.id === contactId
@@ -1196,10 +1202,12 @@ const handleEventToggle = async (contactId: string, eventId: string) => {
     );
 
   } catch (error) {
-    setLocalContactEvents(localContactEvents);
+    // FIX: Restore previous state on error
+    setLocalContactEvents(prevEvents);
     toast({ title: "Failed to update event", variant: "destructive" });
   }
 };
+
   const applyTemplate = (template: any, contact: Contact) => {
     // Build public card link - always use production URL
     const publicCardLink = profile?.public_slug 
@@ -1327,7 +1335,7 @@ window.location.href = `tel:${contact.phone}`;
     return groups;
   }, [filteredContacts, sortBy]);
 
-  // âœ… Silent load â€” no spinner
+  // Silent load — no spinner
 if (authLoading) {
   return null;
 }
@@ -1448,7 +1456,7 @@ if (!contacts && contactsLoading) {
         <Filter className="h-4 w-4" strokeWidth={1.5} />
       </Button>
 
-      {/* ðŸ”µ Active filter indicator */}
+      {/* Active filter indicator */}
       {(activeTagFilter.length > 0 || activeEventFilter.length > 0) && (
         <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-primary" />
       )}
@@ -2006,14 +2014,15 @@ if (!contacts && contactsLoading) {
         handleOnly={isEditOpen}
         shouldScaleBackground={false}
         onOpenChange={(val) => {
-          // Use setTimeout to prevent state conflicts with child components
-          setTimeout(() => {
-            setShowContactDetail(val);
-            if (!val) {
-              setIsEditOpen(false);
+          // FIX: Remove setTimeout - React already batches updates
+          setShowContactDetail(val);
+          if (!val) {
+            setIsEditOpen(false);
+            // FIX: Blur after state change to prevent keyboard jumps
+            requestAnimationFrame(() => {
               editNameRef.current?.blur();
-            }
-          }, 0);
+            });
+          }
         }}
       >
         <DrawerContent className="rounded-t-3xl border-0 shadow-none bg-background h-[100dvh] [&>div:first-child]:hidden">
@@ -2054,10 +2063,8 @@ if (!contacts && contactsLoading) {
                       onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        // Use setTimeout to prevent state conflicts
-                        setTimeout(() => {
-                          setIsEditOpen(true);
-                        }, 0);
+                        // FIX: Remove setTimeout
+                        setIsEditOpen(true);
                       }}
                       className="absolute right-4 top-4 h-9 w-9 rounded-full bg-background/80 backdrop-blur border border-border/40 flex items-center justify-center active:scale-95"
                     >
@@ -2157,7 +2164,6 @@ if (!contacts && contactsLoading) {
             if (!error) {
               setShowContactDetail(false);
               setSelectedContact(null);
-              editNameRef.current?.blur();
               setIsEditOpen(false);
               setConfirmDialog(prev => ({ ...prev, open: false }));
               toast({ title: 'Contact deleted' });
@@ -2176,7 +2182,6 @@ if (!contacts && contactsLoading) {
     <div className="flex gap-2">
       <button
         onClick={() => {
-          editNameRef.current?.blur();
           setIsEditOpen(false);
           if (selectedContact) {
             const { firstName, lastName } = splitFullName(selectedContact.name || '');
@@ -2563,4 +2568,4 @@ if (!contacts && contactsLoading) {
       </Dialog>
     </div>
   );
-          }
+}
