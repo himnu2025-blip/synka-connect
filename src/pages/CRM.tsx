@@ -164,6 +164,21 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
     }
   }, [selectedContact]);
 
+  useEffect(() => {
+  if (!isEditOpen) return;
+
+  const handler = (e: any) => {
+    setTimeout(() => {
+      e.target.scrollIntoView({ block: "center", behavior: "smooth" });
+    }, 250);
+  };
+
+  const els = document.querySelectorAll("input, textarea");
+  els.forEach(el => el.addEventListener("focus", handler));
+
+  return () => els.forEach(el => el.removeEventListener("focus", handler));
+}, [isEditOpen]);
+
   // focus name input when inline edit opens (without scrolling)
   useEffect(() => {
     if (isEditOpen) {
