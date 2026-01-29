@@ -231,13 +231,11 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
 
       if (error) throw error;
 
+      // Sync with database to prevent state duplication
+      await refetch();
+
       // Update selectedContact immediately with form values
       setSelectedContact(prev => prev ? { ...prev, ...updates } : null);
-
-      // Update localContacts too
-      setLocalContacts(prev => prev.map(c => 
-        c.id === selectedContact.id ? { ...c, ...updates } : c
-      ));
 
       // Update notesHistory if we added a note
       if (updates.notes_history) {
@@ -2025,13 +2023,16 @@ if (!contacts && contactsLoading) {
           }
         }}
       >
-        <DrawerContent className="rounded-t-3xl border-0 shadow-none bg-background h-[100dvh] [&>div:first-child]:hidden">
+        <DrawerContent className="rounded-t-3xl border-0 shadow-none bg-background min-h-[100dvh] [&>div:first-child]:hidden">
           {/* Drag Handle */}
           <div className="flex justify-center py-3">
             <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
           </div>
           {selectedContact && (
-            <div className="px-4 pb-6 space-y-6 overflow-y-auto h-[calc(100dvh-48px)] overscroll-contain scroll-auto">
+            <div 
+              className="px-4 pb-6 space-y-6 overflow-y-auto min-h-[calc(100dvh-48px)] overscroll-contain scroll-auto"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
               <DrawerHeader className="text-center relative p-0">
                 <ContactAvatar 
                   name={selectedContact.name}
