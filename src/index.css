@@ -149,13 +149,16 @@
   body {
     @apply bg-background text-foreground;
     overflow-x: hidden;
+    /* 🔴 CRITICAL FIX: Prevents scroll chain break when keyboard shifts viewport */
+    overscroll-behavior-y: contain;
   }
 
-  /* Prevent iOS zoom on input focus */
+  /* 🔴 Prevent iOS zoom on input focus */
   input, textarea, select {
     font-size: 16px;
   }
 }
+
 @layer components {
   .glass {
     background: var(--glass-bg);
@@ -268,7 +271,7 @@
     padding-left: env(safe-area-inset-left);
   }
 
-  /* Dynamic viewport height for mobile browsers - FIXED VERSION */
+  /* 🔴 CORRECTED: Dynamic viewport height for mobile browsers */
   .min-h-dvh {
     min-height: 100dvh;
   }
@@ -416,6 +419,7 @@
 .animation-delay-500 {
   animation-delay: 500ms;
 }
+
 /* Apple-style avatar loading */
 .avatar-apple {
   background-color: #f2f2f7; /* iOS light grey */
