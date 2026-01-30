@@ -185,20 +185,18 @@ export function ContactShareSheet({
   const vv = window.visualViewport;
   if (!vv) return;
 
-  const handleViewportChange = () => {
-    // If viewport height increases, keyboard likely closed
-    const keyboardClosed = vv.height > window.innerHeight * 0.85;
-
-    if (keyboardClosed) {
-      const active = document.activeElement as HTMLElement | null;
-      if (active && active.tagName === 'INPUT') {
-        active.blur(); // Force blur so layout resets
-      }
-    }
+  const updateHeight = () => {
+    document.documentElement.style.setProperty('--vvh', `${vv.height}px`);
   };
 
-  vv.addEventListener('resize', handleViewportChange);
-  return () => vv.removeEventListener('resize', handleViewportChange);
+  updateHeight();
+  vv.addEventListener('resize', updateHeight);
+  vv.addEventListener('scroll', updateHeight);
+
+  return () => {
+    vv.removeEventListener('resize', updateHeight);
+    vv.removeEventListener('scroll', updateHeight);
+  };
 }, []);
   
   const [formData, setFormData] = useState<ContactFormData>({
