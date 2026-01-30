@@ -4,4 +4,10 @@
     <string name="title_activity_main">Synka</string>
     <string name="package_name">com.synka.app</string>
     <string name="custom_url_scheme">com.synka.app</string>
+    
+    <!-- Widget strings -->
+    <string name="widget_name">Synka QR Code</string>
+    <string name="widget_description">Display your profile QR code on your home screen</string>
+    <string name="widget_placeholder">Open Synka to set up</string>
+    <string name="qr_code_description">Your profile QR code</string>
 </resources>

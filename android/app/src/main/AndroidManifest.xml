@@ -40,9 +40,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
         android:windowDisablePreview="true"
-    android:hardwareAccelerated="true">
+        android:hardwareAccelerated="true">
+
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
@@ -61,18 +62,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                 <!-- Public profile -->
-    <data
-        android:scheme="https"
-        android:host="synka.in"
-        android:pathPrefix="/u/" />
+                <!-- Public profile -->
+                <data
+                    android:scheme="https"
+                    android:host="synka.in"
+                    android:pathPrefix="/u/" />
 
-    <!-- Optional legacy card route -->
-    <data
-        android:scheme="https"
-        android:host="synka.in"
-        android:pathPrefix="/card/" />
-</intent-filter>
+                <!-- Optional legacy card route -->
+                <data
+                    android:scheme="https"
+                    android:host="synka.in"
+                    android:pathPrefix="/card/" />
+            </intent-filter>
 
             <!-- Custom URL scheme for deep linking -->
             <intent-filter>
@@ -83,6 +84,19 @@
                 <data android:scheme="synka" />
             </intent-filter>
         </activity>
+
+        <!-- QR Code Widget -->
+        <receiver
+            android:name=".QRWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/qr_widget_info" />
+        </receiver>
 
         <!-- FileProvider (REQUIRED for file share & downloads) -->
         <provider

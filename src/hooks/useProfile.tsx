@@ -2,6 +2,21 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { persistForOffline, getOfflineData } from '@/lib/offlineSync';
+import { Capacitor } from '@capacitor/core';
+import WidgetBridge from '@/lib/widgetBridge';
+
+// Helper to sync profile slug to native widget
+const syncWidgetProfileSlug = async (slug: string | null) => {
+  if (!Capacitor.isNativePlatform() || !slug) return;
+  
+  try {
+    await WidgetBridge.updateWidget({ profileSlug: slug });
+    console.log('[Profile] Widget synced with slug:', slug);
+  } catch (error) {
+    // Widget might not be available on all devices
+    console.log('[Profile] Widget sync skipped:', error);
+  }
+};
 
 export interface Profile {
   id: string;
@@ -163,6 +178,8 @@ export function useProfile() {
         const mappedProfile = mapToCompatProfile(data);
         setProfile(mappedProfile);
         setCachedProfile(user.id, mappedProfile);
+        // Sync widget with profile slug
+        syncWidgetProfileSlug(data.slug);
         setLoading(false);
         return;
       }
@@ -199,6 +216,7 @@ export function useProfile() {
           const mappedProfile = mapToCompatProfile(retryData);
           setProfile(mappedProfile);
           setCachedProfile(user.id, mappedProfile);
+          syncWidgetProfileSlug(retryData.slug);
         } else {
           setProfile(null);
         }
@@ -206,6 +224,7 @@ export function useProfile() {
         const mappedProfile = mapToCompatProfile(newProfile);
         setProfile(mappedProfile);
         setCachedProfile(user.id, mappedProfile);
+        syncWidgetProfileSlug(newProfile.slug);
       }
     } catch (err) {
       console.error('Unexpected error in fetchProfile:', err);
