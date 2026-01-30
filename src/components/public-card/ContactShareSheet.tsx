@@ -186,23 +186,41 @@ export function ContactShareSheet({
   const vv = window.visualViewport;
   if (!vv) return;
 
-  // TRUE full height of screen (never affected by keyboard)
-  const FULL_HEIGHT = screen.height;
+  const setHeight = () => {
+    document.documentElement.style.setProperty('--vvh', `${vv.height}px`);
+  };
 
-  const update = () => {
-    const keyboardOpen = vv.height < FULL_HEIGHT * 0.75;
+  // set once on mount
+  setHeight();
 
-    if (keyboardOpen) {
-      document.documentElement.style.setProperty('--vvh', `${vv.height}px`);
-    } else {
-      document.documentElement.style.setProperty('--vvh', `${FULL_HEIGHT}px`);
+  let resizeTimeout: number;
+
+  const onResize = () => {
+    // Debounce prevents jump when keyboard closes
+    clearTimeout(resizeTimeout);
+    resizeTimeout = window.setTimeout(setHeight, 120);
+  };
+
+  vv.addEventListener('resize', onResize);
+
+  return () => {
+    vv.removeEventListener('resize', onResize);
+    clearTimeout(resizeTimeout);
+  };
+}, []);
+
+  useEffect(() => {
+  const handler = (e: Event) => {
+    const el = e.target as HTMLElement;
+    if (el.tagName === 'INPUT') {
+      setTimeout(() => {
+        el.scrollIntoView({ block: 'center', behavior: 'instant' });
+      }, 50);
     }
   };
 
-  update();
-
-  vv.addEventListener('resize', update);
-  return () => vv.removeEventListener('resize', update);
+  document.addEventListener('focusin', handler);
+  return () => document.removeEventListener('focusin', handler);
 }, []);
   
   const [formData, setFormData] = useState<ContactFormData>({
