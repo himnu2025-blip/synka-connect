@@ -1375,16 +1375,23 @@ if (!contacts && contactsLoading) {
 
   // Handle export contacts
   const handleExportContacts = () => {
-    if (!isOrangePlan) {
-      hapticFeedback.light();
-      navigate('/settings/upgrade');
-      return;
-    }
+  if (!isOrangePlan) {
     hapticFeedback.light();
-    const filename = `synka_contacts_${new Date().toISOString().split('T')[0]}.csv`;
-    downloadContactsCSV(localContacts, filename);
+    navigate('/settings/upgrade');
+    return;
+  }
+
+  hapticFeedback.light();
+  const filename = `synka_contacts_${new Date().toISOString().split('T')[0]}.csv`;
+
+  const success = downloadContactsCSV(localContacts, filename);
+
+  if (success) {
     toast({ title: `Exported ${localContacts.length} contacts` });
-  };
+  } else {
+    toast({ title: 'Export failed', variant: 'destructive' });
+  }
+};
 
   // Handle import contacts
   const handleImportClick = () => {
@@ -1430,30 +1437,44 @@ if (!contacts && contactsLoading) {
 
   // Confirm import
   const confirmImport = async () => {
-    setIsImporting(true);
-    let successCount = 0;
-    
-    for (const contact of importContacts) {
-      const { error } = await createContact({
-        name: contact.name || '',
-        company: contact.company || null,
-        designation: contact.designation || null,
-        email: contact.email || null,
-        phone: contact.phone || null,
-        whatsapp: contact.whatsapp || contact.phone || null,
-        linkedin: contact.linkedin || null,
-        website: contact.website || null,
-        source: 'csv_import',
-      });
-      if (!error) successCount++;
+  setIsImporting(true);
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (const contact of importContacts) {
+    const { error } = await createContact({
+      name: contact.name || '',
+      company: contact.company || null,
+      designation: contact.designation || null,
+      email: contact.email || null,
+      phone: contact.phone || null,
+      whatsapp: contact.whatsapp || contact.phone || null,
+      linkedin: contact.linkedin || null,
+      website: contact.website || null,
+      source: 'csv_import',
+    });
+
+    if (error) {
+      failCount++;
+    } else {
+      successCount++;
     }
-    
-    toast({ title: `Imported ${successCount} contacts` });
-    setShowImportPreview(false);
-    setImportContacts([]);
-    setIsImporting(false);
-    refetch();
-  };
+  }
+
+  setIsImporting(false);
+  setShowImportPreview(false);
+  setImportContacts([]);
+  refetch();
+
+  if (successCount > 0 && failCount === 0) {
+    toast({ title: `Imported ${successCount} contacts successfully` });
+  } else if (successCount > 0 && failCount > 0) {
+    toast({ title: `Imported ${successCount}, Failed ${failCount}`, variant: 'destructive' });
+  } else {
+    toast({ title: 'Import failed', variant: 'destructive' });
+  }
+};
 
   return (
     <div className="min-h-dvh w-full max-w-full overflow-x-hidden bg-background font-inter">
