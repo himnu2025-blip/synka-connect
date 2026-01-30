@@ -2025,7 +2025,7 @@ if (!contacts && contactsLoading) {
           }
         }}
       >
-        <DrawerContent className="rounded-t-3xl border-0 shadow-none bg-background h-[100dvh] [&>div:first-child]:hidden">
+        <DrawerContent hideHandle className="rounded-t-3xl border-0 shadow-none bg-background h-[100dvh]">
           {/* Drag Handle */}
           <div className="flex justify-center py-3">
             <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
