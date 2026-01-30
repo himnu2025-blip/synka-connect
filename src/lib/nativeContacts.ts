@@ -23,14 +23,17 @@ function generateVCard(contact: ContactData): string {
     'VERSION:3.0',
   ];
 
-  // Full name (required)
+  // Full name (required) - FN must come before ORG for proper iOS display
   if (contact.name) {
-    lines.push(`FN:${contact.name}`);
     // Parse name into components for N field
     const nameParts = contact.name.trim().split(/\s+/);
     const lastName = nameParts.length > 1 ? nameParts.pop() : '';
-    const firstName = nameParts.join(' ');
+    const firstName = nameParts.join(' ') || contact.name;
+    
+    // N field first (structured name) - iOS uses this for display
     lines.push(`N:${lastName};${firstName};;;`);
+    // FN field (display name) - ensures proper fallback
+    lines.push(`FN:${contact.name}`);
   }
 
   // Organization and title
