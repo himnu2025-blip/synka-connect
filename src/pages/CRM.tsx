@@ -1377,7 +1377,7 @@ if (!contacts && contactsLoading) {
   const handleExportContacts = () => {
     if (!isOrangePlan) {
       hapticFeedback.light();
-      navigate('/upgrade');
+      navigate('/settings/upgrade');
       return;
     }
     hapticFeedback.light();
@@ -1390,7 +1390,7 @@ if (!contacts && contactsLoading) {
   const handleImportClick = () => {
     if (!isOrangePlan) {
       hapticFeedback.light();
-      navigate('/upgrade');
+      navigate('/settings/upgrade');
       return;
     }
     hapticFeedback.light();
