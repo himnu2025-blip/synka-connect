@@ -700,9 +700,10 @@ useEffect(() => {
   const displayWhatsapp = activeCard?.whatsapp || activeCard?.phone || profile?.phone || '';
 
   return (
+  <div className="fixed inset-0 overflow-y-auto">
     <div
       className={cn(
-        "w-full py-4 sm:py-6 px-3 sm:px-4 space-y-4 sm:space-y-6 mx-auto max-w-full sm:max-w-md lg:max-w-[460px]",
+        "min-h-full py-4 sm:py-6 px-3 sm:px-4 space-y-4 sm:space-y-6 mx-auto max-w-full sm:max-w-md lg:max-w-[460px]",
         // ✅ ISSUE 1 FIX: Only animate on first mount, not on resume
         !didAnimateRef.current && "animate-fade-up"
       )}
