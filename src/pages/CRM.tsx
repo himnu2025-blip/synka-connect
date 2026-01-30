@@ -2014,14 +2014,11 @@ if (!contacts && contactsLoading) {
         handleOnly={isEditOpen}
         shouldScaleBackground={false}
         onOpenChange={(val) => {
-          // FIX: Remove setTimeout - React already batches updates
           setShowContactDetail(val);
           if (!val) {
             setIsEditOpen(false);
-            // FIX: Blur after state change to prevent keyboard jumps
-            requestAnimationFrame(() => {
-              editNameRef.current?.blur();
-            });
+            // Blur immediately - no delay needed
+            editNameRef.current?.blur();
           }
         }}
       >
