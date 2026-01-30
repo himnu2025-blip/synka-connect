@@ -182,23 +182,6 @@ export function ContactShareSheet({
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
 
-useEffect(() => {
-  const vv = window.visualViewport;
-  if (!vv) return;
-
-  const update = () => {
-    // Force layout reflow after keyboard closes
-    document.body.style.height = vv.height + 'px';
-
-    // Next frame restore normal
-    requestAnimationFrame(() => {
-      document.body.style.height = '';
-    });
-  };
-
-  vv.addEventListener('resize', update);
-  return () => vv.removeEventListener('resize', update);
-}, []);
   
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
