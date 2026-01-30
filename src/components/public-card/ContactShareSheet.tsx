@@ -490,9 +490,8 @@ export function ContactShareSheet({
   if (isMobile) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-      <DrawerContent className="flex flex-col" hideHandle>
-
-        <div className="overflow-y-auto overscroll-contain">
+      <DrawerContent className="flex flex-col max-h-[var(--vvh)]" hideHandle>
+        <div className="flex-1 overflow-y-auto overscroll-contain">
           <BlinqHeader />
           {FormContent}
         </div>
