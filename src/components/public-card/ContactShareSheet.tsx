@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,7 +13,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-// Blinq-style input with border-floating label
+// Blinq-style input with border-floating label - defined outside component to prevent re-render focus loss
+// IMPORTANT: Default state is "has value" (label at top), CSS overrides when empty via peer-placeholder-shown
+// This eliminates race conditions between React state and CSS on first interaction
 const BlinqInput = ({
   label,
   value,
@@ -26,11 +28,11 @@ const BlinqInput = ({
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
-  inputMode?: 'text' | 'email' | 'tel' | 'numeric' | 'decimal';
+  inputMode?: 'text' | 'email' | 'tel' | 'numeric';
   autoComplete?: string;
 }) => {
   return (
-    <div className="relative min-h-[56px]">
+    <div className="relative h-14">
       <input
         type={type}
         inputMode={inputMode}
@@ -38,19 +40,14 @@ const BlinqInput = ({
         value={value}
         onChange={onChange}
         placeholder=" "
-        className="peer w-full h-full px-4 pt-5 pb-2 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
-        style={{ 
-          fontSize: '16px',
-          lineHeight: '1.5',
-          paddingTop: '1.25rem',
-          paddingBottom: '0.5rem'
-        }}
+        className="peer absolute inset-0 w-full h-full px-4 pt-5 pb-2 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
+        style={{ fontSize: '16px' }}
       />
       <label
         className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
-          top-0 -translate-y-1/2 text-xs bg-background px-1
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-          peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
+          top-0 -translate-y-1/2 text-xs bg-background
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
+          peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background"
       >
         {label}
       </label>
@@ -58,7 +55,7 @@ const BlinqInput = ({
   );
 };
 
-// Pill input with floating label
+// Pill input with floating label for Job Title and Company - same CSS-first pattern
 const PillInput = ({
   label,
   value,
@@ -69,24 +66,19 @@ const PillInput = ({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   return (
-    <div className="relative min-h-[40px]">
+    <div className="relative h-10">
       <input
         value={value}
         onChange={onChange}
         placeholder=" "
-        className="peer w-full h-full rounded-full border border-border px-4 outline-none bg-transparent focus:border-foreground"
-        style={{ 
-          fontSize: '16px',
-          lineHeight: '1.5',
-          paddingTop: '0.5rem',
-          paddingBottom: '0.5rem'
-        }}
+        className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-transparent focus:border-foreground"
+        style={{ fontSize: '16px' }}
       />
       <label
         className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
-          top-0 -translate-y-1/2 text-[10px] bg-background px-1
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-          peer-focus:top-0 peer-focus:text-[10px] peer-focus:bg-background peer-focus:px-1"
+          top-0 -translate-y-1/2 text-[10px] bg-background
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:bg-transparent
+          peer-focus:top-0 peer-focus:text-[10px] peer-focus:bg-background"
       >
         {label}
       </label>
@@ -190,6 +182,7 @@ export function ContactShareSheet({
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
 
+  
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
     lastName: '',
@@ -325,8 +318,11 @@ export function ContactShareSheet({
   // Common header component for both mobile and desktop
   const BlinqHeader = () => (
     <>
+      {/* EXACT BLINQ HEADER - NO BORDER AT BOTTOM */}
       <div className="px-4 pt-5 pb-4">
+        {/* SCAN & SKIP ROW - EXACTLY LIKE BLINQ */}
         <div className="flex justify-between items-center mb-5">
+          {/* Scan button aligned left like Blinq */}
           <button
             onClick={handleScanBusinessCard}
             disabled={scanState === 'uploading' || scanState === 'processing'}
@@ -336,6 +332,7 @@ export function ContactShareSheet({
             <span className="font-medium">Scan</span>
           </button>
           
+          {/* Skip button at top right with tight spacing */}
           <button
             onClick={handleSkip}
             className="text-sm font-semibold text-foreground hover:text-muted-foreground transition-colors"
@@ -344,7 +341,9 @@ export function ContactShareSheet({
           </button>
         </div>
         
+        {/* PROFILE AND TITLE - EXACTLY LIKE BLINQ */}
         <div className="flex items-start gap-3">
+          {/* LARGE PROFILE PHOTO - EXACT SIZE AS BLINQ */}
           <div className="relative flex-shrink-0">
             {ownerPhotoUrl ? (
               <img
@@ -359,11 +358,13 @@ export function ContactShareSheet({
                 </span>
               </div>
             )}
+            {/* SHARE ICON BADGE - EXACTLY LIKE BLINQ */}
             <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-background rounded-full shadow-md flex items-center justify-center border border-border">
               <Send className="w-3.5 h-3.5 text-destructive" />
             </div>
           </div>
           
+          {/* TITLE TEXT - EXACT FONT AND SPACING AS BLINQ */}
           <div className="flex-1 min-w-0">
             <h2 className="text-[18px] font-bold text-foreground leading-tight -mt-0.5 break-words">
               Share your contact information with {ownerName}
@@ -374,9 +375,10 @@ export function ContactShareSheet({
     </>
   );
 
-  // Form content rendered inline
+  // Form content rendered inline to prevent re-mount issues
   const FormContent = (
     <>
+      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -402,52 +404,45 @@ export function ContactShareSheet({
           />
         </div>
 
-        {/* EMAIL */}
+        {/* EMAIL - Wrapped in grid like name fields for layout stability */}
         <div className="grid grid-cols-1">
           <BlinqInput
             label="Email"
             value={formData.email}
             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-            inputMode="email"
-            autoComplete="email"
           />
         </div>
 
-        {/* FIXED PHONE INPUT SECTION */}
-        <div className="min-h-[56px] rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center">
+        <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
           {/* Country code selector */}
           <div className="flex items-center px-3 h-full border-r border-border shrink-0">
             <select
               value={countryCode}
               onChange={(e) => setCountryCode(e.target.value)}
-              className="bg-transparent text-base outline-none appearance-none cursor-pointer"
-              style={{ fontSize: '16px' }}
+              className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
             >
               {COUNTRY_CODES.map(({ code }) => (
                 <option key={code} value={code}>{code}</option>
               ))}
             </select>
           </div>
-          {/* Phone number input - FIXED */}
+          {/* Phone number input */}
           <input
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            value={formData.phone}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-            }
-            placeholder="Phone number"
-            className="flex-1 h-full px-4 outline-none bg-transparent"
-            style={{ 
-              fontSize: '16px',
-              lineHeight: '1.5',
-              minHeight: '56px'
-            }}
-          />
+  type="tel"
+  inputMode="numeric"
+  autoComplete="off"
+  enterKeyHint="done"
+  value={formData.phone}
+  onChange={(e) =>
+    setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+  }
+  placeholder="Phone number"
+  className="flex-1 h-full px-4 text-base outline-none bg-transparent"
+  style={{ fontSize: '16px' }}
+/>
         </div>
 
-        {/* JOB + COMPANY PILLS */}
+        {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}
         <div className="grid grid-cols-2 gap-2">
           <PillInput
             label="Role"
@@ -461,13 +456,12 @@ export function ContactShareSheet({
           />
         </div>
 
-        {/* SEND BUTTON */}
+        {/* SEND BUTTON WITH GRADIENT */}
         <Button
           onClick={handleSubmit}
           disabled={submitting}
           variant="gradient"
-          className="w-full min-h-[56px] rounded-xl text-white text-base font-medium mt-6 hover:opacity-90 transition-opacity"
-          style={{ fontSize: '16px' }}
+          className="w-full h-14 rounded-xl text-white text-base font-medium mt-6 hover:opacity-90 transition-opacity"
         >
           {submitting ? 'Sending...' : 'Send'}
         </Button>
@@ -480,21 +474,21 @@ export function ContactShareSheet({
   );
 
   if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-        <DrawerContent className="flex flex-col h-dvh" hideHandle>
-          <div className="flex-1 overflow-y-auto touch-pan-y">
-            <BlinqHeader />
-            {FormContent}
-          </div>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-  
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
+      <DrawerContent className="flex flex-col max-h-safe" hideHandle>
+        <div className="flex-1 scroll-keyboard-safe">
+          <BlinqHeader />
+          {FormContent}
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden" hideCloseButton>
+        {/* Desktop layout remains unchanged */}
         <BlinqHeader />
         {FormContent}
       </DialogContent>
