@@ -198,6 +198,20 @@ export function ContactShareSheet({
     vv.removeEventListener('scroll', updateHeight);
   };
 }, []);
+
+  useEffect(() => {
+  const handler = (e: Event) => {
+    const el = e.target as HTMLElement;
+    if (el.tagName === 'INPUT') {
+      setTimeout(() => {
+        el.scrollIntoView({ block: 'center', behavior: 'instant' });
+      }, 50);
+    }
+  };
+
+  document.addEventListener('focusin', handler);
+  return () => document.removeEventListener('focusin', handler);
+}, []);
   
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
