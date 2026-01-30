@@ -181,22 +181,23 @@ export function ContactShareSheet({
   const [submitting, setSubmitting] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
+
   useEffect(() => {
   const vv = window.visualViewport;
   if (!vv) return;
 
+  let initialHeight = vv.height;
+
   const updateHeight = () => {
-    document.documentElement.style.setProperty('--vvh', `${vv.height}px`);
+    // Only shrink when keyboard opens
+    if (vv.height < initialHeight) {
+      document.documentElement.style.setProperty('--vvh', `${vv.height}px`);
+    }
   };
 
-  updateHeight();
   vv.addEventListener('resize', updateHeight);
-  vv.addEventListener('scroll', updateHeight);
 
-  return () => {
-    vv.removeEventListener('resize', updateHeight);
-    vv.removeEventListener('scroll', updateHeight);
-  };
+  return () => vv.removeEventListener('resize', updateHeight);
 }, []);
 
   useEffect(() => {
