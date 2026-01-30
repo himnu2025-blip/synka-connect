@@ -298,10 +298,6 @@
   .touch-pan-y {
   touch-action: pan-y;
   }
-
-  .drawer-no-anim {
-  transition: none !important;
-  }
 }
 
 @keyframes float {
