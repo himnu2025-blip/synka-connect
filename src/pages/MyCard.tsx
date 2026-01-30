@@ -1202,6 +1202,7 @@ useEffect(() => {
           onSave={handleCroppedImageSave}
         />
       )}
+      </div>
     </div>
   );
       }
