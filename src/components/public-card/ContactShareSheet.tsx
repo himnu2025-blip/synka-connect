@@ -429,7 +429,7 @@ export function ContactShareSheet({
           {/* Phone number input */}
           <input
   type="tel"
-  inputMode="numeric"
+  inputMode="tel"
   autoComplete="off"
   enterKeyHint="done"
   value={formData.phone}
