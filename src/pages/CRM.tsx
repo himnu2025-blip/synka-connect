@@ -22,7 +22,10 @@ import {
   Save,
   ArrowUpDown,
   Check,
-  MoreHorizontal
+  MoreHorizontal,
+  Download,
+  Lock,
+  FileUp,
 } from 'lucide-react';
 import { hapticFeedback } from '@/lib/haptics';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -79,6 +82,7 @@ import {
   isValidWebsite,
   isValidLinkedIn,
 } from '@/lib/inputValidation';
+import { downloadContactsCSV, parseCSV, readFileAsText, downloadSampleCSV } from '@/lib/contactsIO';
 
 // Public site URL - always use production URL for links
 const PUBLIC_SITE_URL = import.meta.env.VITE_PUBLIC_SITE_URL || 'https://synka.in';
@@ -358,6 +362,15 @@ const saveNote = async () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  
+  // CSV Import states
+  const csvImportRef = useRef<HTMLInputElement>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [showImportPreview, setShowImportPreview] = useState(false);
+  const [importContacts, setImportContacts] = useState<Partial<Contact>[]>([]);
+
+  // Check if user has Orange plan
+  const isOrangePlan = profile?.plan?.toLowerCase() === 'orange';
 
   // Confirm dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -1360,6 +1373,88 @@ if (!contacts && contactsLoading) {
     localStorage.setItem('crm_sort_by', newSort);
   };
 
+  // Handle export contacts
+  const handleExportContacts = () => {
+    if (!isOrangePlan) {
+      hapticFeedback.light();
+      navigate('/upgrade');
+      return;
+    }
+    hapticFeedback.light();
+    const filename = `synka_contacts_${new Date().toISOString().split('T')[0]}.csv`;
+    downloadContactsCSV(localContacts, filename);
+    toast({ title: `Exported ${localContacts.length} contacts` });
+  };
+
+  // Handle import contacts
+  const handleImportClick = () => {
+    if (!isOrangePlan) {
+      hapticFeedback.light();
+      navigate('/upgrade');
+      return;
+    }
+    hapticFeedback.light();
+    csvImportRef.current?.click();
+  };
+
+  // Handle CSV file selection
+  const handleCSVFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Reset input so same file can be selected again
+    e.target.value = '';
+    
+    try {
+      setIsImporting(true);
+      const text = await readFileAsText(file);
+      const parsed = parseCSV(text);
+      
+      if (parsed.length === 0) {
+        toast({ 
+          title: 'No valid contacts found', 
+          description: 'Make sure your CSV has a "name" column',
+          variant: 'destructive' 
+        });
+        return;
+      }
+      
+      setImportContacts(parsed);
+      setShowImportPreview(true);
+    } catch (err) {
+      toast({ title: 'Failed to read file', variant: 'destructive' });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  // Confirm import
+  const confirmImport = async () => {
+    setIsImporting(true);
+    let successCount = 0;
+    
+    for (const contact of importContacts) {
+      const { error } = await createContact({
+        name: contact.name || '',
+        company: contact.company || null,
+        designation: contact.designation || null,
+        email: contact.email || null,
+        phone: contact.phone || null,
+        whatsapp: contact.whatsapp || contact.phone || null,
+        linkedin: contact.linkedin || null,
+        website: contact.website || null,
+        source: 'csv_import',
+      });
+      if (!error) successCount++;
+    }
+    
+    toast({ title: `Imported ${successCount} contacts` });
+    setShowImportPreview(false);
+    setImportContacts([]);
+    setIsImporting(false);
+    refetch();
+  };
+
   return (
     <div className="min-h-dvh w-full max-w-full overflow-x-hidden bg-background font-inter">
       {/* Apple-style Header */}
@@ -1422,7 +1517,7 @@ if (!contacts && contactsLoading) {
                   <ArrowUpDown className="h-4 w-4" strokeWidth={1.5} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-52">
                 <DropdownMenuItem onClick={() => handleSortChange('name')}>
                   Sort by Name
                   {sortBy === 'name' && <Check className="ml-auto h-4 w-4 text-primary" />}
@@ -1434,6 +1529,22 @@ if (!contacts && contactsLoading) {
                 <DropdownMenuItem onClick={() => handleSortChange('last_interaction')}>
                   Last Interaction
                   {sortBy === 'last_interaction' && <Check className="ml-auto h-4 w-4 text-primary" />}
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                {/* Import Contacts */}
+                <DropdownMenuItem onClick={handleImportClick} className="gap-2">
+                  <FileUp className="h-4 w-4" />
+                  Import Contacts
+                  {!isOrangePlan && <Lock className="ml-auto h-3.5 w-3.5 text-muted-foreground" />}
+                </DropdownMenuItem>
+                
+                {/* Export Contacts */}
+                <DropdownMenuItem onClick={handleExportContacts} className="gap-2">
+                  <Download className="h-4 w-4" />
+                  Export Contacts
+                  {!isOrangePlan && <Lock className="ml-auto h-3.5 w-3.5 text-muted-foreground" />}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -2560,6 +2671,77 @@ if (!contacts && contactsLoading) {
             >
               {interactionConfirmed ? 'Save' : 'Save Note'}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Hidden CSV Import Input */}
+      <input
+        ref={csvImportRef}
+        type="file"
+        accept=".csv,text/csv"
+        className="hidden"
+        onChange={handleCSVFileChange}
+      />
+
+      {/* Import Preview Dialog */}
+      <Dialog open={showImportPreview} onOpenChange={setShowImportPreview}>
+        <DialogContent className="max-w-lg max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Import {importContacts.length} Contacts</DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-auto space-y-2 my-4">
+            {importContacts.slice(0, 10).map((contact, idx) => (
+              <div key={idx} className="p-3 rounded-lg bg-muted/50 border border-border/50">
+                <p className="font-medium text-sm">{contact.name}</p>
+                <div className="text-xs text-muted-foreground space-y-0.5 mt-1">
+                  {contact.company && <p>{contact.company}</p>}
+                  {contact.email && <p>{contact.email}</p>}
+                  {contact.phone && <p>{contact.phone}</p>}
+                </div>
+              </div>
+            ))}
+            {importContacts.length > 10 && (
+              <p className="text-sm text-muted-foreground text-center py-2">
+                + {importContacts.length - 10} more contacts
+              </p>
+            )}
+          </div>
+          
+          <div className="flex justify-between gap-2 pt-2 border-t">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => downloadSampleCSV()}
+            >
+              Download Template
+            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowImportPreview(false);
+                  setImportContacts([]);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="gradient"
+                onClick={confirmImport}
+                disabled={isImporting}
+              >
+                {isImporting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  `Import ${importContacts.length} Contacts`
+                )}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
