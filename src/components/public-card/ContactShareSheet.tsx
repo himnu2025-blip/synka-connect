@@ -186,26 +186,31 @@ export function ContactShareSheet({
   const vv = window.visualViewport;
   if (!vv) return;
 
+  const root = document.documentElement;
+  let resizeTimer: number;
+
   const setHeight = () => {
-    document.documentElement.style.setProperty('--vvh', `${vv.height}px`);
+    root.style.setProperty('--vvh', `${vv.height}px`);
   };
-
-  // set once on mount
-  setHeight();
-
-  let resizeTimeout: number;
 
   const onResize = () => {
-    // Debounce prevents jump when keyboard closes
-    clearTimeout(resizeTimeout);
-    resizeTimeout = window.setTimeout(setHeight, 120);
+    // Disable animation while resizing (keyboard closing)
+    root.classList.add('drawer-no-anim');
+
+    setHeight();
+
+    clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      root.classList.remove('drawer-no-anim');
+    }, 250); // re-enable after keyboard animation ends
   };
 
+  setHeight();
   vv.addEventListener('resize', onResize);
 
   return () => {
     vv.removeEventListener('resize', onResize);
-    clearTimeout(resizeTimeout);
+    clearTimeout(resizeTimer);
   };
 }, []);
 
@@ -514,7 +519,7 @@ export function ContactShareSheet({
   if (isMobile) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-      <DrawerContent className="flex flex-col max-h-[var(--vvh)]" hideHandle>
+      <DrawerContent className="drawer-no-anim flex flex-col max-h-[var(--vvh)]" hideHandle>
         <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
           <BlinqHeader />
           {FormContent}
