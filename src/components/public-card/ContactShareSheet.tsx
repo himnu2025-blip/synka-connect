@@ -186,21 +186,20 @@ export function ContactShareSheet({
   const vv = window.visualViewport;
   if (!vv) return;
 
-  const originalHeight = window.innerHeight; // full screen height (no keyboard)
+  // TRUE full height of screen (never affected by keyboard)
+  const FULL_HEIGHT = screen.height;
 
   const update = () => {
-    const keyboardOpen = vv.height < originalHeight - 100;
+    const keyboardOpen = vv.height < FULL_HEIGHT * 0.75;
 
     if (keyboardOpen) {
-      // keyboard open → shrink drawer
       document.documentElement.style.setProperty('--vvh', `${vv.height}px`);
     } else {
-      // keyboard closed → restore original height
-      document.documentElement.style.setProperty('--vvh', `${originalHeight}px`);
+      document.documentElement.style.setProperty('--vvh', `${FULL_HEIGHT}px`);
     }
   };
 
-  update(); // run once
+  update();
 
   vv.addEventListener('resize', update);
   return () => vv.removeEventListener('resize', update);
