@@ -1804,7 +1804,7 @@ if (!contacts && contactsLoading) {
 
       {/* Add Contact Dialog */}
       <Dialog open={showAddContact} onOpenChange={setShowAddContact}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-safe scroll-keyboard-safe">
           <DialogHeader>
             <DialogTitle>Add Contact</DialogTitle>
           </DialogHeader>
@@ -2154,13 +2154,13 @@ if (!contacts && contactsLoading) {
           }
         }}
       >
-        <DrawerContent hideHandle className="rounded-t-3xl border-0 shadow-none bg-background h-[100dvh]">
+        <DrawerContent hideHandle className="rounded-t-3xl border-0 shadow-none bg-background max-h-safe">
           {/* Drag Handle */}
           <div className="flex justify-center py-3">
             <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
           </div>
           {selectedContact && (
-            <div className="px-4 pb-6 space-y-6 overflow-y-auto h-[calc(100dvh-48px)] overscroll-contain scroll-auto">
+            <div className="px-4 pb-6 space-y-6 scroll-keyboard-safe flex-1">
               <DrawerHeader className="text-center relative p-0">
                 <ContactAvatar 
                   name={selectedContact.name}

@@ -149,7 +149,20 @@
   body {
     @apply bg-background text-foreground;
     overflow-x: hidden;
-    /* 🔴 CRITICAL FIX: Prevents scroll chain break when keyboard shifts viewport */
+    /* 🔴 CRITICAL: Prevents bounce/elastic scroll on iOS */
+    overscroll-behavior-y: none;
+    /* 🔴 CRITICAL: Prevents body scroll when keyboard opens */
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Root element must handle scroll instead of body */
+  #root {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
   }
 
@@ -278,6 +291,21 @@
 
   .h-dvh {
     height: 100dvh;
+  }
+  
+  /* 🔴 CRITICAL: Max height that respects keyboard on mobile */
+  .max-h-safe {
+    max-height: 100dvh;
+    max-height: -webkit-fill-available;
+  }
+  
+  /* 🔴 CRITICAL: Smooth scroll container for forms with keyboard */
+  .scroll-keyboard-safe {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
   }
 
   /* Prevent horizontal overflow */

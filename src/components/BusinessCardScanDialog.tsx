@@ -422,11 +422,11 @@ export function BusinessCardScanDialog({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
+        <DrawerContent className="max-h-safe" hideHandle>
           <DrawerHeader>
             <DrawerTitle>{title}</DrawerTitle>
           </DrawerHeader>
-          <div className="px-4 pb-6">{content}</div>
+          <div className="px-4 pb-6 scroll-keyboard-safe">{content}</div>
         </DrawerContent>
       </Drawer>
     );
