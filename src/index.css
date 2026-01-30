@@ -135,12 +135,13 @@
   }
 
   html {
-    font-family: 'Inter', system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
-    -webkit-text-size-adjust: 100%;
-  }
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation; /* 🔴 ADD THIS */
+}
   
   html, body, #root {
   height: 100%;
@@ -150,6 +151,7 @@ body {
   @apply bg-background text-foreground;
   overflow-x: hidden;
   overscroll-behavior-y: contain;
+  min-height: -webkit-fill-available; /* 🔴 ADD THIS */
 }
 
   /* 🔴 Prevent iOS zoom on input focus */
