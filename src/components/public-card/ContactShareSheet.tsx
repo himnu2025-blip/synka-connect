@@ -428,8 +428,8 @@ export function ContactShareSheet({
           </div>
           {/* Phone number input */}
           <input
-            type="tel"
-            inputMode="tel"
+  type="text"
+  inputMode="numeric"
             value={formData.phone}
             onChange={(e) =>
               setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
