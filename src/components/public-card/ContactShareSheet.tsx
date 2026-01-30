@@ -182,10 +182,6 @@ export function ContactShareSheet({
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
 
-  document.addEventListener('focusin', handler);
-  return () => document.removeEventListener('focusin', handler);
-}, []);
-
 useEffect(() => {
   const vv = window.visualViewport;
   if (!vv) return;
