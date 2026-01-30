@@ -294,6 +294,10 @@
     min-height: 44px;
     min-width: 44px;
   }
+
+  .touch-pan-y {
+  touch-action: pan-y;
+  }
 }
 
 @keyframes float {
