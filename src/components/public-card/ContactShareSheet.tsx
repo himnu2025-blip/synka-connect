@@ -182,47 +182,6 @@ export function ContactShareSheet({
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
 
-  useEffect(() => {
-  const vv = window.visualViewport;
-  if (!vv) return;
-
-  const root = document.documentElement;
-  const fullHeight = window.innerHeight; // natural screen height
-
-  const update = () => {
-    const keyboardOpen = vv.height < fullHeight - 120;
-
-    root.classList.add('drawer-no-anim');
-
-    if (keyboardOpen) {
-      // shrink when keyboard open
-      root.style.setProperty('--vvh', `${vv.height}px`);
-    } else {
-      // restore natural height
-      root.style.setProperty('--vvh', `100vh`);
-    }
-
-    requestAnimationFrame(() => {
-      root.classList.remove('drawer-no-anim');
-    });
-  };
-
-  update();
-  vv.addEventListener('resize', update);
-
-  return () => vv.removeEventListener('resize', update);
-}, []);
-
-  useEffect(() => {
-  const handler = (e: Event) => {
-    const el = e.target as HTMLElement;
-    if (el.tagName === 'INPUT') {
-      setTimeout(() => {
-        el.scrollIntoView({ block: 'center', behavior: 'instant' });
-      }, 50);
-    }
-  };
-
   document.addEventListener('focusin', handler);
   return () => document.removeEventListener('focusin', handler);
 }, []);
@@ -518,7 +477,7 @@ export function ContactShareSheet({
   if (isMobile) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-      <DrawerContent className="drawer-no-anim flex flex-col max-h-[var(--vvh)]" hideHandle>
+      <DrawerContent className="flex flex-col h-[100dvh] max-h-[100dvh]" hideHandle>
         <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
           <BlinqHeader />
           {FormContent}
