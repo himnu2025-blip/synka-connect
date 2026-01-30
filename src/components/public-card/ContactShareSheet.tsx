@@ -428,16 +428,18 @@ export function ContactShareSheet({
           </div>
           {/* Phone number input */}
           <input
-  type="text"
+  type="tel"
   inputMode="numeric"
-            value={formData.phone}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-            }
-            placeholder="Phone number"
-            className="flex-1 h-full px-4 text-base outline-none bg-transparent placeholder:text-muted-foreground"
-            style={{ fontSize: '16px' }}
-          />
+  autoComplete="off"
+  enterKeyHint="done"
+  value={formData.phone}
+  onChange={(e) =>
+    setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+  }
+  placeholder="Phone number"
+  className="flex-1 h-full px-4 text-base outline-none bg-transparent"
+  style={{ fontSize: '16px' }}
+/>
         </div>
 
         {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}
