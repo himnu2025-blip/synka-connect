@@ -476,7 +476,7 @@ export function ContactShareSheet({
   if (isMobile) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-      <DrawerContent className="flex flex-col max-h-safe" hideHandle>
+      <DrawerContent className="flex flex-col h-dvh" hideHandle>
         <div className="flex-1 scroll-keyboard-safe">
           <BlinqHeader />
           {FormContent}
