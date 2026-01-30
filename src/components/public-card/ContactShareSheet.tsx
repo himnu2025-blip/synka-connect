@@ -186,18 +186,27 @@ export function ContactShareSheet({
   const vv = window.visualViewport;
   if (!vv) return;
 
-  let initialHeight = vv.height;
-
-  const updateHeight = () => {
-    // Only shrink when keyboard opens
-    if (vv.height < initialHeight) {
-      document.documentElement.style.setProperty('--vvh', `${vv.height}px`);
-    }
+  const setHeight = () => {
+    document.documentElement.style.setProperty('--vvh', `${vv.height}px`);
   };
 
-  vv.addEventListener('resize', updateHeight);
+  // set once on mount
+  setHeight();
 
-  return () => vv.removeEventListener('resize', updateHeight);
+  let resizeTimeout: number;
+
+  const onResize = () => {
+    // Debounce prevents jump when keyboard closes
+    clearTimeout(resizeTimeout);
+    resizeTimeout = window.setTimeout(setHeight, 120);
+  };
+
+  vv.addEventListener('resize', onResize);
+
+  return () => {
+    vv.removeEventListener('resize', onResize);
+    clearTimeout(resizeTimeout);
+  };
 }, []);
 
   useEffect(() => {
