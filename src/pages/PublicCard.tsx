@@ -24,7 +24,7 @@ import { logScanEvent, logContactSave } from '@/hooks/useAnalytics';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { SmartAppBanner } from '@/components/SmartAppBanner';
-import { IOSPWAPrompt } from '@/components/IOSPWAPrompt';
+
 import { CardImageSection, LayoutType } from '@/components/card/CardImageSection';
 import { DocumentLinks } from '@/components/card/DocumentLinks';
 import { SocialLinkChip } from '@/components/card/SocialLinkChip';
@@ -478,27 +478,15 @@ export default function PublicCard() {
       
       const firstName = displayData.name.split(' ')[0];
       
-      if (result.method === 'native') {
-        // Direct save - best UX, instant success
+      // Only show toast for vCard download (web fallback) - native/share methods open their own UI
+      if (result.method === 'vcard') {
         toast({
-          title: `✓ ${firstName}'s contact saved!`,
-          description: 'Now share your details with them.',
-          className: 'animate-fade-in',
-        });
-      } else if (result.method === 'share') {
-        // Share API - user will see share sheet
-        toast({
-          title: `Save ${firstName}'s contact`,
-          description: 'Tap "Add to Contacts" in the menu.',
-        });
-      } else {
-        // vCard download - web fallback
-        toast({
-          title: `📥 ${firstName}'s contact downloaded`,
-          description: `Tap the downloaded file to add ${firstName} to your contacts.`,
-          duration: 6000, // Longer duration for instruction
+          title: `${firstName}'s contact downloaded`,
+          description: `Tap the file to add to contacts.`,
+          duration: 4000,
         });
       }
+      // No toast for 'native' or 'share' - these open native dialogs that are self-explanatory
 
       // Open contact share sheet after save completes
       setTimeout(() => {
@@ -809,9 +797,6 @@ export default function PublicCard() {
           </div>
         )}
       </div>
-
-      {/* iOS PWA Prompt */}
-      <IOSPWAPrompt path={`/u/${slug}`} />
     </div>
   );
 }
