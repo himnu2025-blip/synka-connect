@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -94,7 +94,87 @@ const PillInput = ({
   );
 };
 
-// ... rest of the interface definitions remain the same
+interface ContactShareSheetProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  ownerName: string;
+  ownerPhotoUrl?: string;
+  onSubmit: (data: ContactFormData) => Promise<void>;
+  onSkip: () => void;
+}
+
+export interface ContactFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  designation: string;
+  company: string;
+  linkedin?: string;
+}
+
+type ScanState = 'idle' | 'uploading' | 'processing' | 'success' | 'failed';
+
+// Comprehensive country codes list
+const COUNTRY_CODES = [
+  { code: '+91', country: 'India' },
+  { code: '+1', country: 'United States' },
+  { code: '+44', country: 'United Kingdom' },
+  { code: '+61', country: 'Australia' },
+  { code: '+971', country: 'UAE' },
+  { code: '+966', country: 'Saudi Arabia' },
+  { code: '+65', country: 'Singapore' },
+  { code: '+81', country: 'Japan' },
+  { code: '+86', country: 'China' },
+  { code: '+82', country: 'South Korea' },
+  { code: '+49', country: 'Germany' },
+  { code: '+33', country: 'France' },
+  { code: '+39', country: 'Italy' },
+  { code: '+34', country: 'Spain' },
+  { code: '+31', country: 'Netherlands' },
+  { code: '+41', country: 'Switzerland' },
+  { code: '+46', country: 'Sweden' },
+  { code: '+47', country: 'Norway' },
+  { code: '+45', country: 'Denmark' },
+  { code: '+358', country: 'Finland' },
+  { code: '+43', country: 'Austria' },
+  { code: '+32', country: 'Belgium' },
+  { code: '+48', country: 'Poland' },
+  { code: '+420', country: 'Czech Republic' },
+  { code: '+36', country: 'Hungary' },
+  { code: '+351', country: 'Portugal' },
+  { code: '+30', country: 'Greece' },
+  { code: '+353', country: 'Ireland' },
+  { code: '+7', country: 'Russia' },
+  { code: '+380', country: 'Ukraine' },
+  { code: '+90', country: 'Turkey' },
+  { code: '+972', country: 'Israel' },
+  { code: '+20', country: 'Egypt' },
+  { code: '+27', country: 'South Africa' },
+  { code: '+234', country: 'Nigeria' },
+  { code: '+254', country: 'Kenya' },
+  { code: '+55', country: 'Brazil' },
+  { code: '+52', country: 'Mexico' },
+  { code: '+54', country: 'Argentina' },
+  { code: '+57', country: 'Colombia' },
+  { code: '+56', country: 'Chile' },
+  { code: '+51', country: 'Peru' },
+  { code: '+58', country: 'Venezuela' },
+  { code: '+60', country: 'Malaysia' },
+  { code: '+62', country: 'Indonesia' },
+  { code: '+63', country: 'Philippines' },
+  { code: '+66', country: 'Thailand' },
+  { code: '+84', country: 'Vietnam' },
+  { code: '+92', country: 'Pakistan' },
+  { code: '+880', country: 'Bangladesh' },
+  { code: '+94', country: 'Sri Lanka' },
+  { code: '+977', country: 'Nepal' },
+  { code: '+64', country: 'New Zealand' },
+  { code: '+974', country: 'Qatar' },
+  { code: '+968', country: 'Oman' },
+  { code: '+973', country: 'Bahrain' },
+  { code: '+965', country: 'Kuwait' },
+];
 
 export function ContactShareSheet({
   open,
@@ -120,7 +200,127 @@ export function ContactShareSheet({
     linkedin: '',
   });
 
-  // ... other functions remain the same
+  const normalizeLinkedInUrl = (value: string) => {
+    let v = value.trim();
+    if (!v) return '';
+    
+    v = v.replace(/^https?:\/\//, '');
+    
+    if (v.includes('linkedin.com')) {
+      return `https://${v}`;
+    }
+    
+    return `https://linkedin.com/in/${v}`;
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.firstName.trim()) {
+      toast({
+        title: 'First name is required',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Only include country code if phone number is not empty
+      const phoneValue = formData.phone.trim() ? `${countryCode}${formData.phone.trim()}` : '';
+      
+      await onSubmit({
+        ...formData,
+        phone: phoneValue,
+      });
+      onOpenChange(false);
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        designation: '',
+        company: '',
+        linkedin: '',
+      });
+    } catch (error) {
+      console.error('Submit error:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSkip = () => {
+    onSkip();
+    onOpenChange(false);
+  };
+
+  const handleScanBusinessCard = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setScanState('uploading');
+
+    try {
+      const [{ fileToOptimizedBase64 }] = await Promise.all([
+        import('@/lib/imageOptimization')
+      ]);
+      
+      setScanState('processing');
+      const base64 = await fileToOptimizedBase64(file);
+      
+      const { data, error } = await supabase.functions.invoke('scan-business-card', {
+        body: { image: base64 }
+      });
+
+      if (error) throw error;
+
+      if (data?.success && data?.contact) {
+        const contact = data.contact;
+        const nameParts = (contact.name || '').split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        setScanState('success');
+        setFormData(prev => ({
+          firstName: firstName || prev.firstName,
+          lastName: lastName || prev.lastName,
+          email: contact.email || prev.email,
+          phone: contact.phone || prev.phone,
+          designation: contact.designation || prev.designation,
+          company: contact.company || prev.company,
+        }));
+        
+        toast({
+          title: 'Card scanned!',
+          description: 'Details filled in. Please review.',
+        });
+
+        setTimeout(() => setScanState('idle'), 2000);
+      } else {
+        setScanState('failed');
+        toast({
+          title: "Couldn't read card",
+          description: 'Please enter details manually.',
+          variant: 'destructive',
+        });
+        setTimeout(() => setScanState('idle'), 2000);
+      }
+    } catch (err) {
+      console.error('Scan error:', err);
+      setScanState('failed');
+      toast({
+        title: 'Scan failed',
+        description: 'Please enter details manually.',
+        variant: 'destructive',
+      });
+      setTimeout(() => setScanState('idle'), 2000);
+    }
+
+    e.target.value = '';
+  };
 
   // Common header component for both mobile and desktop
   const BlinqHeader = () => (
@@ -231,7 +431,7 @@ export function ContactShareSheet({
           {/* Phone number input - FIXED */}
           <input
             type="tel"
-            inputMode="tel" // Changed from 'numeric' to 'tel' for proper keyboard
+            inputMode="tel"
             autoComplete="tel"
             value={formData.phone}
             onChange={(e) =>
@@ -282,9 +482,7 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-        {/* CHANGED: Use h-dvh instead of max-h-safe for drawer */}
         <DrawerContent className="flex flex-col h-dvh" hideHandle>
-          {/* CHANGED: Removed scroll-keyboard-safe, let browser handle it */}
           <div className="flex-1 overflow-y-auto touch-pan-y">
             <BlinqHeader />
             {FormContent}
