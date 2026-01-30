@@ -151,7 +151,6 @@ body {
   @apply bg-background text-foreground;
   overflow-x: hidden;
   overscroll-behavior-y: contain;
-  min-height: -webkit-fill-available; /* 🔴 ADD THIS */
 }
 
   /* 🔴 Prevent iOS zoom on input focus */
