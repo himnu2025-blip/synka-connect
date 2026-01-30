@@ -187,31 +187,30 @@ export function ContactShareSheet({
   if (!vv) return;
 
   const root = document.documentElement;
-  let resizeTimer: number;
+  const fullHeight = window.innerHeight; // natural screen height
 
-  const setHeight = () => {
-    root.style.setProperty('--vvh', `${vv.height}px`);
-  };
+  const update = () => {
+    const keyboardOpen = vv.height < fullHeight - 120;
 
-  const onResize = () => {
-    // Disable animation while resizing (keyboard closing)
     root.classList.add('drawer-no-anim');
 
-    setHeight();
+    if (keyboardOpen) {
+      // shrink when keyboard open
+      root.style.setProperty('--vvh', `${vv.height}px`);
+    } else {
+      // restore natural height
+      root.style.setProperty('--vvh', `100vh`);
+    }
 
-    clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(() => {
+    requestAnimationFrame(() => {
       root.classList.remove('drawer-no-anim');
-    }, 250); // re-enable after keyboard animation ends
+    });
   };
 
-  setHeight();
-  vv.addEventListener('resize', onResize);
+  update();
+  vv.addEventListener('resize', update);
 
-  return () => {
-    vv.removeEventListener('resize', onResize);
-    clearTimeout(resizeTimer);
-  };
+  return () => vv.removeEventListener('resize', update);
 }, []);
 
   useEffect(() => {
