@@ -2241,12 +2241,7 @@ if (!contacts && contactsLoading) {
 
               {/* --- Inline Edit Form inside Sheet --- */}
               {isEditOpen && selectedContact ? (
-  <div 
-    className="space-y-4" 
-    style={{ 
-      paddingBottom: keyboardHeight > 0 ? '180px' : '24px' 
-    }}
-  >
+  <div className="space-y-4 pb-6">
                   <div 
   onFocus={() => {
     // Small delay to let keyboard open, then scroll into view
