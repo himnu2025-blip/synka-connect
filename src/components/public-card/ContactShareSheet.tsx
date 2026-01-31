@@ -388,7 +388,7 @@ export function ContactShareSheet({
       />
 
       {/* FORM FIELDS CONTAINER */}
-      <div className="space-y-4 px-4 pb-8">
+      <div className="space-y-4 px-4 pb-[max(2rem,env(safe-area-inset-bottom))]">
         {/* FIRST + LAST NAME */}
         <div className="grid grid-cols-2 gap-3">
           <BlinqInput
@@ -488,16 +488,11 @@ export function ContactShareSheet({
   return (
     <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
       <DrawerContent
-  className="!fixed bottom-0 left-0 right-0 top-auto
-             flex flex-col w-full
-             max-h-[85dvh]
-             rounded-t-2xl"
-  style={{
-    paddingBottom: 'env(safe-area-inset-bottom)',
-  }}
-  hideHandle
->
-        <div className="overflow-y-auto flex-1">
+        className="flex flex-col"
+        hideHandle
+      >
+        {/* Scrollable content area */}
+        <div className="overflow-y-auto overscroll-contain flex-1">
           <BlinqHeader />
           {FormContent}
         </div>
