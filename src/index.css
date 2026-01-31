@@ -161,11 +161,20 @@
     touch-action: manipulation;
   }
 
-  /* Fix iOS tel input first-focus padding bug */
-  input[type="tel"] {
-    appearance: none;
-    -webkit-appearance: none;
-  }
+  /* Fix iOS + Android + Web tel input padding bug */
+input[type="tel"] {
+  appearance: none;
+  -webkit-appearance: none;
+  /* Prevent iOS/Android from adding padding on first focus */
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Also fix on focus state (covers all mobile browsers) */
+input[type="tel"]:focus {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
 }
 
 /* Note: Avoid overscroll-behavior-y: contain on form containers - it causes keyboard gaps on iOS */
