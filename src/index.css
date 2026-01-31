@@ -283,7 +283,6 @@ body {
   /* 🔴 CRITICAL: Max height that respects keyboard on mobile */
   .max-h-safe {
     max-height: 100dvh;
-    max-height: -webkit-fill-available;
   }
   
   /* 🔴 CRITICAL: Smooth scroll container for forms with keyboard */
