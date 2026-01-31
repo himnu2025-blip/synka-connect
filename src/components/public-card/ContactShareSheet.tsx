@@ -444,7 +444,12 @@ export function ContactShareSheet({
             }
             placeholder="Phone number"
             className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none placeholder:text-muted-foreground"
-            style={{ fontSize: '16px' }}
+            style={{ 
+  fontSize: '16px',
+  paddingTop: '0',
+  paddingBottom: '0',
+  lineHeight: '56px',
+}}
           />
         </div>
 
@@ -483,15 +488,15 @@ export function ContactShareSheet({
   return (
     <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
       <DrawerContent
-        style={{
-          maxHeight: 'calc(85dvh - env(safe-area-inset-bottom))',
-          paddingBottom: 'env(safe-area-inset-bottom)'
-        }}
-        className="!fixed bottom-0 left-0 right-0 top-auto
-                   flex flex-col w-full
-                   rounded-t-2xl"
-        hideHandle
-      >
+  className="!fixed bottom-0 left-0 right-0 top-auto
+             flex flex-col w-full
+             max-h-[85dvh]
+             rounded-t-2xl"
+  style={{
+    paddingBottom: 'env(safe-area-inset-bottom)',
+  }}
+  hideHandle
+>
         <div className="overflow-y-auto flex-1">
           <BlinqHeader />
           {FormContent}
