@@ -451,55 +451,65 @@ export default function PublicCard() {
   };
 
   // Save contact and open share sheet (for non-Synka users)
-  const saveContactAndShare = async () => {
-    if (!displayData || !profile) return;
+const saveContactAndShare = async () => {
+  if (!displayData || !profile) return;
+  
+  // Haptic feedback
+  await hapticFeedback.light();
+
+  // Use native contact save - opens "Add to Contacts" dialog on mobile
+  // Flow: 1) Try native direct save, 2) Share API vCard, 3) Web vCard download
+  const result = await saveContactToPhone({
+    name: displayData.name,
+    company: displayData.company,
+    designation: displayData.designation,
+    phone: displayData.phone,
+    email: displayData.email,
+    website: displayData.website,
+    whatsapp: displayData.whatsapp,
+    about: displayData.about,
+    photo_url: displayData.photo_url,
+  });
+
+  // Show appropriate toast based on save method
+  if (result.success) {
+    // Log the contact save event
+    await logContactSave(profile.user_id, card?.id || null);
     
-    // Haptic feedback
-    await hapticFeedback.light();
-
-    // Use native contact save - opens "Add to Contacts" dialog on mobile
-    // Flow: 1) Try native direct save, 2) Share API vCard, 3) Web vCard download
-    const result = await saveContactToPhone({
-      name: displayData.name,
-      company: displayData.company,
-      designation: displayData.designation,
-      phone: displayData.phone,
-      email: displayData.email,
-      website: displayData.website,
-      whatsapp: displayData.whatsapp,
-      about: displayData.about,
-      photo_url: displayData.photo_url,
-    });
-
-    // Show appropriate toast based on save method
-    if (result.success) {
-      // Log the contact save event
-      await logContactSave(profile.user_id, card?.id || null);
-      
-      const firstName = displayData.name.split(' ')[0];
-      
-      // Only show toast for vCard download (web fallback) - native/share methods open their own UI
-      if (result.method === 'vcard') {
-        toast({
-          title: `${firstName}'s contact downloaded`,
-          description: `Tap the file to add to contacts.`,
-          duration: 4000,
-        });
-      }
-      // No toast for 'native' or 'share' - these open native dialogs that are self-explanatory
-
-      // Open contact share sheet after save completes
-      setTimeout(() => {
-        setShowContactSheet(true);
-      }, 300);
-    } else {
+    const firstName = displayData.name.split(' ')[0];
+    
+    // Show toast ONLY for vCard download after download completes
+    if (result.method === 'vcard') {
+      // Toast shows AFTER download is triggered (promise resolved)
       toast({
-        title: 'Contact not saved',
-        description: 'You can try again anytime.',
-        variant: 'destructive',
+        title: `${firstName}'s contact ready`,
+        description: `Open the downloaded file to save to contacts.`,
+        duration: 5000,
+      });
+    } else if (result.method === 'native') {
+      // Native save completed silently
+      toast({
+        title: 'Contact saved',
+        description: `${firstName} added to your contacts.`,
+        duration: 3000,
       });
     }
-  };
+    // No toast for 'share' method - Share sheet is self-explanatory
+
+    // Open contact share sheet after save completes
+    // Longer delay for vCard to ensure file is processed
+    const delay = result.method === 'vcard' ? 800 : 300;
+    setTimeout(() => {
+      setShowContactSheet(true);
+    }, delay);
+  } else {
+    toast({
+      title: 'Could not save contact',
+      description: 'Please try again.',
+      variant: 'destructive',
+    });
+  }
+};
 
   const shareCard = async () => {
     navigator.vibrate?.(10);
