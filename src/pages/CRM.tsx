@@ -2154,13 +2154,16 @@ if (!contacts && contactsLoading) {
           }
         }}
       >
-        <DrawerContent hideHandle className="rounded-t-3xl border-0 shadow-none bg-background max-h-[85dvh]">
-          {/* Drag Handle */}
-          <div className="flex justify-center py-3">
-            <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
-          </div>
-          {selectedContact && (
-            <div className="px-4 pb-6 space-y-6 overflow-y-auto flex-1">
+        <DrawerContent hideHandle className="rounded-t-3xl border-0 shadow-none bg-background flex flex-col">
+  {/* Drag Handle */}
+  <div className="flex justify-center py-3">
+    <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
+  </div>
+  {selectedContact && (
+    <div 
+      className="px-4 pb-6 space-y-6 overflow-y-auto overscroll-contain flex-1" 
+      style={{ maxHeight: '90dvh' }}
+    >
               <DrawerHeader className="text-center relative p-0">
                 <ContactAvatar 
                   name={selectedContact.name}
@@ -2205,7 +2208,7 @@ if (!contacts && contactsLoading) {
 
               {/* --- Inline Edit Form inside Sheet --- */}
               {isEditOpen && selectedContact ? (
-                <div className="space-y-4">
+                <div className="space-y-4 pb-6">
                   <FloatingNameInput
                     firstName={editForm.firstName}
                     lastName={editForm.lastName}
@@ -2280,7 +2283,7 @@ if (!contacts && contactsLoading) {
                 </div>
               ) : null}
 {isEditOpen && (
-  <div className="border-t bg-background px-4 py-3 flex justify-between mt-4">
+  <div className="border-t bg-background px-4 py-3 flex justify-between mt-6 mb-2">
     <Button
       variant="destructive"
       onClick={() => {
