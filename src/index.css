@@ -198,7 +198,7 @@ select:focus {
 }
   
 /* Note: Avoid overscroll-behavior-y: contain on form containers - it causes keyboard gaps on iOS */
-
+}
 @layer components {
   .glass {
     background: var(--glass-bg);
