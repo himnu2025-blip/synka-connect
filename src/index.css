@@ -145,13 +145,12 @@
   
   html, body, #root {
   height: 100%;
-  min-height: 100vh;
-  background: hsl(var(--background));
 }
 
 body {
   @apply bg-background text-foreground;
   overflow-x: hidden;
+  overscroll-behavior-y: contain;
 }
 
   /* 🔴 Prevent iOS zoom on input focus */
@@ -246,6 +245,10 @@ body {
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+
+  .pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+  }
   
   .safe-left {
     padding-left: env(safe-area-inset-left);
@@ -284,17 +287,15 @@ body {
   /* 🔴 CRITICAL: Max height that respects keyboard on mobile */
   .max-h-safe {
     max-height: 100dvh;
-    max-height: -webkit-fill-available;
   }
   
   /* 🔴 CRITICAL: Smooth scroll container for forms with keyboard */
   .scroll-keyboard-safe {
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-    scroll-behavior: smooth;
-  }
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  height: 100%;
+}
 
   /* Prevent horizontal overflow */
   .no-overflow-x {
