@@ -458,54 +458,42 @@ export async function getPublicCardData(slug: string): Promise<{
   profile: import('@/hooks/useProfile').Profile & import('@/hooks/useProfile').ProfileCompat | null;
   card: Card | null;
 }> {
-  try {
-    // ✅ PARALLEL queries using Promise.all
-    const [profileResult, cardsResult] = await Promise.all([
-      // Query 1: Get profile by slug
-      supabase
-        .from('profiles')
-        .select('*')
-        .eq('slug', slug)
-        .maybeSingle(),
-      
-      // Query 2: Get cards for this slug's user
-      // We join through profiles to get cards in one parallel query
-      supabase
-        .from('cards')
-        .select('*, profiles!inner(slug)')
-        .eq('profiles.slug', slug)
-        .eq('is_default', true)
-        .maybeSingle()
-    ]);
+  // Single query to get profile
+  const { data: profileData, error: profileError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle();
 
-    const { data: profileData, error: profileError } = profileResult;
-    const { data: cardData } = cardsResult;
-
-    if (profileError || !profileData) {
-      return { profile: null, card: null };
-    }
-
-    // Map profile with compatibility fields
-    const profile = {
-      ...profileData,
-      name: profileData.full_name || '',
-      designation: profileData.designation || profileData.title || '',
-      company: profileData.company || '',
-      phone: profileData.phone || '',
-      email: profileData.email || '',
-      website: profileData.website || '',
-      whatsapp: profileData.whatsapp || '',
-      linkedin: profileData.linkedin || '',
-      about: profileData.about || '',
-      photo_url: profileData.photo_url || '',
-      logo_url: profileData.logo_url || '',
-      card_design: profileData.card_design || 'minimal',
-      public_slug: profileData.slug || '',
-    } as import('@/hooks/useProfile').Profile & import('@/hooks/useProfile').ProfileCompat;
-
-    return { profile, card: cardData as Card | null };
-  } catch (error) {
-    console.error('Error loading public card:', error);
+  if (profileError || !profileData) {
     return { profile: null, card: null };
   }
+
+  // Map profile with compatibility fields
+  const profile = {
+    ...profileData,
+    name: profileData.full_name || '',
+    designation: profileData.designation || profileData.title || '',
+    company: profileData.company || '',
+    phone: profileData.phone || '',
+    email: profileData.email || '',
+    website: profileData.website || '',
+    whatsapp: profileData.whatsapp || '',
+    linkedin: profileData.linkedin || '',
+    about: profileData.about || '',
+    photo_url: profileData.photo_url || '',
+    logo_url: profileData.logo_url || '',
+    card_design: profileData.card_design || 'minimal',
+    public_slug: profileData.slug || '',
+  } as import('@/hooks/useProfile').Profile & import('@/hooks/useProfile').ProfileCompat;
+
+  // Get default card in parallel with profile mapping
+  const { data: cardData } = await supabase
+    .from('cards')
+    .select('*')
+    .eq('user_id', profileData.user_id)
+    .eq('is_default', true)
+    .maybeSingle();
+
+  return { profile, card: cardData as Card | null };
 }
