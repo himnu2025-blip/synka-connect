@@ -413,33 +413,53 @@ export function ContactShareSheet({
           />
         </div>
 
-        <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center">
-          {/* Country code selector */}
-          <div className="flex items-center px-3 h-full border-r border-border shrink-0">
-            <select
-              value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
-              className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
-            >
-              {COUNTRY_CODES.map(({ code }) => (
-                <option key={code} value={code}>{code}</option>
-              ))}
-            </select>
+        {/* Phone input with CSS-only floating label - no React state to prevent focus race conditions */}
+        <div className="relative h-14">
+          <div className="phone-container flex items-center h-full rounded-xl border border-border transition-colors focus-within:border-foreground">
+            {/* Country code selector */}
+            <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                autoComplete="off"
+                className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
+                style={{ fontSize: '14px' }}
+              >
+                {COUNTRY_CODES.map(({ code }) => (
+                  <option key={code} value={code} className="bg-background text-foreground">{code}</option>
+                ))}
+              </select>
+            </div>
+            {/* Phone number input - uses placeholder=" " for CSS peer detection */}
+            <input
+              type="tel"
+              inputMode="tel"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              data-form-type="other"
+              enterKeyHint="done"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+              }
+              placeholder=" "
+              className="peer flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none"
+              style={{ fontSize: '16px' }}
+            />
           </div>
-          {/* Phone number input */}
-          <input
-            type="tel"
-            inputMode="tel"
-            autoComplete="off"
-            enterKeyHint="done"
-            value={formData.phone}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-            }
-            placeholder="Phone number"
-            className="flex-1 h-full px-4 text-base outline-none bg-transparent"
-            style={{ fontSize: '16px' }}
-          />
+          {/* Floating label - pure CSS animation via focus-within, no React state */}
+          <label
+            className={`absolute text-muted-foreground pointer-events-none transition-all duration-200
+              ${formData.phone
+                ? "left-3 top-0 -translate-y-1/2 text-xs bg-background px-1"
+                : "left-[5.5rem] top-1/2 -translate-y-1/2 text-base bg-transparent px-0"
+              }
+              [.phone-container:focus-within_~_&]:left-3 [.phone-container:focus-within_~_&]:top-0 [.phone-container:focus-within_~_&]:-translate-y-1/2 [.phone-container:focus-within_~_&]:text-xs [.phone-container:focus-within_~_&]:bg-background [.phone-container:focus-within_~_&]:px-1`}
+          >
+            Phone
+          </label>
         </div>
 
         {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}

@@ -174,7 +174,7 @@ export function Layout() {
 
   /* ---------------- APP PAGES ---------------- */
   return (
-    <div className="min-h-dvh w-full max-w-full overflow-x-hidden bg-background">
+    <div className="min-h-dvh w-full max-w-full overflow-x-hidden bg-background overscroll-contain">
       <DesktopNav />
 
       {/* Mobile app header */}
@@ -212,7 +212,7 @@ export function Layout() {
         </div>
       </header>
 
-      <main className="pt-14 md:pt-16 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-8 w-full">
+      <main className="pt-14 md:pt-16 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-8 w-full overscroll-contain">
         <Suspense fallback={<PageSkeleton variant={getSkeletonVariant(location.pathname)} />}>
           <div className="animate-fade-in">
             <Outlet />
