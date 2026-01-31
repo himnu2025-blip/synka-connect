@@ -94,7 +94,6 @@ interface ContactShareSheetProps {
   onSubmit: (data: ContactFormData) => Promise<void>;
   onSkip: () => void;
 }
-const { keyboardHeight, isKeyboardVisible } = useIOSKeyboard();
 
 export interface ContactFormData {
   firstName: string;
@@ -177,6 +176,7 @@ export function ContactShareSheet({
   onSubmit,
   onSkip,
 }: ContactShareSheetProps) {
+  const { keyboardHeight, isKeyboardVisible } = useIOSKeyboard();
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
