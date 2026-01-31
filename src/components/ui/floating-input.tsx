@@ -181,7 +181,7 @@ interface FloatingPhoneInputProps {
 }
 
 // Phone input with country code selector - STATIC placeholder to prevent keyboard jump
-// No floating label animation = no layout shift during keyboard open on iOS/Android
+// Phone input with country code selector AND floating label
 export const FloatingPhoneInput = ({
   label,
   value,
@@ -194,40 +194,59 @@ export const FloatingPhoneInput = ({
   onBlur,
 }: FloatingPhoneInputProps) => {
   return (
-    <div className={cn("h-14 rounded-xl border border-border focus-within:border-foreground flex items-center", className)}>
-      {/* Country code selector - compact, no emoji */}
-      <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
-        <select
-          value={countryCode}
-          onChange={(e) => onCountryCodeChange(e.target.value)}
+    <div className={cn("relative h-14", className)}>
+      {/* Container with border */}
+      <div className="peer w-full h-full rounded-xl border border-border focus-within:border-foreground flex items-center">
+        {/* Country code selector - compact, no emoji */}
+        <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
+          <select
+            value={countryCode}
+            onChange={(e) => onCountryCodeChange(e.target.value)}
+            disabled={disabled}
+            autoComplete="off"
+            className="bg-transparent text-sm outline-none cursor-pointer disabled:opacity-50 appearance-none font-medium"
+            style={{ fontSize: '14px' }}
+          >
+            {COUNTRY_CODES.map(({ code }) => (
+              <option key={code} value={code} className="bg-background text-foreground">
+                {code}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        {/* Phone input - with peer selector for floating label */}
+        <input
+          type="tel"
+          inputMode="tel"
+          value={value}
+          onChange={onChange}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          placeholder=" "
           disabled={disabled}
           autoComplete="off"
-          className="bg-transparent text-sm outline-none cursor-pointer disabled:opacity-50 appearance-none font-medium"
-          style={{ fontSize: '14px' }}
-        >
-          {COUNTRY_CODES.map(({ code }) => (
-            <option key={code} value={code} className="bg-background text-foreground">{code}</option>
-          ))}
-        </select>
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-form-type="other"
+          className="peer-phone flex-1 min-w-0 h-full px-3 pt-4 pb-2 text-base bg-transparent outline-none disabled:opacity-50"
+          style={{ fontSize: '16px' }}
+        />
       </div>
-      {/* Phone input - static placeholder, no animation */}
-      <input
-        type="tel"
-        inputMode="tel"
-        value={value}
-        onChange={onChange}
-        onFocus={onFocus}
-        onBlur={onBlur}
-        placeholder={label}
-        disabled={disabled}
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        spellCheck={false}
-        data-form-type="other"
-        className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none disabled:opacity-50 placeholder:text-muted-foreground"
-        style={{ fontSize: '16px' }}
-      />
+      
+      {/* Floating label - animates to border on focus/fill */}
+      <label
+        className="absolute left-16 text-muted-foreground pointer-events-none transition-all duration-200
+          top-0 -translate-y-1/2 text-xs bg-background px-1
+          peer-focus-within:top-0 peer-focus-within:text-xs peer-focus-within:bg-background peer-focus-within:px-1
+          peer-has-[:placeholder-shown]:peer-has-[input:not(:focus)]:top-1/2 
+          peer-has-[:placeholder-shown]:peer-has-[input:not(:focus)]:text-base 
+          peer-has-[:placeholder-shown]:peer-has-[input:not(:focus)]:bg-transparent 
+          peer-has-[:placeholder-shown]:peer-has-[input:not(:focus)]:px-0"
+      >
+        {label}
+      </label>
     </div>
   );
 };
