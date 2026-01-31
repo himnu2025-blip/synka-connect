@@ -413,7 +413,7 @@ export function ContactShareSheet({
           />
         </div>
 
-        <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center overflow-hidden">
+        <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center">
           {/* Country code selector */}
           <div className="flex items-center px-3 h-full border-r border-border shrink-0">
             <select
