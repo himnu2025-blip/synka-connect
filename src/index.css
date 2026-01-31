@@ -245,16 +245,6 @@ body {
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
-
-  .overscroll-contain {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  }
-
-  .pb-safe {
-  padding-bottom: env(safe-area-inset-bottom);
-  }
   
   .safe-left {
     padding-left: env(safe-area-inset-left);
@@ -280,13 +270,30 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
   }
+
+  /* 🔴 CORRECTED: Dynamic viewport height for mobile browsers */
+  .min-h-dvh {
+    min-height: 100dvh;
+  }
+
+  .h-dvh {
+    height: 100dvh;
+  }
+  
+  /* 🔴 CRITICAL: Max height that respects keyboard on mobile */
+  .max-h-safe {
+    max-height: 100dvh;
+    max-height: -webkit-fill-available;
+  }
   
   /* 🔴 CRITICAL: Smooth scroll container for forms with keyboard */
   .scroll-keyboard-safe {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-}
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
+  }
 
   /* Prevent horizontal overflow */
   .no-overflow-x {
