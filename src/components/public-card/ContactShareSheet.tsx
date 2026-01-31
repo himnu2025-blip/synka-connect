@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useIOSKeyboard } from '@/hooks/useIOSKeyboard';
 import {
   Dialog,
   DialogContent,
@@ -93,6 +94,7 @@ interface ContactShareSheetProps {
   onSubmit: (data: ContactFormData) => Promise<void>;
   onSkip: () => void;
 }
+const { keyboardHeight, isKeyboardVisible } = useIOSKeyboard();
 
 export interface ContactFormData {
   firstName: string;
@@ -487,13 +489,24 @@ export function ContactShareSheet({
 
   if (isMobile) {
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
+    <Drawer open={open} onOpenChange={onOpenChange} handleOnly={false} dismissible={true}>
       <DrawerContent
         className="flex flex-col"
+        style={{
+          maxHeight: isKeyboardVisible 
+            ? `calc(90dvh - ${keyboardHeight}px)` 
+            : '90dvh',
+          transition: 'max-height 0.2s ease-out',
+        }}
         hideHandle
       >
         {/* Scrollable content area */}
-        <div className="overflow-y-auto overscroll-contain flex-1">
+        <div 
+          className="overflow-y-auto overscroll-contain flex-1"
+          style={{
+            paddingBottom: isKeyboardVisible ? '20px' : '0px',
+          }}
+        >
           <BlinqHeader />
           {FormContent}
         </div>
