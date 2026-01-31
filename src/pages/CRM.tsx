@@ -2242,26 +2242,12 @@ if (!contacts && contactsLoading) {
               {/* --- Inline Edit Form inside Sheet --- */}
               {isEditOpen && selectedContact ? (
   <div className="space-y-4 pb-6">
-                  <div 
-  onFocus={() => {
-    // Small delay to let keyboard open, then scroll into view
-    setTimeout(() => {
-      const activeElement = document.activeElement as HTMLElement;
-      activeElement?.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center',
-        inline: 'nearest'
-      });
-    }, 300);
-  }}
->
-  <FloatingNameInput
-    firstName={editForm.firstName}
-    lastName={editForm.lastName}
-    onFirstNameChange={(val) => updateEditField('firstName', val)}
-    onLastNameChange={(val) => updateEditField('lastName', val)}
-  />
-</div>
+                  <FloatingNameInput
+  firstName={editForm.firstName}
+  lastName={editForm.lastName}
+  onFirstNameChange={(val) => updateEditField('firstName', val)}
+  onLastNameChange={(val) => updateEditField('lastName', val)}
+/>
                   <FloatingInput
                     label="Company Name"
                     value={editForm.company}
