@@ -143,16 +143,21 @@
   touch-action: manipulation; /* 🔴 ADD THIS */
 }
   
-  html, body, #root {
-  height: 100%;
-    overflow: hidden;
-}
-
-body {
-  @apply bg-background text-foreground;
-  overflow-x: hidden;
-  /* Allow natural pull-to-refresh - no overscroll-behavior restriction */
-}
+  html {
+    height: 100%;
+    overflow-x: hidden;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  
+  #root {
+    min-height: 100%;
+  }
 
   /* 🔴 Prevent iOS zoom on input focus */
   input, textarea, select {
