@@ -157,6 +157,17 @@ body {
   input, textarea, select {
     font-size: 16px;
   }
+
+  /* 🔴 Fix iOS tel input first-focus padding bug */
+  input[type="tel"] {
+    appearance: none;
+    -webkit-appearance: none;
+  }
+}
+
+/* 🔴 Overscroll containment - prevents scroll bounce causing extra space */
+.overscroll-contain {
+  overscroll-behavior-y: contain;
 }
 
 @layer components {

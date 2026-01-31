@@ -184,7 +184,7 @@ interface FloatingPhoneInputProps {
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
-// Floating label input with country code selector
+// Floating label input with country code selector - CSS-only focus state to prevent keyboard jump
 export const FloatingPhoneInput = ({
   label,
   value,
@@ -196,16 +196,11 @@ export const FloatingPhoneInput = ({
   onFocus,
   onBlur,
 }: FloatingPhoneInputProps) => {
-  const [isFocused, setIsFocused] = React.useState(false);
   const hasValue = value !== undefined && value !== null && value !== '';
-  const isFloating = hasValue || isFocused;
   
   return (
     <div className={cn("relative h-14", className)}>
-      <div className={cn(
-        "flex items-center h-full rounded-xl border transition-colors",
-        isFocused ? "border-foreground" : "border-border"
-      )}>
+      <div className="peer-container flex items-center h-full rounded-xl border border-border transition-colors focus-within:border-foreground">
         {/* Country code selector - compact, no emoji */}
         <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
           <select
@@ -221,20 +216,14 @@ export const FloatingPhoneInput = ({
             ))}
           </select>
         </div>
-        {/* Phone input - vertically centered */}
+        {/* Phone input - CSS peer for label animation */}
         <input
           type="tel"
           inputMode="tel"
           value={value}
           onChange={onChange}
-          onFocus={(e) => {
-            setIsFocused(true);
-            onFocus?.(e);
-          }}
-          onBlur={(e) => {
-            setIsFocused(false);
-            onBlur?.(e);
-          }}
+          onFocus={onFocus}
+          onBlur={onBlur}
           placeholder=" "
           disabled={disabled}
           autoComplete="off"
@@ -242,17 +231,19 @@ export const FloatingPhoneInput = ({
           autoCapitalize="off"
           spellCheck={false}
           data-form-type="other"
-          className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none disabled:opacity-50"
+          className="peer flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none disabled:opacity-50"
           style={{ fontSize: '16px' }}
         />
       </div>
-      {/* Floating label - stable positioning with focus + hasValue check */}
+      {/* Floating label - pure CSS animation via peer, no React state re-renders */}
       <label
         className={cn(
           "absolute text-muted-foreground pointer-events-none transition-all duration-200",
-          isFloating
+          hasValue
             ? "left-3 top-0 -translate-y-1/2 text-xs bg-background px-1"
-            : "left-[5.5rem] top-1/2 -translate-y-1/2 text-base bg-transparent px-0"
+            : "left-[5.5rem] top-1/2 -translate-y-1/2 text-base bg-transparent px-0",
+          // CSS override when input is focused (regardless of hasValue)
+          "[.peer-container:focus-within_~_&]:left-3 [.peer-container:focus-within_~_&]:top-0 [.peer-container:focus-within_~_&]:-translate-y-1/2 [.peer-container:focus-within_~_&]:text-xs [.peer-container:focus-within_~_&]:bg-background [.peer-container:focus-within_~_&]:px-1"
         )}
       >
         {label}

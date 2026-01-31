@@ -926,7 +926,7 @@ useEffect(() => {
   open={isEditOpen} 
   onOpenChange={setIsEditOpen}
 >
-        <DialogContent className="max-w-lg max-h-[85vh] rounded-3xl overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[85dvh] rounded-3xl overflow-y-auto overscroll-contain">
           <DialogHeader>
             <DialogTitle className="text-[22px] font-semibold tracking-tight">
               Edit Your Card
