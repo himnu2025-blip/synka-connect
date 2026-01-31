@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useIOSKeyboard } from '@/hooks/useIOSKeyboard';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +11,6 @@ import {
   DrawerContent,
 } from '@/components/ui/drawer';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useIOSKeyboard } from '@/hooks/useIOSKeyboard';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -176,8 +176,8 @@ export function ContactShareSheet({
   onSubmit,
   onSkip,
 }: ContactShareSheetProps) {
-  const isMobile = useIsMobile();
   const { keyboardHeight, isKeyboardVisible } = useIOSKeyboard();
+  const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
@@ -390,14 +390,7 @@ export function ContactShareSheet({
       />
 
       {/* FORM FIELDS CONTAINER */}
-      <div 
-  className="space-y-4 px-4"
-  style={{
-    paddingBottom: isKeyboardVisible 
-      ? '24px'  // Less padding when keyboard is visible
-      : 'max(2rem, env(safe-area-inset-bottom))'
-  }}
->
+      <div className="space-y-4 px-4 pb-[max(2rem,env(safe-area-inset-bottom))]">
         {/* FIRST + LAST NAME */}
         <div className="grid grid-cols-2 gap-3">
           <BlinqInput
@@ -496,20 +489,14 @@ export function ContactShareSheet({
 
   if (isMobile) {
   return (
-    <Drawer 
-      open={open} 
-      onOpenChange={onOpenChange}
-      dismissible={!isKeyboardVisible}  // Can't dismiss while typing
-      modal={true}
-      shouldScaleBackground={false}
-    >
+    <Drawer open={open} onOpenChange={onOpenChange} handleOnly={false} dismissible={true}>
       <DrawerContent
         className="flex flex-col"
         style={{
           maxHeight: isKeyboardVisible 
             ? `calc(90dvh - ${keyboardHeight}px)` 
             : '90dvh',
-          transition: 'max-height 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
+          transition: 'max-height 0.2s ease-out',
         }}
         hideHandle
       >
@@ -517,65 +504,11 @@ export function ContactShareSheet({
         <div 
           className="overflow-y-auto overscroll-contain flex-1"
           style={{
-            paddingBottom: isKeyboardVisible ? '100px' : '0px',
-            WebkitOverflowScrolling: 'touch',
-          }}
-          onTouchMove={(e) => {
-            if (isKeyboardVisible) {
-              e.stopPropagation();
-            }
+            paddingBottom: isKeyboardVisible ? '20px' : '0px',
           }}
         >
           <BlinqHeader />
-          
-          {/* Form content with dynamic padding */}
-          <div 
-            className="space-y-4 px-4"
-            style={{
-              paddingBottom: isKeyboardVisible 
-                ? '24px' 
-                : 'max(2rem, env(safe-area-inset-bottom))'
-            }}
-          >
-            {/* FIRST + LAST NAME */}
-            <div className="grid grid-cols-2 gap-3">
-              <BlinqInput
-                label="First name"
-                value={formData.firstName}
-                onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-              />
-              <BlinqInput
-                label="Last name"
-                value={formData.lastName}
-                onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-              />
-            </div>
-
-            {/* EMAIL */}
-            <div className="grid grid-cols-1">
-              <BlinqInput
-                label="Email"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              />
-            </div>
-
-            {/* Phone and other fields... */}
-            
-            {/* SEND BUTTON */}
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting}
-              variant="gradient"
-              className="w-full h-14 rounded-xl text-white text-base font-medium mt-6 hover:opacity-90 transition-opacity"
-            >
-              {submitting ? 'Sending...' : 'Send'}
-            </Button>
-
-            <p className="text-[11px] text-center text-muted-foreground/70 mt-4">
-              We don't sell your contact details
-            </p>
-          </div>
+          {FormContent}
         </div>
       </DrawerContent>
     </Drawer>
