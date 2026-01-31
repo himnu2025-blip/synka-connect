@@ -370,179 +370,179 @@ const Upgrade = () => {
           </p>
         </div>
 
-        {/* Plan Cards */}
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
-          {/* FREE Plan */}
-          <div className="relative rounded-2xl border border-border bg-card p-6 lg:p-8 shadow-sm">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-foreground">FREE</h2>
-              <p className="text-muted-foreground mt-1">Get started with the basics</p>
-            </div>
+        {/* Pricing Cards */}
+<div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+  {/* ORANGE Plan */}
+  <div className="relative rounded-2xl border-2 border-orange-plan bg-card p-6 lg:p-8 shadow-lg shadow-orange-plan/10">
+    {/* Orange Badge */}
+    <div className="absolute -top-4 left-6 bg-orange-plan text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-md">
+      ORANGE
+    </div>
 
-            <div className="space-y-3 mb-8">
-              {freeFeatures.map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-3">
-                  {feature.included ? (
-                    <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  ) : (
-                    <X className="w-5 h-5 text-muted-foreground/50 mt-0.5 flex-shrink-0" />
-                  )}
-                  <span
-                    className={
-                      feature.included
-                        ? "text-foreground"
-                        : "text-muted-foreground/50 line-through"
-                    }
-                  >
-                    {feature.text}
-                  </span>
-                </div>
-              ))}
-            </div>
+    <div className="mb-6 mt-2">
+      <h2 className="text-2xl font-bold text-foreground">ORANGE</h2>
+      
+      {/* Billing Toggle */}
+      <div className="flex items-center justify-center gap-3 mt-4 p-3 bg-muted/50 rounded-lg">
+        <span className={`text-sm font-medium ${!isAnnually ? 'text-foreground' : 'text-muted-foreground'}`}>
+          Monthly
+        </span>
+        <Switch
+          checked={isAnnually}
+          onCheckedChange={setIsAnnually}
+          className="data-[state=checked]:bg-orange-plan"
+        />
+        <span className={`text-sm font-medium ${isAnnually ? 'text-foreground' : 'text-muted-foreground'}`}>
+          Annually
+        </span>
+        {isAnnually && (
+          <span className="text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full font-medium">
+            Save 50%
+          </span>
+        )}
+      </div>
 
-            <Button
-              className="w-full"
-              variant={!isOrange && orangeOrderStatus !== "approved" ? "secondary" : "outline"}
-              disabled={!isOrange && orangeOrderStatus !== "approved"}
-            >
-              {!isOrange && orangeOrderStatus !== "approved" ? "Current Plan" : "Free Plan"}
-            </Button>
-          </div>
+      {/* Pricing Display */}
+      <div className="mt-4 text-center">
+        <div className="flex items-baseline justify-center gap-1">
+          <span className="text-4xl font-bold text-orange-plan">₹{currentPricing.displayPrice}</span>
+          <span className="text-muted-foreground">/{currentPricing.period}</span>
+        </div>
+        
+        {isAnnually ? (
+          <p className="text-sm text-muted-foreground mt-1">
+            {currentPricing.billingNote}
+          </p>
+        ) : null}
 
-          {/* ORANGE Plan */}
-          <div className="relative rounded-2xl border-2 border-orange-plan bg-card p-6 lg:p-8 shadow-lg shadow-orange-plan/10">
-            {/* Orange Badge */}
-            <div className="absolute -top-4 left-6 bg-orange-plan text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-md">
-              ORANGE
-            </div>
+        {/* Limited Period Offer */}
+        <div className="mt-3 flex items-center justify-center gap-2">
+          <span className="text-muted-foreground line-through text-lg">
+            ₹{currentPricing.originalPrice}
+          </span>
+          <span className="text-xs bg-red-500/20 text-red-600 px-2 py-1 rounded-full font-semibold animate-pulse">
+            Limited Period Offer!
+          </span>
+        </div>
+      </div>
+    </div>
 
-            <div className="mb-6 mt-2">
-              <h2 className="text-2xl font-bold text-foreground">ORANGE</h2>
-              
-              {/* Billing Toggle */}
-              <div className="flex items-center justify-center gap-3 mt-4 p-3 bg-muted/50 rounded-lg">
-                <span className={`text-sm font-medium ${!isAnnually ? 'text-foreground' : 'text-muted-foreground'}`}>
-                  Monthly
-                </span>
-                <Switch
-                  checked={isAnnually}
-                  onCheckedChange={setIsAnnually}
-                  className="data-[state=checked]:bg-orange-plan"
-                />
-                <span className={`text-sm font-medium ${isAnnually ? 'text-foreground' : 'text-muted-foreground'}`}>
-                  Annually
-                </span>
-                {isAnnually && (
-                  <span className="text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full font-medium">
-                    Save 50%
-                  </span>
-                )}
-              </div>
+    {/* Core Features */}
+    <div className="mb-5">
+      <h3 className="text-sm font-semibold text-orange-plan mb-3">
+        {orangeFeatures.core.title}
+      </h3>
+      <div className="space-y-2.5">
+        {orangeFeatures.core.items.map((feature, idx) => (
+          <FeatureItem key={idx} feature={feature} />
+        ))}
+      </div>
+    </div>
 
-              {/* Pricing Display */}
-              <div className="mt-4 text-center">
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold text-orange-plan">₹{currentPricing.displayPrice}</span>
-                  <span className="text-muted-foreground">/{currentPricing.period}</span>
-                </div>
-                
-                {isAnnually ? (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {currentPricing.billingNote}
-                  </p>
-                ) : null}
+    {/* Communication Features */}
+    <div className="mb-5">
+      <h3 className="text-sm font-semibold text-orange-plan mb-3">
+        {orangeFeatures.communication.title}
+      </h3>
+      <div className="space-y-2.5">
+        {orangeFeatures.communication.items.map((feature, idx) => (
+          <FeatureItem key={idx} feature={feature} />
+        ))}
+      </div>
+    </div>
 
-                {/* Limited Period Offer */}
-                <div className="mt-3 flex items-center justify-center gap-2">
-                  <span className="text-muted-foreground line-through text-lg">
-                    ₹{currentPricing.originalPrice}
-                  </span>
-                  <span className="text-xs bg-red-500/20 text-red-600 px-2 py-1 rounded-full font-semibold animate-pulse">
-                    Limited Period Offer!
-                  </span>
-                </div>
-              </div>
-            </div>
+    {/* Automation Features */}
+    <div className="mb-8">
+      <h3 className="text-sm font-semibold text-orange-plan mb-3">
+        {orangeFeatures.automation.title}
+      </h3>
+      <div className="space-y-2.5">
+        {orangeFeatures.automation.items.map((feature, idx) => (
+          <FeatureItem key={idx} feature={feature} />
+        ))}
+      </div>
+    </div>
 
-            {/* Core Features */}
-            <div className="mb-5">
-              <h3 className="text-sm font-semibold text-orange-plan mb-3">
-                {orangeFeatures.core.title}
-              </h3>
-              <div className="space-y-2.5">
-                {orangeFeatures.core.items.map((feature, idx) => (
-                  <FeatureItem key={idx} feature={feature} />
-                ))}
-              </div>
-            </div>
-
-            {/* Communication Features */}
-            <div className="mb-5">
-              <h3 className="text-sm font-semibold text-orange-plan mb-3">
-                {orangeFeatures.communication.title}
-              </h3>
-              <div className="space-y-2.5">
-                {orangeFeatures.communication.items.map((feature, idx) => (
-                  <FeatureItem key={idx} feature={feature} />
-                ))}
-              </div>
-            </div>
-
-            {/* Automation Features */}
-            <div className="mb-8">
-              <h3 className="text-sm font-semibold text-orange-plan mb-3">
-                {orangeFeatures.automation.title}
-              </h3>
-              <div className="space-y-2.5">
-                {orangeFeatures.automation.items.map((feature, idx) => (
-                  <FeatureItem key={idx} feature={feature} />
-                ))}
-              </div>
-            </div>
-
-            {/* Payment Summary Box */}
-            {!isOrange && orangeOrderStatus !== "requested" && (
-              <div className="mb-4 p-4 bg-orange-plan/10 rounded-lg border border-orange-plan/20">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Total to pay</span>
-                  <div className="text-right">
-                    <span className="text-2xl font-bold text-orange-plan">₹{currentPricing.totalPrice}</span>
-                    <span className="text-xs text-muted-foreground ml-1">
-                      {isAnnually ? "/year" : "/month"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Button
-                className={
-                  orangeButton.variant === "default"
-                    ? "w-full bg-orange-plan hover:bg-orange-plan/90 text-white"
-                    : "w-full"
-                }
-                variant={orangeButton.variant}
-                disabled={orangeButton.disabled || submitting}
-                onClick={orangeButton.disabled ? undefined : handleUpgradeRequest}
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  orangeButton.text
-                )}
-              </Button>
-              {orangeOrderStatus === "requested" && (
-                <p className="text-xs text-muted-foreground text-center">
-                  Request under review
-                </p>
-              )}
-            </div>
+    {/* Payment Summary Box */}
+    {!isOrange && orangeOrderStatus !== "requested" && (
+      <div className="mb-4 p-4 bg-orange-plan/10 rounded-lg border border-orange-plan/20">
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-muted-foreground">Total to pay</span>
+          <div className="text-right">
+            <span className="text-2xl font-bold text-orange-plan">₹{currentPricing.totalPrice}</span>
+            <span className="text-xs text-muted-foreground ml-1">
+              {isAnnually ? "/year" : "/month"}
+            </span>
           </div>
         </div>
+      </div>
+    )}
+
+    <div className="space-y-2">
+      <Button
+        className={
+          orangeButton.variant === "default"
+            ? "w-full bg-orange-plan hover:bg-orange-plan/90 text-white"
+            : "w-full"
+        }
+        variant={orangeButton.variant}
+        disabled={orangeButton.disabled || submitting}
+        onClick={orangeButton.disabled ? undefined : handleUpgradeRequest}
+      >
+        {submitting ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Submitting...
+          </>
+        ) : (
+          orangeButton.text
+        )}
+      </Button>
+      {orangeOrderStatus === "requested" && (
+        <p className="text-xs text-muted-foreground text-center">
+          Request under review
+        </p>
+      )}
+    </div>
+  </div>
+
+  {/* FREE Plan */}
+  <div className="rounded-2xl border border-border bg-card p-6 lg:p-8">
+    <div className="mb-6">
+      <h2 className="text-2xl font-bold text-foreground">FREE</h2>
+      <p className="text-muted-foreground mt-1">Get started with the basics</p>
+    </div>
+
+    <div className="space-y-3 mb-8">
+      {freeFeatures.map((feature, idx) => (
+        <div key={idx} className="flex items-start gap-3">
+          {feature.included ? (
+            <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+          ) : (
+            <X className="w-5 h-5 text-muted-foreground/50 mt-0.5 flex-shrink-0" />
+          )}
+          <span
+            className={
+              feature.included
+                ? "text-foreground"
+                : "text-muted-foreground/50 line-through"
+            }
+          >
+            {feature.text}
+          </span>
+        </div>
+      ))}
+    </div>
+
+    <Button
+      className="w-full"
+      variant={!isOrange && orangeOrderStatus !== "approved" ? "secondary" : "outline"}
+      disabled={!isOrange && orangeOrderStatus !== "approved"}
+    >
+      {!isOrange && orangeOrderStatus !== "approved" ? "Current Plan" : "Free Plan"}
+    </Button>
+  </div>
+</div>
 
         {/* Footnote */}
         <p className="text-xs text-muted-foreground mt-8 text-center">
