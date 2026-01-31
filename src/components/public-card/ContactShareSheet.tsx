@@ -479,11 +479,11 @@ export function ContactShareSheet({
       <DrawerContent
         className="!fixed bottom-0 left-0 right-0 top-auto
                    flex flex-col w-full
-                   max-h-[85vh]
+                   max-h-[85dvh]
                    rounded-t-2xl"
         hideHandle
       >
-        <div className="overflow-y-auto flex-1">
+        <div className="overflow-y-auto flex-1 overscroll-contain">
           <BlinqHeader />
           {FormContent}
         </div>
