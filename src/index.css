@@ -150,13 +150,24 @@
 body {
   @apply bg-background text-foreground;
   overflow-x: hidden;
-  overscroll-behavior-y: contain;
+  /* Allow natural pull-to-refresh - no overscroll-behavior restriction */
 }
 
   /* 🔴 Prevent iOS zoom on input focus */
   input, textarea, select {
     font-size: 16px;
   }
+
+  /* 🔴 Fix iOS tel input first-focus padding bug */
+  input[type="tel"] {
+    appearance: none;
+    -webkit-appearance: none;
+  }
+}
+
+/* 🔴 Overscroll containment - prevents scroll bounce causing extra space */
+.overscroll-contain {
+  overscroll-behavior-y: contain;
 }
 
 @layer components {
@@ -280,18 +291,17 @@ body {
     height: 100dvh;
   }
   
-  /* 🔴 CRITICAL: Max height that respects keyboard on mobile */
+  /* 🔴 FIXED: Max height for dialogs/drawers - no extra padding */
   .max-h-safe {
-    max-height: 100dvh;
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
   
-  /* 🔴 CRITICAL: Smooth scroll container for forms with keyboard */
+  /* 🔴 FIXED: Natural scroll for forms - no scroll-behavior that causes jumps */
   .scroll-keyboard-safe {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  height: 100%;
-}
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
 
   /* Prevent horizontal overflow */
   .no-overflow-x {
