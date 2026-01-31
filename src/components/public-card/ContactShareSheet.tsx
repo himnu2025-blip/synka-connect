@@ -438,6 +438,7 @@ export function ContactShareSheet({
             spellCheck={false}
             data-form-type="other"
             enterKeyHint="done"
+            scrollMarginTop="80"
             value={formData.phone}
             onChange={(e) =>
               setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
