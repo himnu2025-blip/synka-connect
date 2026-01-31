@@ -107,26 +107,30 @@ export default function PublicCard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
-  // Load viewer's default card for mutual exchange
-  useEffect(() => {
-    const loadViewerCard = async () => {
-      if (!user) {
-        setViewerCard(null);
-        return;
-      }
-      
-      const { data } = await supabase
-        .from('cards')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_default', true)
-        .maybeSingle();
-      
-      setViewerCard(data as Card | null);
-    };
+  // Load viewer's default card (non-blocking, runs in background)
+useEffect(() => {
+  const loadViewerCard = async () => {
+    if (!user) {
+      setViewerCard(null);
+      return;
+    }
     
+    // Fire and forget - doesn't block main render
+    supabase
+      .from('cards')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_default', true)
+      .maybeSingle()
+      .then(({ data }) => setViewerCard(data as Card | null))
+      .catch(err => console.error('Failed to load viewer card:', err));
+  };
+  
+  // Only run if user exists and we don't have viewer card yet
+  if (user && !viewerCard) {
     loadViewerCard();
-  }, [user]);
+  }
+}, [user]);
 
   // Fetch card owner's active events and log scan event
   useEffect(() => {
@@ -560,13 +564,13 @@ const saveContactAndShare = async () => {
     }
   };
 
-  if (loading || authLoading) {
-    return (
-      <div className="min-h-dvh w-full flex items-center justify-center bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) {  // ✅ Remove || authLoading
+  return (
+    <div className="min-h-dvh w-full flex items-center justify-center bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 
   if (!displayData || !displayData.name) {
     return (
