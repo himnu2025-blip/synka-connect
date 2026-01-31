@@ -936,7 +936,7 @@ useEffect(() => {
       <div className="overflow-y-auto overscroll-contain flex-1">
 
         {/* Form Content */}
-        <div className="space-y-6 px-6 py-6 pb-[max(6rem,env(safe-area-inset-bottom))]">
+        <div className="space-y-6 px-6 pt-6 pb-32">
           {/* Photo & Logo Upload */}
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-3">
