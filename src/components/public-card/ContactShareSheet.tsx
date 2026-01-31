@@ -477,7 +477,7 @@ export function ContactShareSheet({
   return (
     <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
       <DrawerContent
-  className="flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden"
+  className="flex flex-col h-auto max-h-[85dvh] overflow-hidden rounded-t-2xl"
   hideHandle
 >
   <div className="flex-1 scroll-keyboard-safe">
