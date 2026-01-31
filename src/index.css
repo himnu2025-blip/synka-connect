@@ -150,7 +150,7 @@
 body {
   @apply bg-background text-foreground;
   overflow-x: hidden;
-  overscroll-behavior-y: contain;
+  /* Allow natural pull-to-refresh - no overscroll-behavior restriction */
 }
 
   /* 🔴 Prevent iOS zoom on input focus */
@@ -280,19 +280,16 @@ body {
     height: 100dvh;
   }
   
-  /* 🔴 CRITICAL: Max height that respects keyboard on mobile */
+  /* 🔴 FIXED: Max height for dialogs/drawers - no extra padding */
   .max-h-safe {
-    max-height: 100dvh;
-    max-height: -webkit-fill-available;
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
   
-  /* 🔴 CRITICAL: Smooth scroll container for forms with keyboard */
+  /* 🔴 FIXED: Natural scroll for forms - no scroll-behavior that causes jumps */
   .scroll-keyboard-safe {
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-    scroll-behavior: smooth;
   }
 
   /* Prevent horizontal overflow */
