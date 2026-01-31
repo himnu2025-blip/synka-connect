@@ -287,12 +287,11 @@ body {
   
   /* 🔴 CRITICAL: Smooth scroll container for forms with keyboard */
   .scroll-keyboard-safe {
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-    scroll-behavior: smooth;
-  }
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  height: 100%;
+}
 
   /* Prevent horizontal overflow */
   .no-overflow-x {
