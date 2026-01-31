@@ -150,7 +150,6 @@
 body {
   @apply bg-background text-foreground;
   overflow-x: hidden;
-  overscroll-behavior-y: contain;
 }
 
   /* 🔴 Prevent iOS zoom on input focus */
