@@ -388,7 +388,7 @@ export function ContactShareSheet({
       />
 
       {/* FORM FIELDS CONTAINER */}
-      <div className="space-y-4 px-4 pb-6">
+      <div className="space-y-4 px-4 pb-8">
         {/* FIRST + LAST NAME */}
         <div className="grid grid-cols-2 gap-3">
           <BlinqInput
@@ -483,9 +483,12 @@ export function ContactShareSheet({
   return (
     <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
       <DrawerContent
+        style={{
+          maxHeight: 'calc(85dvh - env(safe-area-inset-bottom))',
+          paddingBottom: 'env(safe-area-inset-bottom)'
+        }}
         className="!fixed bottom-0 left-0 right-0 top-auto
                    flex flex-col w-full
-                   max-h-[85dvh]
                    rounded-t-2xl"
         hideHandle
       >
