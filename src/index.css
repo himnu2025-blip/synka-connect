@@ -249,6 +249,19 @@ body {
     display: none;
   }
 
+  /* App scroll container */
+.app-scroll {
+  -webkit-overflow-scrolling: touch;   /* iOS momentum */
+  overscroll-behavior-y: auto;         /* allow pull-to-refresh */
+}
+
+/* Prevent bottom rubber band gap */
+.app-scroll::after {
+  content: "";
+  display: block;
+  height: env(safe-area-inset-bottom);
+}
+
   /* Safe area utilities for iOS/Android notches and camera holes */
   .safe-top {
     padding-top: env(safe-area-inset-top);
