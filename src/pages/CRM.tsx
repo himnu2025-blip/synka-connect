@@ -123,6 +123,8 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
     const saved = localStorage.getItem('crm_sort_by');
     return (saved as 'name' | 'date' | 'last_interaction') || 'date';
   });
+  // Track keyboard height for drawer adjustment
+const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [showContactDetail, setShowContactDetail] = useState(false);
 
@@ -284,7 +286,28 @@ const parseNoteForEdit = (text: string) => {
   }
   return { systemText: '', userText: text };
 };
+// Track keyboard height using Visual Viewport API
+useEffect(() => {
+  if (typeof window === 'undefined' || !window.visualViewport) return;
 
+  const handleViewportResize = () => {
+    if (window.visualViewport) {
+      const viewportHeight = window.visualViewport.height;
+      const windowHeight = window.innerHeight;
+      const keyboardSpace = windowHeight - viewportHeight;
+      // Only set if keyboard is actually open (>100px difference)
+      setKeyboardHeight(keyboardSpace > 100 ? keyboardSpace : 0);
+    }
+  };
+
+  window.visualViewport.addEventListener('resize', handleViewportResize);
+  window.visualViewport.addEventListener('scroll', handleViewportResize);
+  
+  return () => {
+    window.visualViewport.removeEventListener('resize', handleViewportResize);
+    window.visualViewport.removeEventListener('scroll', handleViewportResize);
+  };
+}, []);
 // Load saved notes history when contact selected
 useEffect(() => {
   if (selectedContact?.notes_history) {
@@ -2154,16 +2177,26 @@ if (!contacts && contactsLoading) {
           }
         }}
       >
-        <DrawerContent hideHandle className="rounded-t-3xl border-0 shadow-none bg-background flex flex-col">
+        <DrawerContent 
+  hideHandle 
+  className="rounded-t-3xl border-0 shadow-none bg-background flex flex-col"
+  style={{
+    maxHeight: keyboardHeight > 0 
+      ? `calc(90dvh - ${keyboardHeight}px)` 
+      : '90dvh',
+  }}
+>
   {/* Drag Handle */}
   <div className="flex justify-center py-3">
     <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
   </div>
   {selectedContact && (
     <div 
-      className="px-4 pb-6 space-y-6 overflow-y-auto overscroll-contain flex-1" 
-      style={{ maxHeight: '90dvh' }}
-    >
+  className="px-4 pb-6 space-y-6 overflow-y-auto overscroll-contain flex-1"
+  style={{
+    maxHeight: keyboardHeight > 0 ? '100%' : '80dvh',
+  }}
+>
               <DrawerHeader className="text-center relative p-0">
                 <ContactAvatar 
                   name={selectedContact.name}
@@ -2208,13 +2241,32 @@ if (!contacts && contactsLoading) {
 
               {/* --- Inline Edit Form inside Sheet --- */}
               {isEditOpen && selectedContact ? (
-                <div className="space-y-4 pb-6">
-                  <FloatingNameInput
-                    firstName={editForm.firstName}
-                    lastName={editForm.lastName}
-                    onFirstNameChange={(val) => updateEditField('firstName', val)}
-                    onLastNameChange={(val) => updateEditField('lastName', val)}
-                  />
+  <div 
+    className="space-y-4" 
+    style={{ 
+      paddingBottom: keyboardHeight > 0 ? '180px' : '24px' 
+    }}
+  >
+                  <div 
+  onFocus={() => {
+    // Small delay to let keyboard open, then scroll into view
+    setTimeout(() => {
+      const activeElement = document.activeElement as HTMLElement;
+      activeElement?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center',
+        inline: 'nearest'
+      });
+    }, 300);
+  }}
+>
+  <FloatingNameInput
+    firstName={editForm.firstName}
+    lastName={editForm.lastName}
+    onFirstNameChange={(val) => updateEditField('firstName', val)}
+    onLastNameChange={(val) => updateEditField('lastName', val)}
+  />
+</div>
                   <FloatingInput
                     label="Company Name"
                     value={editForm.company}
