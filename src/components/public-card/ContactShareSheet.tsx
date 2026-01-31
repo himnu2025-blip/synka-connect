@@ -13,9 +13,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-// Blinq-style input with border-floating label - defined outside component to prevent re-render focus loss
-// IMPORTANT: Default state is "has value" (label at top), CSS overrides when empty via peer-placeholder-shown
-// This eliminates race conditions between React state and CSS on first interaction
+// Blinq-style input with border-floating label - pure CSS, no transitions that cause keyboard jumps
+// Uses peer-placeholder-shown for label animation without React state or JS transitions
 const BlinqInput = ({
   label,
   value,
@@ -40,11 +39,11 @@ const BlinqInput = ({
         value={value}
         onChange={onChange}
         placeholder=" "
-        className="peer absolute inset-0 w-full h-full px-4 pt-5 pb-2 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
+        className="peer absolute inset-0 w-full h-full px-4 pt-4 pb-2 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground"
         style={{ fontSize: '16px' }}
       />
       <label
-        className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
+        className="absolute left-4 text-muted-foreground pointer-events-none
           top-0 -translate-y-1/2 text-xs bg-background
           peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent
           peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background"
@@ -55,7 +54,7 @@ const BlinqInput = ({
   );
 };
 
-// Pill input with floating label for Job Title and Company - same CSS-first pattern
+// Pill input with floating label for Job Title and Company - pure CSS, no JS transitions
 const PillInput = ({
   label,
   value,
@@ -75,7 +74,7 @@ const PillInput = ({
         style={{ fontSize: '16px' }}
       />
       <label
-        className="absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200
+        className="absolute left-4 text-muted-foreground pointer-events-none
           top-0 -translate-y-1/2 text-[10px] bg-background
           peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:bg-transparent
           peer-focus:top-0 peer-focus:text-[10px] peer-focus:bg-background"
@@ -414,7 +413,7 @@ export function ContactShareSheet({
         </div>
 
         {/* Phone input - simple inline design without floating label to prevent focus issues */}
-        <div className="h-14 rounded-xl border border-border focus-within:border-foreground transition-colors flex items-center">
+        <div className="h-14 rounded-xl border border-border focus-within:border-foreground flex items-center">
           {/* Country code selector */}
           <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
             <select
@@ -444,7 +443,7 @@ export function ContactShareSheet({
               setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
             }
             placeholder="Phone number"
-            className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none"
+            className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none placeholder:text-muted-foreground"
             style={{ fontSize: '16px' }}
           />
         </div>
