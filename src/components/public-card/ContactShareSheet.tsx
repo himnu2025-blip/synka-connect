@@ -31,6 +31,13 @@ const BlinqInput = ({
   inputMode?: 'text' | 'email' | 'tel' | 'numeric';
   autoComplete?: string;
 }) => {
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Delay scroll to let iOS keyboard animate
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
+  
   return (
     <div className="relative h-14">
       <input
@@ -39,6 +46,7 @@ const BlinqInput = ({
         autoComplete={autoComplete}
         value={value}
         onChange={onChange}
+        onFocus={handleFocus}
         placeholder=" "
         className="peer absolute inset-0 w-full h-full px-4 pt-5 pb-2 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors"
         style={{ fontSize: '16px' }}
@@ -65,11 +73,18 @@ const PillInput = ({
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
+  
   return (
     <div className="relative h-10">
       <input
         value={value}
         onChange={onChange}
+        onFocus={handleFocus}
         placeholder=" "
         className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-transparent focus:border-foreground"
         style={{ fontSize: '16px' }}
@@ -428,18 +443,23 @@ export function ContactShareSheet({
           </div>
           {/* Phone number input */}
           <input
-  type="tel"
-  inputMode="tel"
-  autoComplete="off"
-  enterKeyHint="done"
-  value={formData.phone}
-  onChange={(e) =>
-    setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-  }
-  placeholder="Phone number"
-  className="flex-1 h-full px-4 text-base outline-none bg-transparent"
-  style={{ fontSize: '16px' }}
-/>
+            type="tel"
+            inputMode="tel"
+            autoComplete="off"
+            enterKeyHint="done"
+            value={formData.phone}
+            onChange={(e) =>
+              setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+            }
+            onFocus={(e) => {
+              setTimeout(() => {
+                e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 300);
+            }}
+            placeholder="Phone number"
+            className="flex-1 h-full px-4 text-base outline-none bg-transparent"
+            style={{ fontSize: '16px' }}
+          />
         </div>
 
         {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}
@@ -483,7 +503,7 @@ export function ContactShareSheet({
                    rounded-t-2xl overflow-hidden"
         hideHandle
       >
-        <div className="overflow-y-auto overscroll-contain">
+        <div className="overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <BlinqHeader />
           {FormContent}
         </div>

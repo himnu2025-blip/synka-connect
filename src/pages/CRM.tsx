@@ -2154,13 +2154,13 @@ if (!contacts && contactsLoading) {
           }
         }}
       >
-        <DrawerContent hideHandle className="rounded-t-3xl border-0 shadow-none bg-background max-h-safe">
+        <DrawerContent hideHandle className="rounded-t-3xl border-0 shadow-none bg-background max-h-[85vh] overflow-hidden">
           {/* Drag Handle */}
           <div className="flex justify-center py-3">
             <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
           </div>
           {selectedContact && (
-            <div className="px-4 pb-6 space-y-6 scroll-keyboard-safe flex-1">
+            <div className="px-4 pb-6 space-y-6 overflow-y-auto flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
               <DrawerHeader className="text-center relative p-0">
                 <ContactAvatar 
                   name={selectedContact.name}
