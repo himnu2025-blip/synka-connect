@@ -490,7 +490,7 @@ export function ContactShareSheet({
                    rounded-t-2xl"
         hideHandle
       >
-        <div className="overflow-y-auto flex-1 overscroll-contain">
+        <div className="overflow-y-auto flex-1">
           <BlinqHeader />
           {FormContent}
         </div>

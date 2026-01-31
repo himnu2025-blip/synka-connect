@@ -168,10 +168,7 @@
   }
 }
 
-/* 🔴 Overscroll containment - prevents scroll bounce causing extra space */
-.overscroll-contain {
-  overscroll-behavior-y: contain;
-}
+/* Note: Avoid overscroll-behavior-y: contain on form containers - it causes keyboard gaps on iOS */
 
 @layer components {
   .glass {
