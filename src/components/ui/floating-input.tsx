@@ -83,6 +83,15 @@ export const FloatingInput = ({
 }: FloatingInputProps) => {
   const hasValue = value !== undefined && value !== null && value !== '';
   
+  // Handle focus to scroll into view smoothly on iOS
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    onFocus?.(e);
+    // Delay scroll to let iOS keyboard animate
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
+  
   return (
     <div className={cn("relative h-14", className)}>
       <input
@@ -91,7 +100,7 @@ export const FloatingInput = ({
         inputMode={inputMode}
         value={value}
         onChange={onChange}
-        onFocus={onFocus}
+        onFocus={handleFocus}
         onBlur={onBlur}
         placeholder=" "
         disabled={disabled}
@@ -230,6 +239,10 @@ export const FloatingPhoneInput = ({
           onFocus={(e) => {
             setIsFocused(true);
             onFocus?.(e);
+            // Delay scroll to let iOS keyboard animate
+            setTimeout(() => {
+              e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
           }}
           onBlur={(e) => {
             setIsFocused(false);

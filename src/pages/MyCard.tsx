@@ -926,7 +926,7 @@ useEffect(() => {
   open={isEditOpen} 
   onOpenChange={setIsEditOpen}
 >
-        <DialogContent className="max-w-lg max-h-safe rounded-3xl scroll-keyboard-safe">
+        <DialogContent className="max-w-lg max-h-[85vh] rounded-3xl overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <DialogHeader>
             <DialogTitle className="text-[22px] font-semibold tracking-tight">
               Edit Your Card
