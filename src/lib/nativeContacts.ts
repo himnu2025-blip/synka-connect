@@ -23,20 +23,24 @@ function generateVCard(contact: ContactData): string {
     'VERSION:3.0',
   ];
 
-  // Full name (required) - FN must come before ORG for proper iOS display
+  // ⚠️ CRITICAL: FN must come FIRST for iOS to display name at top
+  // FN (formatted/display name) - PRIMARY field iOS uses for display
+  if (contact.name) {
+    lines.push(`FN:${contact.name}`);
+  }
+
+  // N (structured name) - Required by spec, must come AFTER FN for iOS
   if (contact.name) {
     // Parse name into components for N field
     const nameParts = contact.name.trim().split(/\s+/);
     const lastName = nameParts.length > 1 ? nameParts.pop() : '';
     const firstName = nameParts.join(' ') || contact.name;
     
-    // N field first (structured name) - iOS uses this for display
+    // Format: LastName;FirstName;MiddleName;Prefix;Suffix
     lines.push(`N:${lastName};${firstName};;;`);
-    // FN field (display name) - ensures proper fallback
-    lines.push(`FN:${contact.name}`);
   }
 
-  // Organization and title
+  // Organization and title - MUST come AFTER name fields
   if (contact.company) {
     lines.push(`ORG:${contact.company}`);
   }
@@ -199,52 +203,69 @@ async function saveContactViaShareAPI(contact: ContactData): Promise<boolean> {
 
 /**
  * Save contact using vCard download - web fallback
+ * Returns a promise that resolves when download is triggered
  */
-function saveContactViaVCard(contact: ContactData): void {
-  const vCard = generateVCard(contact);
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isAndroid = /Android/.test(navigator.userAgent);
-  const fileName = `${contact.name.replace(/[^a-zA-Z0-9]/g, '_')}.vcf`;
-  
-  // Create blob
-  const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
-  
-  if (isIOS) {
-    // iOS Safari - use data URL approach which triggers native contact picker
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = fileName;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(() => document.body.removeChild(link), 100);
-    };
-    reader.readAsDataURL(blob);
-  } else if (isAndroid) {
-    // Android - use blob URL
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => {
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }, 100);
-  } else {
-    // Desktop fallback
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+function saveContactViaVCard(contact: ContactData): Promise<void> {
+  return new Promise((resolve, reject) => {
+    try {
+      const vCard = generateVCard(contact);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isAndroid = /Android/.test(navigator.userAgent);
+      const fileName = `${contact.name.replace(/[^a-zA-Z0-9]/g, '_')}.vcf`;
+      
+      // Create blob with proper MIME type
+      const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
+      
+      if (isIOS) {
+        // iOS Safari - use data URL approach which triggers native contact picker
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result as string;
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = fileName;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          
+          // Resolve after click (download triggered)
+          setTimeout(() => {
+            document.body.removeChild(link);
+            resolve();
+          }, 100);
+        };
+        reader.onerror = () => reject(new Error('Failed to read vCard'));
+        reader.readAsDataURL(blob);
+      } else if (isAndroid) {
+        // Android - use blob URL
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        
+        // Resolve after click (download triggered)
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          resolve();
+        }, 100);
+      } else {
+        // Desktop fallback
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+        resolve();
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 /**
@@ -281,13 +302,23 @@ export async function saveContactToPhone(contact: ContactData): Promise<{ succes
     
     // Step 3: Share also failed, use web vCard download as last resort
     console.log('Share API failed, using web vCard download');
-    saveContactViaVCard(contact);
-    return { success: true, method: 'vcard' };
+    try {
+      await saveContactViaVCard(contact);
+      return { success: true, method: 'vcard' };
+    } catch (error) {
+      console.error('vCard download failed:', error);
+      return { success: false, method: 'vcard' };
+    }
   }
   
   // For mobile web, use vCard method which triggers native contact picker
-  saveContactViaVCard(contact);
-  return { success: true, method: 'vcard' };
+  try {
+    await saveContactViaVCard(contact);
+    return { success: true, method: 'vcard' };
+  } catch (error) {
+    console.error('vCard download failed:', error);
+    return { success: false, method: 'vcard' };
+  }
 }
 
 /**
