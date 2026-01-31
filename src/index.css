@@ -175,8 +175,28 @@ input[type="tel"]:focus {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
+/* Native keyboard handling for mobile drawers */
+@supports (height: 100dvh) {
+  /* Let mobile browsers naturally handle viewport changes */
+  [data-vaul-drawer] {
+    max-height: 90dvh !important;
+  }
+  
+  /* Ensure content scrolls naturally when keyboard appears */
+  [data-vaul-drawer-content] {
+    display: flex;
+    flex-direction: column;
+    max-height: inherit;
+  }
 }
 
+/* Smooth scroll behavior for form inputs */
+input:focus, 
+textarea:focus, 
+select:focus {
+  scroll-margin-block: 1rem;
+}
+  
 /* Note: Avoid overscroll-behavior-y: contain on form containers - it causes keyboard gaps on iOS */
 
 @layer components {
