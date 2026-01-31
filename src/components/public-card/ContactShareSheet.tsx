@@ -390,7 +390,7 @@ export function ContactShareSheet({
       />
 
       {/* FORM FIELDS CONTAINER */}
-      <div className="space-y-4 px-4 pb-8">
+      <div className="space-y-4 px-4 pb-[max(2rem,env(safe-area-inset-bottom))]">
         {/* FIRST + LAST NAME */}
         <div className="grid grid-cols-2 gap-3">
           <BlinqInput
@@ -491,22 +491,26 @@ export function ContactShareSheet({
   return (
     <Drawer open={open} onOpenChange={onOpenChange} handleOnly={false} dismissible={true}>
       <DrawerContent
-  className="flex flex-col"
-  style={{
-    height: isKeyboardVisible
-      ? `${window.visualViewport?.height || window.innerHeight}px`
-      : '90dvh',
-  }}
-  hideHandle
->
-  <div
-    className="overflow-y-auto overscroll-auto flex-1"
-    style={{ WebkitOverflowScrolling: 'touch' }}
-  >
-    <BlinqHeader />
-    {FormContent}
-  </div>
-</DrawerContent>
+        className="flex flex-col"
+        style={{
+          maxHeight: isKeyboardVisible 
+            ? `calc(90dvh - ${keyboardHeight}px)` 
+            : '90dvh',
+          transition: 'max-height 0.2s ease-out',
+        }}
+        hideHandle
+      >
+        {/* Scrollable content area */}
+        <div 
+          className="overflow-y-auto overscroll-contain flex-1"
+          style={{
+            paddingBottom: isKeyboardVisible ? '20px' : '0px',
+          }}
+        >
+          <BlinqHeader />
+          {FormContent}
+        </div>
+      </DrawerContent>
     </Drawer>
   );
 }
