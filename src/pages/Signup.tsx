@@ -353,7 +353,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-dvh flex">
       {/* Left Panel - Visual */}
       <div className="hidden lg:flex flex-1 gradient-bg items-center justify-center p-12">
         <div className="max-w-md text-center space-y-6">
@@ -376,8 +376,8 @@ export default function Signup() {
       </div>
 
       {/* Right Panel - Form - Scrollable on mobile */}
-      <div className="flex-1 min-h-screen overflow-y-auto">
-        <div className="min-h-full flex items-center justify-center p-4 py-8 md:p-12">
+      <div className="flex-1 min-h-dvh overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-4 py-8 md:p-12 pb-safe">
           <div className="w-full max-w-md space-y-6 animate-fade-up">
             <div className="text-center lg:text-left">
               <div className="mb-6">
@@ -564,6 +564,8 @@ export default function Signup() {
                       maxLength={4} 
                       value={newPin} 
                       onChange={setNewPin}
+                      inputMode="numeric"
+  pattern="[0-9]*"
                     >
                       <InputOTPGroup>
                         <InputOTPSlot index={0} />
@@ -582,6 +584,8 @@ export default function Signup() {
                       maxLength={4} 
                       value={confirmPin} 
                       onChange={setConfirmPin}
+                      inputMode="numeric"
+  pattern="[0-9]*"
                     >
                       <InputOTPGroup>
                         <InputOTPSlot index={0} />
