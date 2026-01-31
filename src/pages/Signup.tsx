@@ -408,7 +408,7 @@ export default function Signup() {
                 />
 
                 <FloatingPhoneInput
-                  label="Mobile *"
+                  label="Phone Number *"
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value.replace(/[^\d\s]/g, ''))}
                   countryCode={countryCode}
