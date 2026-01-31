@@ -934,12 +934,6 @@ useEffect(() => {
     <DrawerContent className="flex flex-col" hideHandle>
       {/* Scrollable content */}
       <div className="overflow-y-auto overscroll-contain flex-1">
-        {/* Header - sticky at top */}
-        <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 px-6 pt-6 pb-4 border-b">
-          <h2 className="text-[22px] font-semibold tracking-tight">
-            Edit Your Card
-          </h2>
-        </div>
 
         {/* Form Content */}
         <div className="space-y-6 px-6 py-6 pb-[max(6rem,env(safe-area-inset-bottom))]">
