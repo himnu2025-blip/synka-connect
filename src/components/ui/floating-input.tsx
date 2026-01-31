@@ -68,7 +68,7 @@ interface FloatingInputProps {
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
-// Floating label input component
+// Floating label input component - CSS-only transitions, no React state during focus
 export const FloatingInput = ({
   label,
   value,
@@ -81,8 +81,6 @@ export const FloatingInput = ({
   onFocus,
   onBlur,
 }: FloatingInputProps) => {
-  const hasValue = value !== undefined && value !== null && value !== '';
-  
   return (
     <div className={cn("relative h-14", className)}>
       <input
@@ -100,17 +98,15 @@ export const FloatingInput = ({
         autoCapitalize="off"
         spellCheck={false}
         data-form-type="other"
-        className="peer w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground transition-colors disabled:opacity-50"
+        className="peer w-full h-full px-4 pt-4 pb-2 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground disabled:opacity-50"
         style={{ fontSize: '16px' }}
       />
+      {/* Label uses CSS peer selectors only - no JS state changes during focus */}
       <label
-        className={cn(
-          "absolute left-4 text-muted-foreground pointer-events-none transition-all duration-200",
-          hasValue
-            ? "top-0 -translate-y-1/2 text-xs bg-background px-1"
-            : "top-1/2 -translate-y-1/2 text-base bg-transparent px-0",
-          "peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
-        )}
+        className="absolute left-4 text-muted-foreground pointer-events-none
+          top-0 -translate-y-1/2 text-xs bg-background px-1
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
+          peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
       >
         {label}
       </label>
@@ -184,7 +180,8 @@ interface FloatingPhoneInputProps {
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
-// Floating label input with country code selector - CSS-only focus state to prevent keyboard jump
+// Phone input with country code selector - STATIC placeholder to prevent keyboard jump
+// No floating label animation = no layout shift during keyboard open on iOS/Android
 export const FloatingPhoneInput = ({
   label,
   value,
@@ -196,58 +193,41 @@ export const FloatingPhoneInput = ({
   onFocus,
   onBlur,
 }: FloatingPhoneInputProps) => {
-  const hasValue = value !== undefined && value !== null && value !== '';
-  
   return (
-    <div className={cn("relative h-14", className)}>
-      <div className="peer-container flex items-center h-full rounded-xl border border-border transition-colors focus-within:border-foreground">
-        {/* Country code selector - compact, no emoji */}
-        <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
-          <select
-            value={countryCode}
-            onChange={(e) => onCountryCodeChange(e.target.value)}
-            disabled={disabled}
-            autoComplete="off"
-            className="bg-transparent text-sm outline-none cursor-pointer disabled:opacity-50 appearance-none font-medium"
-            style={{ fontSize: '14px' }}
-          >
-            {COUNTRY_CODES.map(({ code }) => (
-              <option key={code} value={code} className="bg-background text-foreground">{code}</option>
-            ))}
-          </select>
-        </div>
-        {/* Phone input - CSS peer for label animation */}
-        <input
-          type="tel"
-          inputMode="tel"
-          value={value}
-          onChange={onChange}
-          onFocus={onFocus}
-          onBlur={onBlur}
-          placeholder=" "
+    <div className={cn("h-14 rounded-xl border border-border focus-within:border-foreground flex items-center", className)}>
+      {/* Country code selector - compact, no emoji */}
+      <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
+        <select
+          value={countryCode}
+          onChange={(e) => onCountryCodeChange(e.target.value)}
           disabled={disabled}
           autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
-          data-form-type="other"
-          className="peer flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none disabled:opacity-50"
-          style={{ fontSize: '16px' }}
-        />
+          className="bg-transparent text-sm outline-none cursor-pointer disabled:opacity-50 appearance-none font-medium"
+          style={{ fontSize: '14px' }}
+        >
+          {COUNTRY_CODES.map(({ code }) => (
+            <option key={code} value={code} className="bg-background text-foreground">{code}</option>
+          ))}
+        </select>
       </div>
-      {/* Floating label - pure CSS animation via peer, no React state re-renders */}
-      <label
-        className={cn(
-          "absolute text-muted-foreground pointer-events-none transition-all duration-200",
-          hasValue
-            ? "left-3 top-0 -translate-y-1/2 text-xs bg-background px-1"
-            : "left-[5.5rem] top-1/2 -translate-y-1/2 text-base bg-transparent px-0",
-          // CSS override when input is focused (regardless of hasValue)
-          "[.peer-container:focus-within_~_&]:left-3 [.peer-container:focus-within_~_&]:top-0 [.peer-container:focus-within_~_&]:-translate-y-1/2 [.peer-container:focus-within_~_&]:text-xs [.peer-container:focus-within_~_&]:bg-background [.peer-container:focus-within_~_&]:px-1"
-        )}
-      >
-        {label}
-      </label>
+      {/* Phone input - static placeholder, no animation */}
+      <input
+        type="tel"
+        inputMode="tel"
+        value={value}
+        onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        placeholder={label}
+        disabled={disabled}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
+        data-form-type="other"
+        className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none disabled:opacity-50 placeholder:text-muted-foreground"
+        style={{ fontSize: '16px' }}
+      />
     </div>
   );
 };
