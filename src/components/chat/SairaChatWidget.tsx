@@ -1031,7 +1031,7 @@ export function SairaChatWidget() {
     <>
       {/* Floating Button with Helper Tooltip */}
       <div className={cn(
-        "fixed bottom-6 right-6 z-50 flex flex-col items-center gap-2",
+        "fixed right-6 z-50 flex flex-col items-center gap-2 bottom-[calc(1.5rem+env(safe-area-inset-bottom))]",
         "transition-all duration-300 ease-out",
         isOpen && "scale-0 opacity-0 pointer-events-none"
       )}>
@@ -1068,7 +1068,7 @@ export function SairaChatWidget() {
       {/* Chat Window */}
       <div
         className={cn(
-          "fixed bottom-6 right-6 z-50",
+          "fixed right-6 z-50 bottom-[calc(1.5rem+env(safe-area-inset-bottom))]",
           "w-[380px] max-w-[calc(100vw-48px)] h-[600px] max-h-[calc(100vh-100px)]",
           "bg-background border border-border rounded-2xl shadow-2xl",
           "flex flex-col overflow-hidden",

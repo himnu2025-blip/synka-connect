@@ -127,7 +127,7 @@ export function MobileLanding({
         </p>
 
         {/* POINTERS */}
-        <div className="relative mt-6 min-h-[110px] sm:min-h-[96px] overflow-hidden">
+        <div className="relative mt-6 h-[110px] sm:h-[96px] overflow-hidden">
           <motion.div
             key={pointerSet}
             initial={{ opacity: 0, y: 6 }}
@@ -197,9 +197,7 @@ export function MobileLanding({
       </motion.div>
 
       {/* ===== CHAT ===== */}
-      <div className="fixed right-4 z-50 bottom-[calc(1rem+env(safe-area-inset-bottom))]">
-        <SairaChatWidget />
-      </div>
+      <SairaChatWidget />
     </div>
   );
 }
