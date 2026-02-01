@@ -521,7 +521,10 @@ export function ContactShareSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-        <DrawerContent className="max-h-[90dvh] flex flex-col" hideHandle>
+        <DrawerContent
+  className="flex flex-col !h-auto max-h-[100dvh]"
+  hideHandle
+>
           {/* Scrollable content - matches MyCard edit drawer pattern */}
           <div className="overflow-y-auto overscroll-auto flex-1 min-h-0 touch-pan-y" data-vaul-no-drag>
             <BlinqHeader />
