@@ -1031,7 +1031,7 @@ export function SairaChatWidget() {
     <>
       {/* Floating Button with Helper Tooltip */}
       <div className={cn(
-        "fixed bottom-6 right-6 z-50 flex flex-col items-center gap-2",
+        "fixed right-6 z-50 flex flex-col items-center gap-2 bottom-[calc(1.5rem+env(safe-area-inset-bottom))]",
         "transition-all duration-300 ease-out",
         isOpen && "scale-0 opacity-0 pointer-events-none"
       )}>
