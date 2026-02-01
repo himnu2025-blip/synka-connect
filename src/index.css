@@ -162,73 +162,75 @@
   }
 
   /* Fix iOS + Android + Web tel input padding bug */
-input[type="tel"] {
-  appearance: none;
-  -webkit-appearance: none;
-  /* Prevent iOS/Android from adding padding on first focus */
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
+  input[type="tel"] {
+    appearance: none;
+    -webkit-appearance: none;
+    /* Prevent iOS/Android from adding padding on first focus */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
 
-/* Also fix on focus state (covers all mobile browsers) */
-input[type="tel"]:focus {
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
-/* Native keyboard handling for mobile drawers */
+  /* Also fix on focus state (covers all mobile browsers) */
+  input[type="tel"]:focus {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Native keyboard handling for mobile drawers */
   /* iOS-specific keyboard handling */
-@supports (-webkit-touch-callout: none) {
-  /* iOS detection */
-  
-  /* Prevent iOS from adding extra padding */
-  input:focus,
-  textarea:focus,
+  @supports (-webkit-touch-callout: none) {
+    /* iOS detection */
+    
+    /* Prevent iOS from adding extra padding */
+    input:focus,
+    textarea:focus,
+    select:focus {
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+    }
+    
+    /* Account for iOS keyboard accessory bar */
+    [data-vaul-drawer][data-vaul-drawer-visible="true"] {
+      margin-bottom: env(safe-area-inset-bottom, 0);
+    }
+    
+    /* Smooth transitions for iOS keyboard */
+    [data-vaul-drawer-content] {
+      transition: max-height 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+  }
+
+  /* Prevent double-tap zoom on iOS */
+  input,
+  button,
+  textarea,
+  select {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @supports (height: 100dvh) {
+    /* Let mobile browsers naturally handle viewport changes */
+    [data-vaul-drawer] {
+      max-height: 90dvh !important;
+    }
+    
+    /* Ensure content scrolls naturally when keyboard appears */
+    [data-vaul-drawer-content] {
+      display: flex;
+      flex-direction: column;
+      max-height: inherit;
+    }
+  }
+
+  /* Smooth scroll behavior for form inputs */
+  input:focus, 
+  textarea:focus, 
   select:focus {
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
+    scroll-margin-block: 1rem;
   }
-  
-  /* Account for iOS keyboard accessory bar */
-  [data-vaul-drawer][data-vaul-drawer-visible="true"] {
-    margin-bottom: env(safe-area-inset-bottom, 0);
-  }
-  
-  /* Smooth transitions for iOS keyboard */
-  [data-vaul-drawer-content] {
-    transition: max-height 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-  }
-}
-
-/* Prevent double-tap zoom on iOS */
-input,
-button,
-textarea,
-select {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-@supports (height: 100dvh) {
-  /* Let mobile browsers naturally handle viewport changes */
-  [data-vaul-drawer] {
-    max-height: 90dvh !important;
-  }
-  
-  /* Ensure content scrolls naturally when keyboard appears */
-  [data-vaul-drawer-content] {
-    display: flex;
-    flex-direction: column;
-    max-height: inherit;
-  }
-}
-
-/* Smooth scroll behavior for form inputs */
-input:focus, 
-textarea:focus, 
-select:focus {
-  scroll-margin-block: 1rem;
-}
-  
-/* Note: Avoid overscroll-behavior-y: contain on form containers - it causes keyboard gaps on iOS */
+    
+  /* Note: Avoid overscroll-behavior-y: contain on form containers - it causes keyboard gaps on iOS */
 }
 @layer components {
   .glass {

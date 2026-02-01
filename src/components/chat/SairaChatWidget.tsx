@@ -1136,9 +1136,11 @@ export function SairaChatWidget() {
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <input
                           {...register("name")}
-                          className="w-full pl-10 pr-3 py-2 text-sm bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                          inputMode="text"
+                          className="w-full pl-10 pr-3 py-3 text-base bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                           placeholder="Your name"
                           disabled={isFormSubmitting}
+                          style={{ fontSize: '16px' }}
                         />
                       </div>
                       {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
@@ -1151,9 +1153,11 @@ export function SairaChatWidget() {
                         <input
                           {...register("email")}
                           type="email"
-                          className="w-full pl-10 pr-3 py-2 text-sm bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                          inputMode="email"
+                          className="w-full pl-10 pr-3 py-3 text-base bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                           placeholder="your@email.com"
                           disabled={isFormSubmitting}
+                          style={{ fontSize: '16px' }}
                         />
                       </div>
                       {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
@@ -1166,9 +1170,11 @@ export function SairaChatWidget() {
                         <input
                           {...register("mobile")}
                           type="tel"
-                          className="w-full pl-10 pr-3 py-2 text-sm bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                          inputMode="tel"
+                          className="w-full pl-10 pr-3 py-3 text-base bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                           placeholder="Mobile number"
                           disabled={isFormSubmitting}
+                          style={{ fontSize: '16px' }}
                         />
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">* Email or Mobile required</p>
