@@ -70,7 +70,7 @@ const PillInput = ({
         value={value}
         onChange={onChange}
         placeholder=" "
-        className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-transparent focus:ring-2 focus:ring-foreground/20"
+        className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-transparent focus:border-foreground"
         style={{ fontSize: '16px' }}
       />
       <label
@@ -447,7 +447,7 @@ export function ContactShareSheet({
         </div>
 
         {/* Phone input - simple inline design without floating label to prevent focus issues */}
-        <div className="h-14 rounded-xl border border-border focus-within:ring-2 focus-within:ring-foreground/20 flex items-center">
+        <div className="h-14 rounded-xl border border-border focus-within:border-foreground flex items-center">
           {/* Country code selector */}
           <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
             <select
@@ -523,11 +523,7 @@ export function ContactShareSheet({
       <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
         <DrawerContent className="flex flex-col" hideHandle>
           {/* Scrollable content - matches MyCard edit drawer pattern */}
-          <div
-  className="overflow-y-auto overscroll-auto touch-pan-y will-change-transform"
-  style={{ transform: 'translateZ(0)' }}
-  data-vaul-no-drag
->
+          <div className="overflow-y-auto overscroll-auto touch-pan-y" data-vaul-no-drag>
             <BlinqHeader />
             {FormContent}
           </div>
