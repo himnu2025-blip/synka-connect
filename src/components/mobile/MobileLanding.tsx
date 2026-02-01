@@ -197,7 +197,7 @@ export function MobileLanding({
       </motion.div>
 
       {/* ===== CHAT ===== */}
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed right-4 z-50 bottom-[calc(1rem+env(safe-area-inset-bottom))]">
         <SairaChatWidget />
       </div>
     </div>

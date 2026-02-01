@@ -23,36 +23,29 @@ const features = [
 
 export function MobileFeaturesCarousel() {
   return (
-    <div className="relative overflow-hidden">
-      <div className="flex gap-3 overflow-hidden py-2 px-4">
-        <div
-          className="flex gap-3"
-          style={{ animation: 'mobileScroll 20s linear infinite' }}
-        >
-          {[...features, ...features].map((feature, index) => (
-            <div
-              key={index}
-              className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full bg-card border border-border/50 shadow-sm"
-            >
-              <div
-                className={`w-7 h-7 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center`}
-              >
-                <feature.icon className="h-3.5 w-3.5 text-white" />
-              </div>
-              <span className="text-xs font-medium text-foreground whitespace-nowrap">
-                {feature.title}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+    <div className="relative overflow-hidden py-2">
+      {/* Edge fades for Apple-style look */}
+      <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
-      <style>{`
-        @keyframes mobileScroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
+      <div className="flex gap-3 px-4 animate-mobile-scroll">
+        {/* Triple items for seamless loop */}
+        {[...features, ...features, ...features].map((feature, index) => (
+          <div
+            key={index}
+            className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full bg-card border border-border/50 shadow-sm"
+          >
+            <div
+              className={`w-7 h-7 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center`}
+            >
+              <feature.icon className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="text-xs font-medium text-foreground whitespace-nowrap">
+              {feature.title}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
