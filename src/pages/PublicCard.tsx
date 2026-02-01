@@ -115,15 +115,24 @@ useEffect(() => {
       return;
     }
     
-    // Fire and forget - doesn't block main render
-    supabase
-      .from('cards')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('is_default', true)
-      .maybeSingle()
-      .then(({ data }) => setViewerCard(data as Card | null))
-      .catch(err => console.error('Failed to load viewer card:', err));
+    try {
+      // Fire and forget - doesn't block main render
+      const { data, error } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_default', true)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Failed to load viewer card:', error);
+        return;
+      }
+
+      setViewerCard(data as Card | null);
+    } catch (err) {
+      console.error('Failed to load viewer card:', err);
+    }
   };
   
   // Only run if user exists and we don't have viewer card yet
