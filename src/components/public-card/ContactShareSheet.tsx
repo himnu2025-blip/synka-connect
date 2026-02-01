@@ -522,15 +522,21 @@ export function ContactShareSheet({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange} repositionInputs={false}>
-        <DrawerContent className="h-dvh flex flex-col" hideHandle>
+      <Drawer
+        open={open}
+        onOpenChange={onOpenChange}
+        repositionInputs={false}
+        shouldScaleBackground={false}
+        modal
+      >
+        <DrawerContent className="h-dvh flex flex-col touch-pan-y" hideHandle>
           {/* Fixed header */}
           <div className="flex-shrink-0">
             <BlinqHeader />
           </div>
 
-          {/* Scrollable form */}
-          <div className="flex-1 overflow-y-auto">
+          {/* Scrollable form - data-vaul-no-drag prevents scroll from closing drawer */}
+          <div className="flex-1 overflow-y-auto" data-vaul-no-drag>
             {FormContent}
           </div>
         </DrawerContent>
