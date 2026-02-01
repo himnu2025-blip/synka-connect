@@ -480,12 +480,10 @@ export function ContactShareSheet({
             className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none placeholder:text-muted-foreground"
             style={{ 
               fontSize: '16px',
-              paddingTop: '0',
-              paddingBottom: '0',
-              lineHeight: '56px',
-              // Ensure any browser auto-scroll aligns nicely without JS
-              scrollMarginTop: 80,
-}}
+              paddingTop: 0,
+              paddingBottom: 0,
+              scrollMarginTop: 16,
+            }}
           />
         </div>
 
