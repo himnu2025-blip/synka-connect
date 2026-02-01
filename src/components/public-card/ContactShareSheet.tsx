@@ -520,16 +520,10 @@ export function ContactShareSheet({
 
   if (isMobile) {
     return (
-      <Drawer 
-        open={open} 
-        onOpenChange={onOpenChange}
-        repositionInputs={false}
-        shouldScaleBackground={false}
-        modal={true}
-      >
-        <DrawerContent className="h-dvh flex flex-col touch-pan-y" hideHandle>
-          {/* Scrollable content - matches Native Mobile Sheet architecture */}
-          <div className="flex-1 overflow-y-auto min-h-0 touch-pan-y" data-vaul-no-drag>
+      <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
+        <DrawerContent className="flex flex-col" hideHandle>
+          {/* Scrollable content - matches MyCard edit drawer pattern */}
+          <div className="flex-1 overflow-y-auto touch-pan-y" data-vaul-no-drag>
             <BlinqHeader />
             {FormContent}
           </div>
