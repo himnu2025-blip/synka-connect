@@ -208,6 +208,21 @@ export const FloatingPhoneInput = ({
   onFocus,
   onBlur,
 }: FloatingPhoneInputProps) => {
+  // iOS FIX for smooth scroll when keyboard opens
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    onFocus?.(e);
+    
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      setTimeout(() => {
+        e.target.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'nearest' 
+        });
+      }, 300);
+    }
+  };
+
   return (
     <div className={cn("relative h-14", className)}>
       {/* Container with border */}
