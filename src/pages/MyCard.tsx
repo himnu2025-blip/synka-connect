@@ -933,7 +933,7 @@ useEffect(() => {
   <Drawer open={isEditOpen} onOpenChange={setIsEditOpen} handleOnly>
     <DrawerContent className="flex flex-col" hideHandle>
       {/* Scrollable content */}
-      <div className="overflow-y-auto overscroll-contain flex-1" style={{ maxHeight: '90dvh' }}>
+      <div className="overflow-y-auto overscroll-auto flex-1">
 
         {/* Form Content */}
         <div className="space-y-6 px-6 pt-6 pb-6">
