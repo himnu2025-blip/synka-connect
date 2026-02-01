@@ -200,6 +200,11 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [data-vaul-drawer-content] > div {
+  overscroll-behavior-y: none;
   }
 
   /* Smooth scroll behavior for form inputs */
