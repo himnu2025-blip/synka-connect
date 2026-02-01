@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -167,6 +167,30 @@ const COUNTRY_CODES = [
   { code: '+965', country: 'Kuwait' },
 ];
 
+// Parse a raw phone string from scan into { code, number }
+// Matches against COUNTRY_CODES longest-first so "+971..." matches UAE before "+97..." etc.
+function parseScanPhone(raw: string): { code: string; number: string } | null {
+  if (!raw) return null;
+  // Strip spaces/dashes, keep +
+  const cleaned = raw.replace(/[\s\-()]/g, '');
+  if (!cleaned) return null;
+
+  // Sort codes longest first so +971 matches before +97
+  const sorted = [...COUNTRY_CODES].sort((a, b) => b.code.length - a.code.length);
+
+  // Try matching with + prefix
+  const withPlus = cleaned.startsWith('+') ? cleaned : '+' + cleaned;
+  for (const { code } of sorted) {
+    if (withPlus.startsWith(code)) {
+      const number = withPlus.slice(code.length).replace(/\D/g, '');
+      if (number.length > 0) return { code, number };
+    }
+  }
+
+  // Nothing matched — return digits only, keep current country code
+  return { code: '', number: cleaned.replace(/\D/g, '') };
+}
+
 export function ContactShareSheet({
   open,
   onOpenChange,
@@ -276,11 +300,21 @@ export function ContactShareSheet({
         const lastName = nameParts.slice(1).join(' ') || '';
 
         setScanState('success');
+
+        // Parse phone separately so we can update countryCode state too
+        if (contact.phone) {
+          const parsed = parseScanPhone(contact.phone);
+          if (parsed) {
+            if (parsed.code) setCountryCode(parsed.code);
+            setFormData(prev => ({ ...prev, phone: parsed.number }));
+          }
+        }
+
         setFormData(prev => ({
+          ...prev,
           firstName: firstName || prev.firstName,
           lastName: lastName || prev.lastName,
           email: contact.email || prev.email,
-          phone: contact.phone || prev.phone,
           designation: contact.designation || prev.designation,
           company: contact.company || prev.company,
         }));
