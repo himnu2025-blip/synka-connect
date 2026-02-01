@@ -220,11 +220,12 @@ export default function Signup() {
       
       if (user) {
         const trimmedName = combineNames(firstName, lastName);
-        const normalizedMobile = mobile.trim();
+        // Build full phone with country code (e.g., "+1" + "2125551234" = "+12125551234")
+        const fullPhone = mobile.trim() ? `${countryCode}${mobile.trim().replace(/\D/g, '')}` : '';
         
         // 1. Update user metadata first
         await supabase.auth.updateUser({
-          data: { name: trimmedName, phone: normalizedMobile }
+          data: { name: trimmedName, phone: fullPhone }
         });
         
         // 2. Update profile with signup data
@@ -232,7 +233,7 @@ export default function Signup() {
           .from('profiles')
           .update({ 
             full_name: trimmedName, 
-            phone: normalizedMobile 
+            phone: fullPhone 
           })
           .eq('user_id', user.id);
 
@@ -253,8 +254,8 @@ export default function Signup() {
               name: 'My Card',
               full_name: trimmedName,
               email: email.trim().toLowerCase(),
-              phone: normalizedMobile,
-              whatsapp: normalizedMobile,
+              phone: fullPhone,
+              whatsapp: fullPhone,
             })
             .eq('id', existingCard.id);
         } else {
@@ -266,8 +267,8 @@ export default function Signup() {
             layout: 'dark-professional',
             full_name: trimmedName,
             email: email.trim().toLowerCase(),
-            phone: normalizedMobile,
-            whatsapp: normalizedMobile,
+            phone: fullPhone,
+            whatsapp: fullPhone,
           });
         }
 
