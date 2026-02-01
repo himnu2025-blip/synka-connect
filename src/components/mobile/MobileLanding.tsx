@@ -65,7 +65,7 @@ export function MobileLanding({
     >
       {/* ===== BACKGROUND IMAGE ===== */}
       <div
-        className="absolute inset-0 -z-10 bg-center bg-cover opacity-[0.06] blur-3xl scale-110"
+        className="absolute inset-0 -z-10 bg-center bg-cover opacity-[0.05] blur-2xl scale-110"
         style={{
           backgroundImage:
             "url('/images/ai/ai-digital-nfc-business-visiting-card-synka.jpg')",
@@ -150,7 +150,7 @@ export function MobileLanding({
         <Button
           size="lg"
           onClick={() => handleNavigate('/signup')}
-          className="w-full mt-6 py-5 text-base rounded-full bg-primary text-primary-foreground shadow-lg"
+          className="w-full mt-6 py-5 text-base rounded-full bg-primary text-primary-foreground shadow-lg active:scale-[0.98] transition-transform"
         >
           Create your free card
           <ArrowRight className="h-5 w-5 ml-2" />

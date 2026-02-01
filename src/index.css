@@ -522,6 +522,7 @@
 
 .animate-mobile-scroll {
   animation: mobileScroll 22s linear infinite;
+  will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
