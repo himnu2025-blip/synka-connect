@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useIOSKeyboard } from '@/hooks/useIOSKeyboard';
 import {
   Dialog,
   DialogContent,
@@ -176,7 +175,6 @@ export function ContactShareSheet({
   onSubmit,
   onSkip,
 }: ContactShareSheetProps) {
-  const { keyboardHeight, isKeyboardVisible } = useIOSKeyboard();
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -440,7 +438,6 @@ export function ContactShareSheet({
             spellCheck={false}
             data-form-type="other"
             enterKeyHint="done"
-            scrollMarginTop="80"
             value={formData.phone}
             onChange={(e) =>
               setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
@@ -448,10 +445,12 @@ export function ContactShareSheet({
             placeholder="Phone number"
             className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none placeholder:text-muted-foreground"
             style={{ 
-  fontSize: '16px',
-  paddingTop: '0',
-  paddingBottom: '0',
-  lineHeight: '56px',
+              fontSize: '16px',
+              paddingTop: '0',
+              paddingBottom: '0',
+              lineHeight: '56px',
+              // Ensure any browser auto-scroll aligns nicely without JS
+              scrollMarginTop: 80,
 }}
           />
         </div>
@@ -488,32 +487,21 @@ export function ContactShareSheet({
   );
 
   if (isMobile) {
-  return (
-    <Drawer open={open} onOpenChange={onOpenChange} handleOnly={false} dismissible={true}>
-      <DrawerContent
-        className="flex flex-col"
-        style={{
-          maxHeight: isKeyboardVisible 
-            ? `calc(90dvh - ${keyboardHeight}px)` 
-            : '90dvh',
-          transition: 'max-height 0.2s ease-out',
-        }}
-        hideHandle
-      >
-        {/* Scrollable content area */}
-        <div 
-          className="overflow-y-auto overscroll-contain flex-1"
-          style={{
-            paddingBottom: isKeyboardVisible ? '20px' : '0px',
-          }}
-        >
-          <BlinqHeader />
-          {FormContent}
-        </div>
-      </DrawerContent>
-    </Drawer>
-  );
-}
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange} handleOnly={false} dismissible={true}>
+        <DrawerContent className="flex flex-col" hideHandle>
+          {/*
+            Let iOS/Android manage viewport/keyboard naturally.
+            Avoid dynamic height/padding/overscroll-contain here (it can create the stuck “gap”).
+          */}
+          <div className="flex-1 overflow-y-auto overscroll-auto">
+            <BlinqHeader />
+            {FormContent}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden" hideCloseButton>

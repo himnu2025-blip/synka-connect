@@ -237,7 +237,7 @@ export const FloatingPhoneInput = ({
       
       {/* Floating label - animates to border on focus/fill */}
       <label
-        className="absolute left-16 text-muted-foreground pointer-events-none transition-all duration-200
+        className="absolute left-16 text-muted-foreground pointer-events-none
           top-0 -translate-y-1/2 text-xs bg-background px-1
           peer-focus-within:top-0 peer-focus-within:text-xs peer-focus-within:bg-background peer-focus-within:px-1
           peer-has-[:placeholder-shown]:peer-has-[input:not(:focus)]:top-1/2 
