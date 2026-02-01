@@ -422,7 +422,7 @@ export function ContactShareSheet({
       />
 
       {/* FORM FIELDS CONTAINER */}
-      <div className="space-y-4 px-4 pb-[max(2rem,env(safe-area-inset-bottom))]">
+      <div className="space-y-4 px-4 pb-8">
         {/* FIRST + LAST NAME */}
         <div className="grid grid-cols-2 gap-3">
           <BlinqInput
@@ -522,14 +522,15 @@ export function ContactShareSheet({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange} handleOnly={false} dismissible={true}>
-        <DrawerContent className="flex flex-col" hideHandle>
-          {/*
-            Let iOS/Android manage viewport/keyboard naturally.
-            Avoid dynamic height/padding/overscroll-contain here (it can create the stuck “gap”).
-          */}
-          <div className="flex-1 overflow-y-auto overscroll-auto">
+      <Drawer open={open} onOpenChange={onOpenChange} repositionInputs={false}>
+        <DrawerContent className="h-dvh flex flex-col" hideHandle>
+          {/* Fixed header */}
+          <div className="flex-shrink-0">
             <BlinqHeader />
+          </div>
+
+          {/* Scrollable form */}
+          <div className="flex-1 overflow-y-auto">
             {FormContent}
           </div>
         </DrawerContent>
