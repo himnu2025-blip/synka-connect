@@ -127,7 +127,7 @@ export function MobileLanding({
         </p>
 
         {/* POINTERS */}
-        <div className="relative mt-6 min-h-[96px] overflow-hidden">
+        <div className="relative mt-6 min-h-[110px] sm:min-h-[96px] overflow-hidden">
           <motion.div
             key={pointerSet}
             initial={{ opacity: 0, y: 6 }}
