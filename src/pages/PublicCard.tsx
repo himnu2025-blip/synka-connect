@@ -33,11 +33,12 @@ import { saveContactToPhone } from '@/lib/nativeContacts';
 import { ContactShareSheet, ContactFormData } from '@/components/public-card/ContactShareSheet';
 import { ExchangeSuccessSheet } from '@/components/public-card/ExchangeSuccessSheet';
 import { hapticFeedback } from '@/lib/haptics';
+import { formatPhoneByCountry, getWhatsAppNumber } from '@/lib/phoneFormat';
 
 // Helper to generate WhatsApp link
 const getWhatsappLink = (number: string) => {
-  const cleaned = number.replace(/[^0-9+]/g, '');
-  return `https://wa.me/${cleaned.replace('+', '')}`;
+  const cleaned = getWhatsAppNumber(number);
+  return `https://wa.me/${cleaned}`
 };
 
 // Contact row component for consistent styling
@@ -662,7 +663,7 @@ const saveContactAndShare = async () => {
           {/* Contact Section */}
           <div className="p-6 space-y-2">
             {displayData.phone && (
-              <ContactRow icon={Phone} label="Mobile" value={displayData.phone} href={`tel:${displayData.phone}`} />
+              <ContactRow icon={Phone} label="Mobile" value={formatPhoneByCountry(displayData.phone)} href={`tel:${displayData.phone}`} />
             )}
             {displayData.email && (
               <ContactRow icon={Mail} label="Email" value={displayData.email} href={`mailto:${displayData.email}`} />

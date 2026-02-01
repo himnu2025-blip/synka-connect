@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { FloatingInput, FloatingPhoneInput, FloatingNameInput, splitFullName, combineNames, COUNTRY_CODES, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
+import { formatPhoneByCountry, getWhatsAppNumber } from '@/lib/phoneFormat';
 import {
   Drawer,
   DrawerContent,
@@ -98,12 +99,9 @@ function ContactRow({ icon: Icon, value, href, iconClass }: ContactRowProps) {
 
 // WhatsApp link helper - uses wa.me for consistency
 const getWhatsappLink = (rawNumber: string) => {
-  const digits = rawNumber.replace(/\D/g, '');
-
+  const digits = getWhatsAppNumber(rawNumber);
   // If only 10 digits, assume India (+91)
-  const numberWithCountry =
-    digits.length === 10 ? `91${digits}` : digits;
-
+  const numberWithCountry = digits.length === 10 ? `91${digits}` : digits;
   return `https://wa.me/${numberWithCountry}`;
 };
 
@@ -783,7 +781,7 @@ useEffect(() => {
           {displayPhone && (
             <ContactRow
               icon={Phone}
-              value={displayPhone}
+              value={formatPhoneByCountry(displayPhone)}
               href={`tel:${displayPhone}`}
             />
           )}
