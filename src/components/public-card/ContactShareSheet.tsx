@@ -522,11 +522,19 @@ export function ContactShareSheet({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange} handleOnly>
-        <DrawerContent className="flex flex-col" hideHandle>
-          {/* Scrollable content - matches MyCard edit drawer pattern */}
-          <div className="overflow-y-auto overscroll-auto flex-1" data-vaul-no-drag>
+      <Drawer
+        open={open}
+        onOpenChange={onOpenChange}
+        repositionInputs={false}
+        shouldScaleBackground={false}
+        modal
+      >
+        <DrawerContent className="h-dvh flex flex-col touch-pan-y" hideHandle>
+          <div className="flex-shrink-0">
             <BlinqHeader />
+          </div>
+
+          <div className="flex-1 overflow-y-auto" data-vaul-no-drag>
             {FormContent}
           </div>
         </DrawerContent>
