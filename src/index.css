@@ -513,3 +513,19 @@
   filter: blur(0);
   transform: scale(1);
 }
+
+/* Mobile features carousel - GPU-optimized */
+@keyframes mobileScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+
+.animate-mobile-scroll {
+  animation: mobileScroll 22s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-mobile-scroll {
+    animation: none;
+  }
+}
