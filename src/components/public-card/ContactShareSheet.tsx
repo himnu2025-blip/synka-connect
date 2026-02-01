@@ -65,14 +65,15 @@ const PillInput = ({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   return (
-    <div className="relative h-10">
+    <div className="relative h-10 rounded-full border border-border">
       <input
         value={value}
         onChange={onChange}
         placeholder=" "
-        className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-transparent focus:border-foreground"
+        className="peer absolute inset-0 w-full h-full px-4 text-sm bg-transparent outline-none rounded-full"
         style={{ fontSize: '16px' }}
       />
+
       <label
         className="absolute left-4 text-muted-foreground pointer-events-none
           top-0 -translate-y-1/2 text-[10px] bg-background
@@ -447,7 +448,16 @@ export function ContactShareSheet({
         </div>
 
         {/* Phone input - simple inline design without floating label to prevent focus issues */}
-        <div className="h-14 rounded-xl border border-border focus-within:border-foreground flex items-center">
+        <div className="relative h-14 rounded-xl border border-border">
+  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pr-1 border-r border-border/50">
+    <select ... />
+  </div>
+
+  <input
+    className="absolute inset-0 pl-[72px] pr-3 text-base bg-transparent outline-none"
+    ...
+  />
+</div>
           {/* Country code selector */}
           <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
             <select
