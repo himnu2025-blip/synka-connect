@@ -32,6 +32,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FloatingInput, FloatingPhoneInput, FloatingNameInput, splitFullName, combineNames, COUNTRY_CODES as PHONE_COUNTRY_CODES, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
+import { formatPhoneByCountry } from '@/lib/phoneFormat';
 import { cn, getContrastTextColor, getSubtleBackground } from '@/lib/utils';
 import {
   Dialog,
@@ -2399,7 +2400,7 @@ if (!contacts && contactsLoading) {
           className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform w-full text-left"
         >
           <Phone className="h-5 w-5 text-foreground/70" strokeWidth={1.3} />
-          <span className="text-foreground">{selectedContact.phone}</span>
+          <span className="text-foreground">{formatPhoneByCountry(selectedContact.phone)}</span>
         </button>
       )}
       {selectedContact.email && (
