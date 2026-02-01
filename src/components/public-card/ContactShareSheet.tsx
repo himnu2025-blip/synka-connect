@@ -65,15 +65,14 @@ const PillInput = ({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   return (
-    <div className="relative h-10 rounded-full border border-border">
+    <div className="relative h-10">
       <input
         value={value}
         onChange={onChange}
         placeholder=" "
-        className="peer absolute inset-0 w-full h-full px-4 text-sm bg-transparent outline-none rounded-full"
+        className="peer w-full h-full rounded-full border border-border px-4 text-sm outline-none bg-transparent focus:border-foreground"
         style={{ fontSize: '16px' }}
       />
-
       <label
         className="absolute left-4 text-muted-foreground pointer-events-none
           top-0 -translate-y-1/2 text-[10px] bg-background
@@ -447,37 +446,46 @@ export function ContactShareSheet({
           />
         </div>
 
-        {/* PHONE FIELD — stable structure */}
-<div className="relative h-14 rounded-xl border border-border">
-  {/* Country code */}
-  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pr-2 border-r border-border/50">
-    <select
-      value={countryCode}
-      onChange={(e) => setCountryCode(e.target.value)}
-      className="bg-transparent text-sm font-medium outline-none appearance-none"
-      style={{ fontSize: '14px' }}
-    >
-      {COUNTRY_CODES.map(({ code }) => (
-        <option key={code} value={code} className="bg-background text-foreground">
-          {code}
-        </option>
-      ))}
-    </select>
-  </div>
-
-  {/* Phone input */}
-  <input
-    type="tel"
-    inputMode="tel"
-    value={formData.phone}
-    onChange={(e) =>
-      setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-    }
-    placeholder="Phone number"
-    className="absolute inset-0 pl-[72px] pr-3 text-base bg-transparent outline-none placeholder:text-muted-foreground"
-    style={{ fontSize: '16px' }}
-  />
-</div>
+        {/* Phone input - simple inline design without floating label to prevent focus issues */}
+        <div className="h-14 rounded-xl border border-border focus-within:border-foreground flex items-center">
+          {/* Country code selector */}
+          <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
+            <select
+              value={countryCode}
+              onChange={(e) => setCountryCode(e.target.value)}
+              autoComplete="off"
+              className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
+              style={{ fontSize: '14px' }}
+            >
+              {COUNTRY_CODES.map(({ code }) => (
+                <option key={code} value={code} className="bg-background text-foreground">{code}</option>
+              ))}
+            </select>
+          </div>
+          {/* Phone number input - static placeholder, no floating label */}
+          <input
+            type="tel"
+            inputMode="tel"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            data-form-type="other"
+            enterKeyHint="done"
+            value={formData.phone}
+            onChange={(e) =>
+              setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+            }
+            placeholder="Phone number"
+            className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none placeholder:text-muted-foreground"
+            style={{ 
+              fontSize: '16px',
+              paddingTop: 0,
+              paddingBottom: 0,
+              scrollMarginTop: 16,
+            }}
+          />
+        </div>
 
         {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}
         <div className="grid grid-cols-2 gap-2">
