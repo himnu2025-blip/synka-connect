@@ -61,7 +61,7 @@ export function MobileLanding({
   return (
     <div
       ref={containerRef}
-      className="relative min-h-dvh w-full flex flex-col bg-background overscroll-contain"
+      className="relative min-h-dvh w-full flex flex-col bg-background"
     >
       {/* ===== BACKGROUND IMAGE ===== */}
       <div
