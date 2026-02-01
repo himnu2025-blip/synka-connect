@@ -188,7 +188,12 @@
   /* ===== Native Mobile Sheet Behavior ===== */
   /* Full viewport height - keyboard shrinks viewport naturally */
   [data-vaul-drawer] {
-    height: 100dvh;
+    height: 100vh;
+  }
+  [data-vaul-drawer-content] {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
   }
 
   [data-vaul-drawer-content] {
