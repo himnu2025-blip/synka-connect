@@ -176,30 +176,6 @@
     padding-bottom: 0 !important;
   }
 
-  /* Native keyboard handling for mobile drawers */
-  /* iOS-specific keyboard handling */
-  @supports (-webkit-touch-callout: none) {
-    /* iOS detection */
-    
-    /* Prevent iOS from adding extra padding */
-    input:focus,
-    textarea:focus,
-    select:focus {
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
-    }
-    
-    /* Account for iOS keyboard accessory bar */
-    [data-vaul-drawer][data-vaul-drawer-visible="true"] {
-      margin-bottom: env(safe-area-inset-bottom, 0);
-    }
-    
-    /* Smooth transitions for iOS keyboard */
-    [data-vaul-drawer-content] {
-      transition: max-height 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-    }
-  }
-
   /* Prevent double-tap zoom on iOS */
   input,
   button,
@@ -209,18 +185,16 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  @supports (height: 100dvh) {
-    /* Let mobile browsers naturally handle viewport changes */
-    [data-vaul-drawer] {
-      max-height: 90dvh !important;
-    }
-    
-    /* Ensure content scrolls naturally when keyboard appears */
-    [data-vaul-drawer-content] {
-      display: flex;
-      flex-direction: column;
-      max-height: inherit;
-    }
+  /* ===== Native Mobile Sheet Behavior ===== */
+  /* Full viewport height - keyboard shrinks viewport naturally */
+  [data-vaul-drawer] {
+    height: 100dvh;
+  }
+
+  [data-vaul-drawer-content] {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
   /* Smooth scroll behavior for form inputs */
