@@ -198,11 +198,11 @@
   }
 
   /* Smooth scroll behavior for form inputs */
-  [data-vaul-drawer-content] input:focus,
-[data-vaul-drawer-content] textarea:focus,
-[data-vaul-drawer-content] select:focus {
-  scroll-margin-block: 0.25rem;
-}
+  input:focus, 
+  textarea:focus, 
+  select:focus {
+    scroll-margin-block: 1rem;
+  }
     
   /* Note: Avoid overscroll-behavior-y: contain on form containers - it causes keyboard gaps on iOS */
 }
