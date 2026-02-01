@@ -150,7 +150,7 @@ export function MobileLanding({
         <Button
           size="lg"
           onClick={() => handleNavigate('/signup')}
-          className="w-full mt-6 py-5 text-base rounded-full bg-primary text-primary-foreground shadow-lg"
+          className="w-full mt-6 py-5 text-base rounded-full bg-primary text-primary-foreground shadow-lg active:scale-[0.98] transition-transform"
         >
           Create your free card
           <ArrowRight className="h-5 w-5 ml-2" />
