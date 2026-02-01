@@ -65,7 +65,7 @@ export function MobileLanding({
     >
       {/* ===== BACKGROUND IMAGE ===== */}
       <div
-        className="absolute inset-0 -z-10 bg-center bg-cover opacity-[0.06] blur-3xl scale-110"
+        className="absolute inset-0 -z-10 bg-center bg-cover opacity-[0.05] blur-2xl scale-110"
         style={{
           backgroundImage:
             "url('/images/ai/ai-digital-nfc-business-visiting-card-synka.jpg')",
