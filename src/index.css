@@ -545,3 +545,31 @@
     animation: none;
   }
 }
+
+/* iOS keyboard viewport fix for dialogs */
+@supports (-webkit-touch-callout: none) {
+  [data-radix-dialog-content] {
+    top: max(10%, env(safe-area-inset-top, 0px)) !important;
+    transform: translateX(0) !important;
+    max-height: calc(90vh - env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  [data-radix-dialog-content] > div {
+    max-height: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  [data-radix-dialog-content] {
+    max-width: calc(100vw - 2rem);
+    overscroll-behavior: contain;
+  }
+  
+  body:has([data-radix-dialog-content]) {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+  }
+}
