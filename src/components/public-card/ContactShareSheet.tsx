@@ -536,8 +536,8 @@ export function ContactShareSheet({
 
   if (isMobile && open) {
   return (
-    <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
-      <div className="min-h-screen flex flex-col">
+    <div className="relative z-50 bg-background">
+      <div className="max-w-md mx-auto">
         <BlinqHeader />
         {FormContent}
       </div>
