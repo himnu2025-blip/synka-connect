@@ -465,6 +465,7 @@ export function ContactShareSheet({
               value={countryCode}
               onChange={(e) => setCountryCode(e.target.value)}
               autoComplete="off"
+              data-form-type="other"
               className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
               style={{ fontSize: '14px' }}
             >
