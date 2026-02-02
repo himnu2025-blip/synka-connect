@@ -949,7 +949,7 @@ useEffect(() => {
     />
 
     {/* Bottom Sheet */}
-    <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
+    <div className="fixed inset-x-0 bottom-0 z-[999] flex justify-center pointer-events-none">
       <div
         className={`w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden
           transform transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
