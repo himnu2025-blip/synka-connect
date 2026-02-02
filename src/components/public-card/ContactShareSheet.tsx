@@ -448,7 +448,7 @@ export function ContactShareSheet({
       />
 
       {/* FORM FIELDS CONTAINER */}
-      <div className="space-y-4 px-4 pb-0">
+      <div className="space-y-4 px-4 pb-4">
         {/* FIRST + LAST NAME */}
         <div className="grid grid-cols-2 gap-3">
           <BlinqInput
@@ -570,7 +570,7 @@ export function ContactShareSheet({
 
             {/* FIXED FOOTER */}
             <div
-              className="px-4 pt-3 border-t bg-background"
+              className="px-4 pt-5 border-t bg-background"
               style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
             >
               <Button
