@@ -957,12 +957,13 @@ useEffect(() => {
         `}
       >
         <div
-          className="overflow-y-auto"
-          style={{
-            WebkitOverflowScrolling: 'touch',
-            maxHeight: '85dvh',
-          }}
-        >
+  className="overflow-y-auto"
+  style={{
+    WebkitOverflowScrolling: 'touch',
+    maxHeight: '85dvh',
+    paddingBottom: 'calc(env(safe-area-inset-bottom) + 90px)',
+  }}
+>
           <div className="space-y-6 px-6 pt-6 pb-6">
             {/* Photo & Logo Upload */}
             <div className="grid grid-cols-2 gap-6">
