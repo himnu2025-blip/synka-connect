@@ -543,12 +543,17 @@ export function ContactShareSheet({
         className="fixed inset-0 bg-black/30 z-40"
         onClick={() => onOpenChange(false)}
         onTouchMove={(e) => e.preventDefault()}
+        style={{ touchAction: 'none' }}
       />
 
-      {/* Bottom sheet - allows internal scroll */}
+      {/* Bottom sheet - keyboard-aware height */}
       <div 
-        className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto touch-pan-y"
-        style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+        className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-3xl shadow-2xl overflow-y-auto touch-pan-y"
+        style={{
+          maxHeight: 'calc(100dvh - 20px)',
+          overscrollBehavior: 'contain',
+          WebkitOverflowScrolling: 'touch'
+        }}
       >
         <div className="max-w-md mx-auto">
           <BlinqHeader />
