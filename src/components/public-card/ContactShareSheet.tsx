@@ -33,7 +33,7 @@ const BlinqInput = ({
   return (
     <div className="relative h-14">
       <input
-        name="no-autofill"
+        name={`field-${label.replace(/\s/g, '').toLowerCase()}`}
         type={type}
         inputMode={inputMode}
         autoComplete="off"
@@ -73,7 +73,7 @@ const PillInput = ({
   return (
     <div className="relative h-10">
       <input
-        name="no-autofill-pill"
+        name={`pill-${label.replace(/\s/g, '').toLowerCase()}`}
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="none"
@@ -464,7 +464,7 @@ export function ContactShareSheet({
           {/* Country code selector */}
           <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
             <select
-              name="no-autofill-country"
+              name="field-country"
               value={countryCode}
               onChange={(e) => setCountryCode(e.target.value)}
               autoComplete="off"
@@ -479,7 +479,7 @@ export function ContactShareSheet({
           </div>
           {/* Phone number input - static placeholder, no floating label */}
           <input
-            name="no-autofill-phone"
+            name="field-phone"
             type="tel"
             inputMode="numeric"
             autoComplete="off"

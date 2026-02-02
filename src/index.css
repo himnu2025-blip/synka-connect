@@ -14,6 +14,11 @@
 }
 
 @layer base {
+  /* GPU layer promotion to prevent iOS viewport jump on keyboard open */
+  input, textarea, select {
+    transform: translateZ(0);
+  }
+
   :root {
     --background: 0 0% 99%;
     --foreground: 222 47% 11%;
