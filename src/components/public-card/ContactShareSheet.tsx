@@ -479,11 +479,12 @@ export function ContactShareSheet({
           </div>
           {/* Phone number input - static placeholder, no floating label */}
           <input
+            name="no-autofill-phone"
             type="tel"
-            inputMode="tel"
+            inputMode="numeric"
             autoComplete="off"
             autoCorrect="off"
-            autoCapitalize="off"
+            autoCapitalize="none"
             spellCheck={false}
             data-form-type="other"
             enterKeyHint="done"
