@@ -5,10 +5,6 @@ import {
   Dialog,
   DialogContent,
 } from '@/components/ui/dialog';
-import {
-  Drawer,
-  DrawerContent,
-} from '@/components/ui/drawer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -536,33 +532,40 @@ export function ContactShareSheet({
   );
 
   if (isMobile && open) {
-  return (
-    <>
-      {/* Dim background - blocks touch on background */}
-      <div 
-        className="fixed inset-0 bg-black/30 z-40"
-        onClick={() => onOpenChange(false)}
-        onTouchMove={(e) => e.preventDefault()}
-        style={{ touchAction: 'none' }}
-      />
+    return (
+      <>
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 bg-black/30 z-40"
+          onClick={() => onOpenChange(false)}
+          style={{ touchAction: 'none' }}
+        />
 
-      {/* Bottom sheet - keyboard-aware height */}
-      <div 
-        className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-3xl shadow-2xl overflow-y-auto touch-pan-y"
-        style={{
-          maxHeight: 'calc(100dvh - 20px)',
-          overscrollBehavior: 'contain',
-          WebkitOverflowScrolling: 'touch'
-        }}
-      >
-        <div className="max-w-md mx-auto">
-          <BlinqHeader />
-          {FormContent}
+        {/* Bottom Sheet Shell (NO SCROLL HERE) */}
+        <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
+          {/* Sheet Body */}
+          <div
+            className="w-full max-w-md bg-background rounded-t-3xl shadow-2xl flex flex-col pointer-events-auto"
+            style={{
+              height: '85dvh',
+              maxHeight: '85dvh',
+            }}
+          >
+            {/* ONLY SCROLL AREA */}
+            <div
+              className="flex-1 overflow-y-auto"
+              style={{
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
+              <BlinqHeader />
+              {FormContent}
+            </div>
+          </div>
         </div>
-      </div>
-    </>
-  );
-}
+      </>
+    );
+  }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden" hideCloseButton>
