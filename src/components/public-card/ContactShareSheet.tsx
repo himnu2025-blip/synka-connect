@@ -216,24 +216,21 @@ export function ContactShareSheet({
   useEffect(() => {
   if (!open) return;
 
-  const appRoot = document.getElementById('root');
-  if (!appRoot) return;
+  const scrollY = window.scrollY;
 
-  const scrollY = appRoot.scrollTop;
-
-  appRoot.style.position = 'fixed';
-  appRoot.style.top = `-${scrollY}px`;
-  appRoot.style.left = '0';
-  appRoot.style.right = '0';
-  appRoot.style.width = '100%';
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.left = '0';
+  document.body.style.right = '0';
+  document.body.style.width = '100%';
 
   return () => {
-    appRoot.style.position = '';
-    appRoot.style.top = '';
-    appRoot.style.left = '';
-    appRoot.style.right = '';
-    appRoot.style.width = '';
-    appRoot.scrollTo(0, scrollY);
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollY);
   };
 }, [open]);
   
@@ -575,13 +572,13 @@ export function ContactShareSheet({
               maxHeight: '85dvh',
             }}
           >
-            {/* ONLY SCROLL AREA */}
             <div
-              className="flex-1 overflow-y-auto"
-              style={{
-                WebkitOverflowScrolling: 'touch',
-              }}
-            >
+  className="flex-1 overflow-y-auto"
+  style={{
+    WebkitOverflowScrolling: 'touch',
+    overscrollBehaviorY: 'contain',   // 🔥 BLOCK SCROLL PASS-THROUGH
+  }}
+>
               <BlinqHeader />
               {FormContent}
             </div>
