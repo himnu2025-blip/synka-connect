@@ -942,7 +942,7 @@ useEffect(() => {
   <>
     {/* Backdrop */}
     <div
-      className={`fixed inset-0 z-40 transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[998] transition-opacity duration-300 ${
         isEditOpen ? 'bg-black/30 opacity-100' : 'opacity-0'
       }`}
       onClick={() => setIsEditOpen(false)}
