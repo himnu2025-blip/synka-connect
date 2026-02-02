@@ -554,16 +554,15 @@ export function ContactShareSheet({
         {/* Bottom Sheet Shell */}
         <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
           <div
-            className="w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden flex flex-col"
-            style={{
-              height: '85dvh',
-              maxHeight: '85dvh',
-            }}
+            className="w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden"
           >
-            {/* SCROLLABLE CONTENT */}
+            {/* SCROLLABLE CONTENT - max height instead of fixed height */}
             <div
-              className="flex-1 overflow-y-auto"
-              style={{ WebkitOverflowScrolling: 'touch' }}
+              className="overflow-y-auto"
+              style={{ 
+                WebkitOverflowScrolling: 'touch',
+                maxHeight: 'calc(85dvh - 120px)', // Subtract footer height
+              }}
             >
               <BlinqHeader />
               {FormContent}
