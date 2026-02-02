@@ -229,16 +229,6 @@ export function ContactShareSheet({
     linkedin: '',
   });
 
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [open]);
 
   const normalizeLinkedInUrl = (value: string) => {
     let v = value.trim();
