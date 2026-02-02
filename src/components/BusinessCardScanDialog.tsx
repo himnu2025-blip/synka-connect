@@ -40,6 +40,7 @@ export function BusinessCardScanDialog({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null); // For mobile browser native camera
   const streamRef = useRef<MediaStream | null>(null);
 
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -47,12 +48,15 @@ export function BusinessCardScanDialog({
   const [isScanning, setIsScanning] = useState(false);
   const [scannedContact, setScannedContact] = useState<ScannedContact | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Check if mobile browser (not native app)
+  const isMobileBrowser = isMobile && typeof window !== 'undefined' && !window.hasOwnProperty('Capacitor');
 
   // Start camera - prefer native camera on mobile for better UX
   const startCamera = useCallback(async () => {
     const { shouldUseNativeCamera, takePhoto } = await import('@/lib/nativeCamera');
     
-    // Always use native camera on native platforms - gives full screen camera
+    // Always use native camera on native Capacitor platforms
     if (shouldUseNativeCamera()) {
       const result = await takePhoto();
       
@@ -73,7 +77,13 @@ export function BusinessCardScanDialog({
       return;
     }
     
-    // Web fallback - use getUserMedia for desktop browsers
+    // Mobile browser - use file input with capture attribute for native camera
+    if (isMobileBrowser && cameraInputRef.current) {
+      cameraInputRef.current.click();
+      return;
+    }
+    
+    // Desktop fallback - use getUserMedia
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
         toast({ title: 'Camera not supported', variant: 'destructive' });
@@ -107,7 +117,7 @@ export function BusinessCardScanDialog({
         variant: 'destructive' 
       });
     }
-  }, []);
+  }, [isMobileBrowser]);
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -132,6 +142,7 @@ export function BusinessCardScanDialog({
     }
   }, [stopCamera]);
 
+  // Handle file upload from gallery
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -142,6 +153,22 @@ export function BusinessCardScanDialog({
       };
       reader.readAsDataURL(file);
     }
+    // Reset the input so same file can be selected again
+    e.target.value = '';
+  };
+
+  // Handle camera capture from mobile browser file input
+  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setCapturedImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+    // Reset the input so same file can be selected again
+    e.target.value = '';
   };
 
   const processWithAI = async () => {
@@ -247,11 +274,21 @@ export function BusinessCardScanDialog({
   const content = (
     <div className="space-y-4">
       <canvas ref={canvasRef} className="hidden" />
+      {/* Gallery file input */}
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
         onChange={handleFileUpload}
+        className="hidden"
+      />
+      {/* Mobile browser camera input - triggers native camera */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handleCameraCapture}
         className="hidden"
       />
 
