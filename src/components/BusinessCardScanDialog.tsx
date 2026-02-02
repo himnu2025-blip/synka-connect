@@ -48,12 +48,13 @@ export function BusinessCardScanDialog({
   const [scannedContact, setScannedContact] = useState<ScannedContact | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Start camera
+  // Start camera - prefer native camera on mobile for better UX
   const startCamera = useCallback(async () => {
-    const { shouldUseNativeCamera, captureOrPickImage } = await import('@/lib/nativeCamera');
+    const { shouldUseNativeCamera, takePhoto } = await import('@/lib/nativeCamera');
     
+    // Always use native camera on native platforms - gives full screen camera
     if (shouldUseNativeCamera()) {
-      const result = await captureOrPickImage();
+      const result = await takePhoto();
       
       if (result.error === 'cancelled') return;
       
@@ -72,6 +73,7 @@ export function BusinessCardScanDialog({
       return;
     }
     
+    // Web fallback - use getUserMedia for desktop browsers
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
         toast({ title: 'Camera not supported', variant: 'destructive' });
