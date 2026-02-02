@@ -549,26 +549,34 @@ export function ContactShareSheet({
     </>
   );
 
-  if (isMobile && open) {
+  if (isMobile && mounted) {
     return (
       <>
-        {/* Backdrop */}
+        {/* Animated Backdrop - fades in/out */}
         <div
-          className="fixed inset-0 bg-black/30 z-40"
+          className={`fixed inset-0 z-40 transition-opacity duration-300 ${
+            open ? 'bg-black/30 opacity-100' : 'bg-black/0 opacity-0'
+          }`}
           onClick={() => onOpenChange(false)}
         />
 
         {/* Bottom Sheet Shell */}
         <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
+          {/* Animated Sheet - slides up with spring curve */}
           <div
-            className="w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden"
+            className={`w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden
+              transform transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
+              ${open ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
+            `}
           >
-            {/* SCROLLABLE CONTENT - max height instead of fixed height */}
+            {/* SCROLLABLE CONTENT with staggered fade animation */}
             <div
-              className="overflow-y-auto"
+              className={`overflow-y-auto transition-all duration-500 delay-100
+                ${open ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
+              `}
               style={{ 
                 WebkitOverflowScrolling: 'touch',
-                maxHeight: 'calc(85dvh - 120px)', // Subtract footer height
+                maxHeight: 'calc(85dvh - 120px)',
               }}
             >
               <BlinqHeader />
@@ -584,7 +592,7 @@ export function ContactShareSheet({
                 onClick={handleSubmit}
                 disabled={submitting}
                 variant="gradient"
-                className="w-full h-14 rounded-xl text-white text-base font-medium"
+                className="w-full h-14 rounded-xl text-white text-base font-medium active:scale-[0.98] transition-transform"
               >
                 {submitting ? 'Sending...' : 'Send'}
               </Button>
