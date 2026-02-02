@@ -212,6 +212,31 @@ export function ContactShareSheet({
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+  if (!open) return;
+
+  const appRoot = document.getElementById('root');
+  if (!appRoot) return;
+
+  const scrollY = appRoot.scrollTop;
+
+  appRoot.style.position = 'fixed';
+  appRoot.style.top = `-${scrollY}px`;
+  appRoot.style.left = '0';
+  appRoot.style.right = '0';
+  appRoot.style.width = '100%';
+
+  return () => {
+    appRoot.style.position = '';
+    appRoot.style.top = '';
+    appRoot.style.left = '';
+    appRoot.style.right = '';
+    appRoot.style.width = '';
+    appRoot.scrollTo(0, scrollY);
+  };
+}, [open]);
+  
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
 
@@ -225,21 +250,6 @@ export function ContactShareSheet({
     company: '',
     linkedin: '',
   });
-
-  useEffect(() => {
-  if (open) {
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden'; // Android needs this too
-  } else {
-    document.body.style.overflow = '';
-    document.documentElement.style.overflow = '';
-  }
-
-  return () => {
-    document.body.style.overflow = '';
-    document.documentElement.style.overflow = '';
-  };
-}, [open]);
 
   const normalizeLinkedInUrl = (value: string) => {
     let v = value.trim();
@@ -551,9 +561,9 @@ export function ContactShareSheet({
       <>
         {/* Backdrop */}
         <div
-  className="fixed inset-0 bg-black/30 z-40"
-  onClick={() => onOpenChange(false)}
-/>
+          className="fixed inset-0 bg-black/30 z-40"
+          onClick={() => onOpenChange(false)}
+        />
 
         {/* Bottom Sheet Shell (NO SCROLL HERE) */}
         <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
@@ -565,14 +575,13 @@ export function ContactShareSheet({
               maxHeight: '85dvh',
             }}
           >
+            {/* ONLY SCROLL AREA */}
             <div
-  className="flex-1 overflow-y-auto"
-  style={{
-    WebkitOverflowScrolling: 'touch',
-    overscrollBehaviorY: 'contain',
-    touchAction: 'pan-y'
-  }}
->
+              className="flex-1 overflow-y-auto"
+              style={{
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
               <BlinqHeader />
               {FormContent}
             </div>
