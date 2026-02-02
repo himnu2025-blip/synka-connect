@@ -548,10 +548,6 @@ export function ContactShareSheet({
         >
           {submitting ? 'Sending...' : 'Send'}
         </Button>
-
-        <p className="text-[11px] text-center text-muted-foreground/70 mt-4">
-          We don't sell your contact details
-        </p>
       </div>
     </>
   );
@@ -575,18 +571,26 @@ export function ContactShareSheet({
       maxHeight: '85dvh',
     }}
   >
-    {/* ONLY SCROLL AREA */}
-    <div
-      className="overflow-y-auto"
-      style={{
-        maxHeight: '100%',
-        WebkitOverflowScrolling: 'touch',
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}
-    >
-              <BlinqHeader />
-              {FormContent}
-            </div>
+    <div className="flex flex-col h-full">
+  {/* SCROLL AREA */}
+  <div
+    className="flex-1 overflow-y-auto"
+    style={{
+      WebkitOverflowScrolling: 'touch',
+    }}
+  >
+    <BlinqHeader />
+    {FormContent}
+  </div>
+
+  {/* FIXED BOTTOM TEXT (NOT SCROLLABLE) */}
+  <div
+    className="text-[11px] text-center text-muted-foreground/70 py-3"
+    style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+  >
+    We don't sell your contact details
+  </div>
+</div>
           </div>
         </div>
       </>
