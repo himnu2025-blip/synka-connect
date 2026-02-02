@@ -14,11 +14,6 @@
 }
 
 @layer base {
-  /* GPU layer promotion to prevent iOS viewport jump on keyboard open */
-  input, textarea, select {
-    transform: translateZ(0);
-  }
-
   :root {
     --background: 0 0% 99%;
     --foreground: 222 47% 11%;
@@ -190,30 +185,6 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* ===== Native Mobile Sheet Behavior ===== */
-  /* Full viewport height - keyboard shrinks viewport naturally */
-  [data-vaul-drawer] {
-    height: 100dvh;
-  }
-
-  [data-vaul-drawer-content] {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  [data-vaul-drawer-content] > div {
-  overscroll-behavior-y: none;
-  }
-
-  /* Smooth scroll behavior for form inputs */
-  input:focus, 
-  textarea:focus, 
-  select:focus {
-    scroll-margin-block: 1rem;
-  }
-    
   /* Note: Avoid overscroll-behavior-y: contain on form containers - it causes keyboard gaps on iOS */
 }
 @layer components {
