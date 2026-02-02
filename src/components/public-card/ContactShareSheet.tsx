@@ -212,21 +212,28 @@ export function ContactShareSheet({
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
+  
+  // Animation state - keeps sheet mounted during exit animation
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-  if (open) {
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-  } else {
-    document.body.style.overflow = '';
-    document.documentElement.style.overflow = '';
-  }
+    if (open) {
+      setMounted(true);
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      // Delay unmount to allow exit animation
+      const t = setTimeout(() => setMounted(false), 300);
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      return () => clearTimeout(t);
+    }
 
-  return () => {
-    document.body.style.overflow = '';
-    document.documentElement.style.overflow = '';
-  };
-}, [open]);
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [open]);
   
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
