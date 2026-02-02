@@ -464,6 +464,7 @@ export function ContactShareSheet({
           {/* Country code selector */}
           <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
             <select
+              name="no-autofill-country"
               value={countryCode}
               onChange={(e) => setCountryCode(e.target.value)}
               autoComplete="off"
