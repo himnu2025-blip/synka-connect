@@ -214,26 +214,17 @@ export function ContactShareSheet({
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-  if (!open) return;
-
-  const appRoot = document.getElementById('root');
-  if (!appRoot) return;
-
-  const scrollY = appRoot.scrollTop;
-
-  appRoot.style.position = 'fixed';
-  appRoot.style.top = `-${scrollY}px`;
-  appRoot.style.left = '0';
-  appRoot.style.right = '0';
-  appRoot.style.width = '100%';
+  if (open) {
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+  }
 
   return () => {
-    appRoot.style.position = '';
-    appRoot.style.top = '';
-    appRoot.style.left = '';
-    appRoot.style.right = '';
-    appRoot.style.width = '';
-    appRoot.scrollTo(0, scrollY);
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
   };
 }, [open]);
   
@@ -577,11 +568,12 @@ export function ContactShareSheet({
           >
             {/* ONLY SCROLL AREA */}
             <div
-              className="flex-1 overflow-y-auto"
-              style={{
-                WebkitOverflowScrolling: 'touch',
-              }}
-            >
+  className="flex-1 overflow-y-auto"
+  style={{
+    WebkitOverflowScrolling: 'touch',
+    paddingBottom: 'env(safe-area-inset-bottom)',
+  }}
+>
               <BlinqHeader />
               {FormContent}
             </div>
