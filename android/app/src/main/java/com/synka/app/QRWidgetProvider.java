@@ -22,7 +22,7 @@ public class QRWidgetProvider extends AppWidgetProvider {
 
     private static final String PREFS_NAME = "SynkaWidgetPrefs";
     private static final String PREF_PROFILE_SLUG = "profile_slug";
-    private static final String BASE_URL = "https://synka.app/u/";
+    private static final String BASE_URL = "https://synka.in/u/";
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
