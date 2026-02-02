@@ -112,6 +112,7 @@ export default function MyCard() {
   const isMobile = useIsMobile();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLayoutOpen, setIsLayoutOpen] = useState(false);
+  const [editSheetMounted, setEditSheetMounted] = useState(false);
   const [currentLayout, setCurrentLayout] = useState<LayoutType>('photo-logo');
   const [currentThemeColor, setCurrentThemeColor] = useState<string | null>(null);
   const [editData, setEditData] = useState({
