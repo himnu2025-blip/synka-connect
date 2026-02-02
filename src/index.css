@@ -14,13 +14,6 @@
 }
 
 @layer base {
-  /* Disable iOS Safari AutoFill bar that causes viewport jump */
-  input,
-  textarea,
-  select {
-    autocomplete: off !important;
-  }
-
   :root {
     --background: 0 0% 99%;
     --foreground: 222 47% 11%;
