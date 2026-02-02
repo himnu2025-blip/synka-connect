@@ -26,10 +26,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { FloatingInput, FloatingPhoneInput, FloatingNameInput, splitFullName, combineNames, COUNTRY_CODES, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
 import { formatPhoneByCountry, getWhatsAppNumber } from '@/lib/phoneFormat';
-import {
-  Drawer,
-  DrawerContent,
-} from '@/components/ui/drawer';
+// Native sheet replaces Drawer for mobile keyboard stability
 import {
   Dialog,
   DialogContent,
@@ -115,6 +112,7 @@ export default function MyCard() {
   const isMobile = useIsMobile();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLayoutOpen, setIsLayoutOpen] = useState(false);
+  const [editSheetMounted, setEditSheetMounted] = useState(false);
   const [currentLayout, setCurrentLayout] = useState<LayoutType>('photo-logo');
   const [currentThemeColor, setCurrentThemeColor] = useState<string | null>(null);
   const [editData, setEditData] = useState({
@@ -184,6 +182,20 @@ useEffect(() => {
       return;
     }
   }, [authLoading, user]);
+
+  // Native sheet mount/unmount with body scroll lock
+  useEffect(() => {
+    if (isEditOpen) {
+      setEditSheetMounted(true);
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      const t = setTimeout(() => setEditSheetMounted(false), 300);
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      return () => clearTimeout(t);
+    }
+  }, [isEditOpen]);
 
   // Card initialization removed - AuthProvider handles card creation
 
@@ -926,258 +938,278 @@ useEffect(() => {
       />
 
       {/* Edit Dialog/Drawer - Responsive */}
-{isMobile ? (
-  // 📱 MOBILE: Bottom Drawer
-  <Drawer open={isEditOpen} onOpenChange={setIsEditOpen} handleOnly>
-    <DrawerContent className="max-h-safe flex flex-col" hideHandle>
-      {/* Scrollable content */}
-      <div className="overflow-y-auto scroll-keyboard-safe flex-1">
+{isMobile && editSheetMounted && (
+  <>
+    {/* Backdrop */}
+    <div
+      className={`fixed inset-0 z-40 transition-opacity duration-300 ${
+        isEditOpen ? 'bg-black/30 opacity-100' : 'opacity-0'
+      }`}
+      onClick={() => setIsEditOpen(false)}
+    />
 
-        {/* Form Content */}
-        <div className="space-y-6 px-6 pt-6 pb-6">
-          {/* Photo & Logo Upload */}
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <Label className="font-semibold">Photo</Label>
-              <div
-                className="aspect-square rounded-2xl overflow-hidden bg-muted cursor-pointer hover:opacity-80 transition-opacity flex items-center justify-center"
-                onClick={() => photoInputRef.current?.click()}
-              >
-                {editData.photo_url ? (
-                  <img
-                    src={editData.photo_url}
-                    alt="Photo"
-                    className="w-full h-full object-cover"
-                    style={{
-                      objectPosition: `${activeCard?.face_x ?? 50}% ${activeCard?.face_y ?? 50}%`
-                    }}
-                  />
-                ) : (
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                )}
-              </div>
-              <input
-                ref={photoInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handlePhotoUpload}
-              />
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => photoInputRef.current?.click()}
-                disabled={isLoading}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                {editData.photo_url ? 'Change Photo' : 'Upload Photo'}
-              </Button>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="font-semibold">Logo</Label>
-              <div
-                className="aspect-square rounded-full overflow-hidden bg-muted cursor-pointer hover:opacity-80 transition-opacity flex items-center justify-center"
-                onClick={() => logoInputRef.current?.click()}
-              >
-                {editData.logo_url ? (
-                  <img
-                    src={editData.logo_url}
-                    alt="Logo"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                )}
-              </div>
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleLogoUpload}
-              />
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => logoInputRef.current?.click()}
-                disabled={isLoading}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                {editData.logo_url ? 'Change Logo' : 'Upload Logo'}
-              </Button>
-            </div>
-          </div>
-
-          {/* Form Fields */}
-          <div className="space-y-4">
-            <FloatingNameInput
-              firstName={editData.firstName}
-              lastName={editData.lastName}
-              onFirstNameChange={(val) =>
-                setEditData(prev => ({ ...prev, firstName: val }))
-              }
-              onLastNameChange={(val) =>
-                setEditData(prev => ({ ...prev, lastName: val }))
-              }
-              disabled={isLoading}
-            />
-
-            <FloatingInput
-              label="Role *"
-              value={editData.designation}
-              onChange={(e) =>
-                setEditData(prev => ({ ...prev, designation: e.target.value }))
-              }
-              disabled={isLoading}
-            />
-
-            <FloatingInput
-              label="Company Name"
-              value={editData.company}
-              onChange={(e) =>
-                setEditData(prev => ({ ...prev, company: e.target.value }))
-              }
-              disabled={isLoading}
-            />
-
-            <FloatingInput
-              label="Email"
-              value={editData.email}
-              onChange={(e) =>
-                setEditData(prev => ({ ...prev, email: e.target.value }))
-              }
-              inputMode="email"
-              disabled={isLoading}
-            />
-
-            <FloatingPhoneInput
-              label="Phone"
-              value={extractPhoneNumber(editData.phone)}
-              onChange={(e) => {
-                const code = getCountryCode(editData.phone);
-                setEditData(prev => ({ ...prev, phone: code + e.target.value }));
-              }}
-              countryCode={getCountryCode(editData.phone)}
-              onCountryCodeChange={(code) => {
-                const number = extractPhoneNumber(editData.phone);
-                setEditData(prev => ({ ...prev, phone: code + number }));
-              }}
-              disabled={isLoading}
-            />
-
-            <FloatingPhoneInput
-              label="WhatsApp"
-              value={extractPhoneNumber(editData.whatsapp)}
-              onChange={(e) => {
-                const code = getCountryCode(editData.whatsapp);
-                setEditData(prev => ({ ...prev, whatsapp: code + e.target.value }));
-              }}
-              countryCode={getCountryCode(editData.whatsapp)}
-              onCountryCodeChange={(code) => {
-                const number = extractPhoneNumber(editData.whatsapp);
-                setEditData(prev => ({ ...prev, whatsapp: code + number }));
-              }}
-              disabled={isLoading}
-            />
-
-            <FloatingInput
-              label="Website"
-              value={editData.website}
-              onChange={(e) =>
-                setEditData(prev => ({ ...prev, website: e.target.value }))
-              }
-              inputMode="url"
-              disabled={isLoading}
-            />
-
-            <FloatingInput
-              label="LinkedIn Username"
-              value={editData.linkedin}
-              onChange={(e) =>
-                setEditData(prev => ({ ...prev, linkedin: e.target.value }))
-              }
-              disabled={isLoading}
-            />
-
-            {/* Social Links Editor */}
-            <div className="space-y-2">
-              <Label>Social Links</Label>
-              <SocialLinksEditor
-                values={{
-                  instagram: editData.instagram,
-                  youtube: editData.youtube,
-                  twitter: editData.twitter,
-                  facebook: editData.facebook,
-                  calendly: editData.calendly,
-                }}
-                onChange={(platform: SocialPlatform, value: string) => {
-                  setEditData(prev => ({ ...prev, [platform]: value }));
-                }}
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>About Me</Label>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={generateAbout}
-                  disabled={isLoading || isGeneratingAbout}
+    {/* Bottom Sheet */}
+    <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
+      <div
+        className={`w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden
+          transform transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
+          ${isEditOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
+        `}
+      >
+        <div
+          className="overflow-y-auto"
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            maxHeight: '85dvh',
+          }}
+        >
+          <div className="space-y-6 px-6 pt-6 pb-6">
+            {/* Photo & Logo Upload */}
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label className="font-semibold">Photo</Label>
+                <div
+                  className="aspect-square rounded-2xl overflow-hidden bg-muted cursor-pointer hover:opacity-80 transition-opacity flex items-center justify-center"
+                  onClick={() => photoInputRef.current?.click()}
                 >
-                  <Sparkles
-                    className={cn(
-                      'h-4 w-4 mr-1',
-                      isGeneratingAbout && 'animate-spin'
-                    )}
-                  />
-                  {isGeneratingAbout ? 'Generating...' : 'Generate with AI'}
+                  {editData.photo_url ? (
+                    <img
+                      src={editData.photo_url}
+                      alt="Photo"
+                      className="w-full h-full object-cover"
+                      style={{
+                        objectPosition: `${activeCard?.face_x ?? 50}% ${activeCard?.face_y ?? 50}%`
+                      }}
+                    />
+                  ) : (
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                  )}
+                </div>
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoUpload}
+                />
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => photoInputRef.current?.click()}
+                  disabled={isLoading}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {editData.photo_url ? 'Change Photo' : 'Upload Photo'}
                 </Button>
               </div>
-              <Textarea
-                placeholder="Tell people about yourself..."
-                value={editData.about}
-                onChange={(e) =>
-                  setEditData(prev => ({ ...prev, about: e.target.value }))
+
+              <div className="space-y-3">
+                <Label className="font-semibold">Logo</Label>
+                <div
+                  className="aspect-square rounded-full overflow-hidden bg-muted cursor-pointer hover:opacity-80 transition-opacity flex items-center justify-center"
+                  onClick={() => logoInputRef.current?.click()}
+                >
+                  {editData.logo_url ? (
+                    <img
+                      src={editData.logo_url}
+                      alt="Logo"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                  )}
+                </div>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleLogoUpload}
+                />
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={isLoading}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {editData.logo_url ? 'Change Logo' : 'Upload Logo'}
+                </Button>
+              </div>
+            </div>
+
+            {/* Form Fields */}
+            <div className="space-y-4">
+              <FloatingNameInput
+                firstName={editData.firstName}
+                lastName={editData.lastName}
+                onFirstNameChange={(val) =>
+                  setEditData(prev => ({ ...prev, firstName: val }))
                 }
-                rows={3}
+                onLastNameChange={(val) =>
+                  setEditData(prev => ({ ...prev, lastName: val }))
+                }
                 disabled={isLoading}
               />
+
+              <FloatingInput
+                label="Role *"
+                value={editData.designation}
+                onChange={(e) =>
+                  setEditData(prev => ({ ...prev, designation: e.target.value }))
+                }
+                disabled={isLoading}
+              />
+
+              <FloatingInput
+                label="Company Name"
+                value={editData.company}
+                onChange={(e) =>
+                  setEditData(prev => ({ ...prev, company: e.target.value }))
+                }
+                disabled={isLoading}
+              />
+
+              <FloatingInput
+                label="Email"
+                value={editData.email}
+                onChange={(e) =>
+                  setEditData(prev => ({ ...prev, email: e.target.value }))
+                }
+                inputMode="email"
+                disabled={isLoading}
+              />
+
+              <FloatingPhoneInput
+                label="Phone"
+                value={extractPhoneNumber(editData.phone)}
+                onChange={(e) => {
+                  const code = getCountryCode(editData.phone);
+                  setEditData(prev => ({ ...prev, phone: code + e.target.value }));
+                }}
+                countryCode={getCountryCode(editData.phone)}
+                onCountryCodeChange={(code) => {
+                  const number = extractPhoneNumber(editData.phone);
+                  setEditData(prev => ({ ...prev, phone: code + number }));
+                }}
+                disabled={isLoading}
+              />
+
+              <FloatingPhoneInput
+                label="WhatsApp"
+                value={extractPhoneNumber(editData.whatsapp)}
+                onChange={(e) => {
+                  const code = getCountryCode(editData.whatsapp);
+                  setEditData(prev => ({ ...prev, whatsapp: code + e.target.value }));
+                }}
+                countryCode={getCountryCode(editData.whatsapp)}
+                onCountryCodeChange={(code) => {
+                  const number = extractPhoneNumber(editData.whatsapp);
+                  setEditData(prev => ({ ...prev, whatsapp: code + number }));
+                }}
+                disabled={isLoading}
+              />
+
+              <FloatingInput
+                label="Website"
+                value={editData.website}
+                onChange={(e) =>
+                  setEditData(prev => ({ ...prev, website: e.target.value }))
+                }
+                inputMode="url"
+                disabled={isLoading}
+              />
+
+              <FloatingInput
+                label="LinkedIn Username"
+                value={editData.linkedin}
+                onChange={(e) =>
+                  setEditData(prev => ({ ...prev, linkedin: e.target.value }))
+                }
+                disabled={isLoading}
+              />
+
+              {/* Social Links Editor */}
+              <div className="space-y-2">
+                <Label>Social Links</Label>
+                <SocialLinksEditor
+                  values={{
+                    instagram: editData.instagram,
+                    youtube: editData.youtube,
+                    twitter: editData.twitter,
+                    facebook: editData.facebook,
+                    calendly: editData.calendly,
+                  }}
+                  onChange={(platform: SocialPlatform, value: string) => {
+                    setEditData(prev => ({ ...prev, [platform]: value }));
+                  }}
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>About Me</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={generateAbout}
+                    disabled={isLoading || isGeneratingAbout}
+                  >
+                    <Sparkles
+                      className={cn(
+                        'h-4 w-4 mr-1',
+                        isGeneratingAbout && 'animate-spin'
+                      )}
+                    />
+                    {isGeneratingAbout ? 'Generating...' : 'Generate with AI'}
+                  </Button>
+                </div>
+                <Textarea
+                  placeholder="Tell people about yourself..."
+                  value={editData.about}
+                  onChange={(e) =>
+                    setEditData(prev => ({ ...prev, about: e.target.value }))
+                  }
+                  rows={3}
+                  disabled={isLoading}
+                />
+              </div>
             </div>
+
+            {/* Document Uploads */}
+            <DocumentLinks
+              documentName={activeCard?.document_name || null}
+              documentUrl={activeCard?.document_url || null}
+              isEditMode={true}
+              userId={user?.id}
+              cardId={activeCard?.id}
+              isPremium={profile?.plan === 'Orange'}
+              onUpdate={async (updates) => {
+                if (activeCard) {
+                  await updateCard(activeCard.id, updates);
+                }
+              }}
+            />
+
+            {/* Save Button */}
+            <Button 
+              variant="gradient" 
+              className="w-full font-medium tracking-tight" 
+              onClick={handleSave}
+              disabled={isLoading}
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Save Changes
+            </Button>
           </div>
-
-          {/* Document Uploads */}
-          <DocumentLinks
-            documentName={activeCard?.document_name || null}
-            documentUrl={activeCard?.document_url || null}
-            isEditMode={true}
-            userId={user?.id}
-            cardId={activeCard?.id}
-            isPremium={profile?.plan === 'Orange'}
-            onUpdate={async (updates) => {
-              if (activeCard) {
-                await updateCard(activeCard.id, updates);
-              }
-            }}
-          />
-
-          {/* Save Button */}
-          <Button 
-            variant="gradient" 
-            className="w-full font-medium tracking-tight" 
-            onClick={handleSave}
-            disabled={isLoading}
-          >
-            <Check className="h-4 w-4 mr-2" />
-            Save Changes
-          </Button>
         </div>
       </div>
-    </DrawerContent>
-  </Drawer>
-) : (
+    </div>
+  </>
+)}
+
+{!isMobile && (
   // 💻 DESKTOP: Centered Dialog
   <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
     <DialogContent className="max-w-lg max-h-[85dvh] rounded-3xl overflow-y-auto">
