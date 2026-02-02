@@ -384,8 +384,11 @@ export function ContactShareSheet({
   // Common header component for both mobile and desktop
   const BlinqHeader = () => (
     <>
-      {/* EXACT BLINQ HEADER - NO BORDER AT BOTTOM */}
-      <div className="px-4 pt-5 pb-4">
+      {/* EXACT BLINQ HEADER with parallax effect */}
+      <div 
+        className="px-4 pt-5 pb-4"
+        style={{ transform: 'translateY(calc(var(--scrollY, 0px) * -0.2))' }}
+      >
         {/* SCAN & SKIP ROW - EXACTLY LIKE BLINQ */}
         <div className="flex justify-between items-center mb-5">
           {/* Scan button aligned left like Blinq */}
