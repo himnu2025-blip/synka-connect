@@ -33,6 +33,7 @@ const BlinqInput = ({
   return (
     <div className="relative h-14">
       <input
+        name="no-autofill"
         type={type}
         inputMode={inputMode}
         autoComplete="off"
