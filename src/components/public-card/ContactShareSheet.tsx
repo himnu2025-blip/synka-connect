@@ -35,7 +35,12 @@ const BlinqInput = ({
       <input
         type={type}
         inputMode={inputMode}
-        autoComplete={autoComplete}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="none"
+        spellCheck={false}
+        data-form-type="other"
+        enterKeyHint="next"
         value={value}
         onChange={onChange}
         placeholder=" "
@@ -67,6 +72,12 @@ const PillInput = ({
   return (
     <div className="relative h-10">
       <input
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="none"
+        spellCheck={false}
+        data-form-type="other"
+        enterKeyHint="next"
         value={value}
         onChange={onChange}
         placeholder=" "
@@ -454,6 +465,7 @@ export function ContactShareSheet({
               value={countryCode}
               onChange={(e) => setCountryCode(e.target.value)}
               autoComplete="off"
+              data-form-type="other"
               className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
               style={{ fontSize: '14px' }}
             >
