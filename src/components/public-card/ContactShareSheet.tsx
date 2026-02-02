@@ -448,7 +448,7 @@ export function ContactShareSheet({
       />
 
       {/* FORM FIELDS CONTAINER */}
-      <div className="space-y-4 px-4 pb-8">
+      <div className="space-y-4 px-4 pb-4">
         {/* FIRST + LAST NAME */}
         <div className="grid grid-cols-2 gap-3">
           <BlinqInput
