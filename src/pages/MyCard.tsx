@@ -183,6 +183,20 @@ useEffect(() => {
     }
   }, [authLoading, user]);
 
+  // Native sheet mount/unmount with body scroll lock
+  useEffect(() => {
+    if (isEditOpen) {
+      setEditSheetMounted(true);
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      const t = setTimeout(() => setEditSheetMounted(false), 300);
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      return () => clearTimeout(t);
+    }
+  }, [isEditOpen]);
+
   // Card initialization removed - AuthProvider handles card creation
 
   // Track which card ID we've initialized edit data for
