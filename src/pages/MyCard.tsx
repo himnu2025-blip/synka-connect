@@ -958,7 +958,14 @@ useEffect(() => {
           ${isEditOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
         `}
       >
-        <div className="edit-sheet-scroll overflow-y-auto">
+        <div
+  className="overflow-y-auto"
+  style={{
+    WebkitOverflowScrolling: 'touch',
+    maxHeight: '95dvh',
+    paddingBottom: 'env(safe-area-inset-bottom)',
+  }}
+>
           <div className="space-y-6 px-6 pt-6 pb-6">
             {/* Photo & Logo Upload */}
             <div className="grid grid-cols-2 gap-6">
