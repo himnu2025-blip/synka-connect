@@ -2393,7 +2393,7 @@ if (!contacts && contactsLoading) {
                 className="overflow-y-auto px-4 pb-6 space-y-6"
                 style={{
                   WebkitOverflowScrolling: 'touch',
-                  maxHeight: 'calc(90dvh - 60px)',
+                  maxHeight: isEditOpen ? 'calc(95dvh - 60px)' : 'calc(90dvh - 60px)',
                   paddingBottom: 'env(safe-area-inset-bottom)',
                 }}
               >
