@@ -536,12 +536,21 @@ export function ContactShareSheet({
 
   if (isMobile && open) {
   return (
-    <div className="relative z-50 bg-background">
-      <div className="max-w-md mx-auto">
-        <BlinqHeader />
-        {FormContent}
+    <>
+      {/* Dim background */}
+      <div 
+        className="fixed inset-0 bg-black/30 z-40"
+        onClick={() => onOpenChange(false)}
+      />
+
+      {/* Bottom sheet */}
+      <div className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto">
+        <div className="max-w-md mx-auto">
+          <BlinqHeader />
+          {FormContent}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
   return (
