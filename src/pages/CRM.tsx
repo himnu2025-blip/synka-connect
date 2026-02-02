@@ -2342,7 +2342,47 @@ if (!contacts && contactsLoading) {
                 }}
               >
                 {/* Header */}
-                <div className="text-center relative">
+                <div className="text-center relative pt-2">
+                  {/* LEFT — Cancel (only in edit mode) */}
+                  {isEditOpen && (
+                    <button
+                      onClick={() => {
+                        setIsEditOpen(false);
+                        if (selectedContact) {
+                          const { firstName, lastName } = splitFullName(selectedContact.name || '');
+                          setEditForm({
+                            firstName,
+                            lastName,
+                            company: selectedContact.company || '',
+                            designation: selectedContact.designation || '',
+                            phone: selectedContact.phone || '',
+                            email: selectedContact.email || '',
+                            whatsapp: selectedContact.whatsapp || '',
+                            linkedin: selectedContact.linkedin || '',
+                            website: selectedContact.website || '',
+                            notes: '',
+                            tags: localContactTags,
+                          });
+                        }
+                      }}
+                      className="absolute left-0 top-0 h-10 w-10 rounded-full bg-muted flex items-center justify-center active:scale-95 transition-transform"
+                      disabled={editLoading}
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+
+                  {/* RIGHT — Save (only in edit mode) */}
+                  {isEditOpen && (
+                    <button
+                      onClick={saveEditedContact}
+                      disabled={editLoading}
+                      className="absolute right-0 top-0 px-4 h-10 rounded-full bg-primary text-primary-foreground text-[15px] font-medium active:scale-95 transition-transform disabled:opacity-50"
+                    >
+                      {editLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                    </button>
+                  )}
+
                   <ContactAvatar 
                     name={selectedContact.name}
                     photoUrl={selectedContact.photo_url}
@@ -2360,11 +2400,12 @@ if (!contacts && contactsLoading) {
                         : selectedContact.company || selectedContact.designation}
                     </p>
                   )}
-                  {selectedContact.about && (
+                  {selectedContact.about && !isEditOpen && (
                     <p className="text-[13px] text-muted-foreground mt-2 max-w-md mx-auto leading-relaxed">
                       {selectedContact.about}
                     </p>
                   )}
+                  {/* Edit pencil when NOT editing */}
                   {!isEditOpen && (
                     <button
                       onClick={(e) => {
@@ -2381,43 +2422,6 @@ if (!contacts && contactsLoading) {
                 {/* Edit Form */}
                 {isEditOpen ? (
                   <div className="space-y-4 pb-6">
-                    {/* iOS-style Edit Header */}
-                    <div className="flex items-center justify-between -mx-4 px-4 pb-4 border-b border-border/30">
-                      <button
-                        onClick={() => {
-                          setIsEditOpen(false);
-                          if (selectedContact) {
-                            const { firstName, lastName } = splitFullName(selectedContact.name || '');
-                            setEditForm({
-                              firstName,
-                              lastName,
-                              company: selectedContact.company || '',
-                              designation: selectedContact.designation || '',
-                              phone: selectedContact.phone || '',
-                              email: selectedContact.email || '',
-                              whatsapp: selectedContact.whatsapp || '',
-                              linkedin: selectedContact.linkedin || '',
-                              website: selectedContact.website || '',
-                              notes: '',
-                              tags: localContactTags,
-                            });
-                          }
-                        }}
-                        className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-95 transition-transform"
-                        disabled={editLoading}
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
-                      <h3 className="text-[17px] font-semibold">Edit Contact</h3>
-                      <button
-                        onClick={saveEditedContact}
-                        disabled={editLoading}
-                        className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-[15px] font-medium active:scale-95 transition-transform disabled:opacity-50"
-                      >
-                        {editLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
-                      </button>
-                    </div>
-
                     {/* Profile Fields Only */}
                     <FloatingNameInput
                       firstName={editForm.firstName}
@@ -2645,7 +2649,47 @@ if (!contacts && contactsLoading) {
             </div>
             {selectedContact && (
               <div className="px-4 pb-6 space-y-6 overflow-y-auto scroll-keyboard-safe flex-1">
-                <DrawerHeader className="text-center relative p-0">
+                <DrawerHeader className="text-center relative p-0 pt-2">
+                  {/* LEFT — Cancel (only in edit mode) */}
+                  {isEditOpen && (
+                    <button
+                      onClick={() => {
+                        setIsEditOpen(false);
+                        if (selectedContact) {
+                          const { firstName, lastName } = splitFullName(selectedContact.name || '');
+                          setEditForm({
+                            firstName,
+                            lastName,
+                            company: selectedContact.company || '',
+                            designation: selectedContact.designation || '',
+                            phone: selectedContact.phone || '',
+                            email: selectedContact.email || '',
+                            whatsapp: selectedContact.whatsapp || '',
+                            linkedin: selectedContact.linkedin || '',
+                            website: selectedContact.website || '',
+                            notes: '',
+                            tags: localContactTags,
+                          });
+                        }
+                      }}
+                      className="absolute left-0 top-0 h-10 w-10 rounded-full bg-muted flex items-center justify-center active:scale-95 transition-transform"
+                      disabled={editLoading}
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+
+                  {/* RIGHT — Save (only in edit mode) */}
+                  {isEditOpen && (
+                    <button
+                      onClick={saveEditedContact}
+                      disabled={editLoading}
+                      className="absolute right-0 top-0 px-4 h-10 rounded-full bg-primary text-primary-foreground text-[15px] font-medium active:scale-95 transition-transform disabled:opacity-50"
+                    >
+                      {editLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                    </button>
+                  )}
+
                   <ContactAvatar name={selectedContact.name} photoUrl={selectedContact.photo_url} sharedCardId={selectedContact.shared_card_id} size="lg" className="mx-auto mb-2" />
                   <DrawerTitle className="text-[22px] font-semibold tracking-tight mt-1">{selectedContact.name}</DrawerTitle>
                   {(selectedContact.company || selectedContact.designation) && (
@@ -2653,9 +2697,10 @@ if (!contacts && contactsLoading) {
                       {selectedContact.company && selectedContact.designation ? `${selectedContact.company} · ${selectedContact.designation}` : selectedContact.company || selectedContact.designation}
                     </p>
                   )}
-                  {selectedContact.about && <p className="text-[13px] text-muted-foreground mt-2 max-w-md mx-auto leading-relaxed">{selectedContact.about}</p>}
+                  {selectedContact.about && !isEditOpen && <p className="text-[13px] text-muted-foreground mt-2 max-w-md mx-auto leading-relaxed">{selectedContact.about}</p>}
+                  {/* Edit pencil when NOT editing */}
                   {!isEditOpen && (
-                    <button onClick={(e) => { e.stopPropagation(); setIsEditOpen(true); }} className="absolute right-4 top-4 h-9 w-9 rounded-full bg-background/80 backdrop-blur border border-border/40 flex items-center justify-center active:scale-95">
+                    <button onClick={(e) => { e.stopPropagation(); setIsEditOpen(true); }} className="absolute right-0 top-0 h-9 w-9 rounded-full bg-background/80 backdrop-blur border border-border/40 flex items-center justify-center active:scale-95">
                       <Edit2 className="w-5 h-5" />
                     </button>
                   )}
@@ -2663,43 +2708,6 @@ if (!contacts && contactsLoading) {
 
                 {isEditOpen ? (
                   <div className="space-y-4 pb-6">
-                    {/* iOS-style Edit Header */}
-                    <div className="flex items-center justify-between pb-4 border-b border-border/30">
-                      <button
-                        onClick={() => {
-                          setIsEditOpen(false);
-                          if (selectedContact) {
-                            const { firstName, lastName } = splitFullName(selectedContact.name || '');
-                            setEditForm({
-                              firstName,
-                              lastName,
-                              company: selectedContact.company || '',
-                              designation: selectedContact.designation || '',
-                              phone: selectedContact.phone || '',
-                              email: selectedContact.email || '',
-                              whatsapp: selectedContact.whatsapp || '',
-                              linkedin: selectedContact.linkedin || '',
-                              website: selectedContact.website || '',
-                              notes: '',
-                              tags: localContactTags,
-                            });
-                          }
-                        }}
-                        className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-95 transition-transform"
-                        disabled={editLoading}
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
-                      <h3 className="text-[17px] font-semibold">Edit Contact</h3>
-                      <button
-                        onClick={saveEditedContact}
-                        disabled={editLoading}
-                        className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-[15px] font-medium active:scale-95 transition-transform disabled:opacity-50"
-                      >
-                        {editLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
-                      </button>
-                    </div>
-
                     {/* Profile Fields Only */}
                     <FloatingNameInput firstName={editForm.firstName} lastName={editForm.lastName} onFirstNameChange={(val) => updateEditField('firstName', val)} onLastNameChange={(val) => updateEditField('lastName', val)} />
                     <FloatingInput label="Company Name" value={editForm.company} onChange={(e) => updateEditField('company', e.target.value)} />
