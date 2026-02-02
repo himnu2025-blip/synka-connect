@@ -121,6 +121,13 @@ export default function CRM() {
   // Mobile sheet mount state for portal system
   const [mobileSheetMounted, setMobileSheetMounted] = useState(false);
 
+  // Drag-to-dismiss state for mobile sheet
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+  const startY = useRef(0);
+  const currentY = useRef(0);
+  const [dragY, setDragY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -254,6 +261,34 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
     }
   }
 
+  // Drag-to-dismiss touch handlers for mobile sheet
+  const onSheetTouchStart = (e: React.TouchEvent) => {
+    if (isEditOpen) return; // disable drag in edit mode
+    startY.current = e.touches[0].clientY;
+    setIsDragging(true);
+  };
+
+  const onSheetTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || isEditOpen) return;
+    currentY.current = e.touches[0].clientY;
+    const diff = currentY.current - startY.current;
+    // Only allow downward drag
+    if (diff > 0) {
+      setDragY(diff);
+    }
+  };
+
+  const onSheetTouchEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    // If dragged more than 120px, close the sheet
+    if (dragY > 120) {
+      setShowContactDetail(false);
+      setIsEditOpen(false);
+    }
+    // Snap back
+    setDragY(0);
+  };
 
 const [showNotesPopup, setShowNotesPopup] = useState(false);
 const [notesInput, setNotesInput] = useState("");
@@ -2321,11 +2356,18 @@ if (!contacts && contactsLoading) {
           {/* Bottom Sheet */}
           <div className="fixed inset-x-0 bottom-0 z-[1001] flex justify-center pointer-events-none">
             <div
+              ref={sheetRef}
+              onTouchStart={onSheetTouchStart}
+              onTouchMove={onSheetTouchMove}
+              onTouchEnd={onSheetTouchEnd}
               className={`w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden
-                transform transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
-                ${showContactDetail ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
+                transform transition-transform ${isDragging ? 'duration-0' : 'duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]'}
+                ${showContactDetail ? 'opacity-100' : 'translate-y-full opacity-0'}
               `}
-              style={{ maxHeight: '90dvh' }}
+              style={{ 
+                transform: `translateY(${dragY}px)`,
+                maxHeight: '90dvh' 
+              }}
             >
               {/* Drag Handle */}
               <div className="flex justify-center py-3">
