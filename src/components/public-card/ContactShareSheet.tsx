@@ -548,16 +548,17 @@ export function ContactShareSheet({
   if (isMobile && open) {
   return (
     <>
-      {/* Dim background */}
+      {/* Dim background - blocks touch on background */}
       <div 
         className="fixed inset-0 bg-black/30 z-40"
         onClick={() => onOpenChange(false)}
+        onTouchMove={(e) => e.preventDefault()}
       />
 
-      {/* Bottom sheet */}
+      {/* Bottom sheet - allows internal scroll */}
       <div 
-        className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto"
-        style={{ overscrollBehavior: 'contain' }}
+        className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto touch-pan-y"
+        style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
       >
         <div className="max-w-md mx-auto">
           <BlinqHeader />
