@@ -111,20 +111,6 @@ export default function MyCard() {
   const { cardRef, isGenerating, generateCardFile } = useCardDownload();
   const isMobile = useIsMobile();
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-
-useEffect(() => {
-  const vv = window.visualViewport;
-  if (!vv) return;
-
-  const onResize = () => {
-    const heightDiff = window.innerHeight - vv.height;
-    setKeyboardHeight(heightDiff > 150 ? heightDiff : 0);
-  };
-
-  vv.addEventListener('resize', onResize);
-  return () => vv.removeEventListener('resize', onResize);
-}, []);
   const [isLayoutOpen, setIsLayoutOpen] = useState(false);
   const [editSheetMounted, setEditSheetMounted] = useState(false);
   const [currentLayout, setCurrentLayout] = useState<LayoutType>('photo-logo');
@@ -974,8 +960,8 @@ useEffect(() => {
   className="overflow-y-auto"
   style={{
     WebkitOverflowScrolling: 'touch',
-    maxHeight: `calc(85dvh - ${keyboardHeight}px)`,
-    paddingBottom: keyboardHeight ? 20 : 'calc(env(safe-area-inset-bottom) + 90px)',
+    maxHeight: '85dvh',
+    paddingBottom: 'calc(env(safe-area-inset-bottom) + 90px)',
   }}
 >
           <div className="space-y-6 px-6 pt-6 pb-6">
