@@ -538,17 +538,7 @@ export function ContactShareSheet({
             onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
           />
         </div>
-
-        {/* SEND BUTTON WITH GRADIENT */}
-        <Button
-          onClick={handleSubmit}
-          disabled={submitting}
-          variant="gradient"
-          className="w-full h-14 rounded-xl text-white text-base font-medium mt-6 hover:opacity-90 transition-opacity"
-        >
-          {submitting ? 'Sending...' : 'Send'}
-        </Button>
-      </div>
+        </div>
     </>
   );
 
@@ -561,36 +551,46 @@ export function ContactShareSheet({
           onClick={() => onOpenChange(false)}
         />
 
-        {/* Bottom Sheet Shell (NO SCROLL HERE) */}
-<div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
-  {/* Sheet Body */}
-  <div
-    className="w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden"
-    style={{
-      height: '85dvh',
-      maxHeight: '85dvh',
-    }}
-  >
-    <div className="flex flex-col h-full">
-  {/* SCROLL AREA */}
-  <div
-    className="flex-1 overflow-y-auto"
-    style={{
-      WebkitOverflowScrolling: 'touch',
-    }}
-  >
-    <BlinqHeader />
-    {FormContent}
-  </div>
+        {/* Bottom Sheet Shell */}
+        <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
+          <div
+            className="w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden flex flex-col"
+            style={{
+              height: '85dvh',
+              maxHeight: '85dvh',
+            }}
+          >
+            {/* SCROLLABLE CONTENT */}
+            <div
+              className="flex-1 overflow-y-auto"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
+              <BlinqHeader />
 
-  {/* FIXED BOTTOM TEXT (NOT SCROLLABLE) */}
-  <div
-    className="text-[11px] text-center text-muted-foreground/70 py-3"
-    style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-  >
-    We don't sell your contact details
-  </div>
-</div>
+              {/* FORM FIELDS ONLY */}
+              <div className="space-y-4 px-4 pb-6">
+                {/** keep ALL inputs here (first name → company) **/}
+              </div>
+            </div>
+
+            {/* FIXED FOOTER */}
+            <div
+              className="px-4 pt-3 border-t bg-background"
+              style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
+            >
+              <Button
+                onClick={handleSubmit}
+                disabled={submitting}
+                variant="gradient"
+                className="w-full h-14 rounded-xl text-white text-base font-medium"
+              >
+                {submitting ? 'Sending...' : 'Send'}
+              </Button>
+
+              <p className="text-[11px] text-center text-muted-foreground/70 mt-3">
+                We don't sell your contact details
+              </p>
+            </div>
           </div>
         </div>
       </>
