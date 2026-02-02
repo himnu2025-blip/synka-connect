@@ -2378,10 +2378,10 @@ if (!contacts && contactsLoading) {
                 transform transition-transform ${isDragging ? 'duration-0' : 'duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]'}
                 ${showContactDetail ? 'opacity-100' : 'translate-y-full opacity-0'}
               `}
-              style={{ 
-                transform: `translateY(${dragY}px)`,
-                maxHeight: '90dvh' 
-              }}
+  style={{
+    transform: `translateY(${dragY}px)`,
+    maxHeight: isEditOpen ? '95dvh' : '90dvh'
+  }}
             >
               {/* Drag Handle */}
               <div className="flex justify-center py-3">
