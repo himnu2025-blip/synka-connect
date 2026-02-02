@@ -73,6 +73,7 @@ const PillInput = ({
   return (
     <div className="relative h-10">
       <input
+        name="no-autofill-pill"
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="none"
