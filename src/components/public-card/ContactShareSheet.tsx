@@ -472,49 +472,58 @@ export function ContactShareSheet({
           />
         </div>
 
-        {/* Phone input - simple inline design without floating label to prevent focus issues */}
-        <div className="h-14 rounded-xl border border-border focus-within:border-foreground flex items-center">
-          {/* Country code selector */}
-          <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
-            <select
-              name="field-country"
-              value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
-              autoComplete="off"
-              data-form-type="other"
-              className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
-              style={{ fontSize: '14px' }}
-            >
-              {COUNTRY_CODES.map(({ code }) => (
-                <option key={code} value={code} className="bg-background text-foreground">{code}</option>
-              ))}
-            </select>
-          </div>
-          {/* Phone number input - static placeholder, no floating label */}
-          <input
-            name="field-phone"
-            type="tel"
-            inputMode="numeric"
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="none"
-            spellCheck={false}
-            data-form-type="other"
-            enterKeyHint="done"
-            value={formData.phone}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
-            }
-            placeholder="Phone number"
-            className="flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none placeholder:text-muted-foreground"
-            style={{ 
-              fontSize: '16px',
-              paddingTop: 0,
-              paddingBottom: 0,
-              scrollMarginTop: 16,
-            }}
-          />
-        </div>
+        {/* Phone input with floating label */}
+<div className="relative h-14 rounded-xl border border-border focus-within:border-foreground flex items-center">
+
+  {/* Country code selector */}
+  <div className="flex items-center justify-center pl-3 pr-1 shrink-0 border-r border-border/50 h-full">
+    <select
+      name="field-country"
+      value={countryCode}
+      onChange={(e) => setCountryCode(e.target.value)}
+      autoComplete="off"
+      data-form-type="other"
+      className="bg-transparent text-sm font-medium outline-none appearance-none cursor-pointer"
+      style={{ fontSize: '14px' }}
+    >
+      {COUNTRY_CODES.map(({ code }) => (
+        <option key={code} value={code} className="bg-background text-foreground">
+          {code}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  {/* Phone number input */}
+  <input
+    name="field-phone"
+    type="tel"
+    inputMode="numeric"
+    autoComplete="off"
+    autoCorrect="off"
+    autoCapitalize="none"
+    spellCheck={false}
+    data-form-type="other"
+    enterKeyHint="done"
+    value={formData.phone}
+    onChange={(e) =>
+      setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))
+    }
+    placeholder=" "
+    className="peer flex-1 min-w-0 h-full px-3 pt-4 pb-2 text-base bg-transparent outline-none"
+    style={{ fontSize: '16px', scrollMarginTop: 16 }}
+  />
+
+  {/* Floating label */}
+  <label
+    className="absolute left-[72px] text-muted-foreground pointer-events-none
+      top-0 -translate-y-1/2 text-xs bg-background px-1
+      peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
+      peer-focus:top-0 peer-focus:text-xs peer-focus:bg-background peer-focus:px-1"
+  >
+    Phone number
+  </label>
+</div>
 
         {/* JOB + COMPANY PILLS - NOW WITH FLOATING LABELS */}
         <div className="grid grid-cols-2 gap-2">
