@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
 import { hapticFeedback } from '@/lib/haptics';
@@ -938,18 +939,19 @@ useEffect(() => {
       />
 
       {/* Edit Dialog/Drawer - Responsive */}
-{isMobile && editSheetMounted && (
-  <>
-    {/* Backdrop */}
-    <div
-      className={`fixed inset-0 z-[998] transition-opacity duration-300 ${
-        isEditOpen ? 'bg-black/30 opacity-100' : 'opacity-0'
-      }`}
-      onClick={() => setIsEditOpen(false)}
-    />
+{isMobile && editSheetMounted &&
+  createPortal(
+    <>
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 z-[1000] transition-opacity duration-300 ${
+          isEditOpen ? 'bg-black/30 opacity-100' : 'opacity-0'
+        }`}
+        onClick={() => setIsEditOpen(false)}
+      />
 
-    {/* Bottom Sheet */}
-    <div className="fixed inset-x-0 bottom-0 z-[999] flex justify-center pointer-events-none">
+      {/* Bottom Sheet */}
+      <div className="fixed inset-x-0 bottom-0 z-[1001] flex justify-center pointer-events-none">
       <div
         className={`w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden
           transform transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
@@ -1207,8 +1209,10 @@ useEffect(() => {
         </div>
       </div>
     </div>
-  </>
-)}
+    </>,
+    document.body
+  )
+}
 
 {!isMobile && (
   // 💻 DESKTOP: Centered Dialog
