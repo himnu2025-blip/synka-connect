@@ -212,6 +212,31 @@ export function ContactShareSheet({
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+  if (!open) return;
+
+  const appRoot = document.getElementById('root');
+  if (!appRoot) return;
+
+  const scrollY = appRoot.scrollTop;
+
+  appRoot.style.position = 'fixed';
+  appRoot.style.top = `-${scrollY}px`;
+  appRoot.style.left = '0';
+  appRoot.style.right = '0';
+  appRoot.style.width = '100%';
+
+  return () => {
+    appRoot.style.position = '';
+    appRoot.style.top = '';
+    appRoot.style.left = '';
+    appRoot.style.right = '';
+    appRoot.style.width = '';
+    appRoot.scrollTo(0, scrollY);
+  };
+}, [open]);
+  
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [countryCode, setCountryCode] = useState('+91');
 
@@ -225,28 +250,6 @@ export function ContactShareSheet({
     company: '',
     linkedin: '',
   });
-
-  useEffect(() => {
-  if (!open) return;
-
-  const scrollY = window.scrollY;
-
-  document.body.style.position = 'fixed';
-  document.body.style.top = `-${scrollY}px`;
-  document.body.style.left = '0';
-  document.body.style.right = '0';
-  document.body.style.width = '100%';
-
-  return () => {
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    document.body.style.width = '';
-    window.scrollTo(0, scrollY);
-  };
-}, [open]);
-
 
   const normalizeLinkedInUrl = (value: string) => {
     let v = value.trim();
