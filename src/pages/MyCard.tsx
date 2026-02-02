@@ -962,7 +962,7 @@ useEffect(() => {
   className="overflow-y-auto"
   style={{
     WebkitOverflowScrolling: 'touch',
-    maxHeight: '85svh',
+    maxHeight: '85dvh',
     paddingBottom: 'env(safe-area-inset-bottom)',
   }}
 >
