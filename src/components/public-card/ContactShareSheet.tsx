@@ -566,11 +566,7 @@ export function ContactShareSheet({
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
               <BlinqHeader />
-
-              {/* FORM FIELDS ONLY */}
-              <div className="space-y-4 px-4 pb-6">
-                {/** keep ALL inputs here (first name → company) **/}
-              </div>
+              {FormContent}
             </div>
 
             {/* FIXED FOOTER */}
