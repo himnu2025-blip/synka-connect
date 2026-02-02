@@ -28,6 +28,7 @@ import {
   Download,
   Lock,
   FileUp,
+  X,
 } from 'lucide-react';
 import { hapticFeedback } from '@/lib/haptics';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -229,16 +230,6 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
         website: normalizedFields.website || null,
       };
 
-      // If notes field has content, add to notes_history
-      if (editForm.notes?.trim()) {
-        const newEntry = {
-          text: editForm.notes.trim(),
-          timestamp: new Date().toISOString(),
-        };
-        const currentHistory = selectedContact.notes_history || [];
-        updates.notes_history = [newEntry, ...currentHistory];
-      }
-
       const { error } = await updateContact(selectedContact.id, updates);
 
       if (error) throw error;
@@ -250,14 +241,6 @@ const [sortBy, setSortBy] = useState<'name' | 'date' | 'last_interaction'>(() =>
       setLocalContacts(prev => prev.map(c => 
         c.id === selectedContact.id ? { ...c, ...updates } : c
       ));
-
-      // Update notesHistory if we added a note
-      if (updates.notes_history) {
-        setNotesHistory(updates.notes_history);
-      }
-
-      // Clear the notes field after saving
-      setEditForm(prev => ({ ...prev, notes: '' }));
 
       // FIX: Set edit mode to false first, then blur after state change
       setIsEditOpen(false);
@@ -2398,6 +2381,44 @@ if (!contacts && contactsLoading) {
                 {/* Edit Form */}
                 {isEditOpen ? (
                   <div className="space-y-4 pb-6">
+                    {/* iOS-style Edit Header */}
+                    <div className="flex items-center justify-between -mx-4 px-4 pb-4 border-b border-border/30">
+                      <button
+                        onClick={() => {
+                          setIsEditOpen(false);
+                          if (selectedContact) {
+                            const { firstName, lastName } = splitFullName(selectedContact.name || '');
+                            setEditForm({
+                              firstName,
+                              lastName,
+                              company: selectedContact.company || '',
+                              designation: selectedContact.designation || '',
+                              phone: selectedContact.phone || '',
+                              email: selectedContact.email || '',
+                              whatsapp: selectedContact.whatsapp || '',
+                              linkedin: selectedContact.linkedin || '',
+                              website: selectedContact.website || '',
+                              notes: '',
+                              tags: localContactTags,
+                            });
+                          }
+                        }}
+                        className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-95 transition-transform"
+                        disabled={editLoading}
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                      <h3 className="text-[17px] font-semibold">Edit Contact</h3>
+                      <button
+                        onClick={saveEditedContact}
+                        disabled={editLoading}
+                        className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-[15px] font-medium active:scale-95 transition-transform disabled:opacity-50"
+                      >
+                        {editLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                      </button>
+                    </div>
+
+                    {/* Profile Fields Only */}
                     <FloatingNameInput
                       firstName={editForm.firstName}
                       lastName={editForm.lastName}
@@ -2427,12 +2448,6 @@ if (!contacts && contactsLoading) {
                         updateEditField('phone', code + number);
                       }}
                     />
-                    <FloatingInput
-                      label="Email"
-                      value={editForm.email}
-                      onChange={(e) => updateEditField('email', e.target.value)}
-                      inputMode="email"
-                    />
                     <FloatingPhoneInput
                       label="WhatsApp"
                       value={extractPhoneNumber(editForm.whatsapp)}
@@ -2447,6 +2462,12 @@ if (!contacts && contactsLoading) {
                       }}
                     />
                     <FloatingInput
+                      label="Email"
+                      value={editForm.email}
+                      onChange={(e) => updateEditField('email', e.target.value)}
+                      inputMode="email"
+                    />
+                    <FloatingInput
                       label="LinkedIn"
                       value={editForm.linkedin}
                       onChange={(e) => updateEditField('linkedin', e.target.value)}
@@ -2457,21 +2478,15 @@ if (!contacts && contactsLoading) {
                       onChange={(e) => updateEditField('website', e.target.value)}
                       inputMode="url"
                     />
-                    <div>
-                      <Label className="text-xs">Add Note</Label>
-                      <Textarea
-                        value={editForm.notes}
-                        onChange={(e) => updateEditField('notes', e.target.value)}
-                        placeholder="Add a new note..."
-                        rows={3}
-                      />
-                    </div>
+
                     {editError && <div className="text-sm text-destructive">{editError}</div>}
 
-                    {/* Edit Actions */}
-                    <div className="border-t bg-background py-3 flex justify-between mt-6">
+                    {/* Danger Zone */}
+                    <div className="pt-6 mt-6 border-t border-border/30">
+                      <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wider">Danger Zone</p>
                       <Button
                         variant="destructive"
+                        className="w-full"
                         onClick={() => {
                           setConfirmDialog({
                             open: true,
@@ -2495,43 +2510,8 @@ if (!contacts && contactsLoading) {
                         disabled={editLoading}
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
+                        Delete Contact
                       </Button>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => {
-                            setIsEditOpen(false);
-                            if (selectedContact) {
-                              const { firstName, lastName } = splitFullName(selectedContact.name || '');
-                              setEditForm({
-                                firstName,
-                                lastName,
-                                company: selectedContact.company || '',
-                                designation: selectedContact.designation || '',
-                                phone: selectedContact.phone || '',
-                                email: selectedContact.email || '',
-                                whatsapp: selectedContact.whatsapp || '',
-                                linkedin: selectedContact.linkedin || '',
-                                website: selectedContact.website || '',
-                                notes: '',
-                                tags: localContactTags,
-                              });
-                            }
-                          }}
-                          className="px-4 py-2 rounded-md border"
-                          disabled={editLoading}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={saveEditedContact}
-                          disabled={editLoading}
-                          className="inline-flex items-center gap-2 px-5 py-2 rounded-md bg-primary text-white"
-                        >
-                          <Save className="w-4 h-4" />
-                          Save
-                        </button>
-                      </div>
                     </div>
                   </div>
                 ) : (
@@ -2683,27 +2663,86 @@ if (!contacts && contactsLoading) {
 
                 {isEditOpen ? (
                   <div className="space-y-4 pb-6">
+                    {/* iOS-style Edit Header */}
+                    <div className="flex items-center justify-between pb-4 border-b border-border/30">
+                      <button
+                        onClick={() => {
+                          setIsEditOpen(false);
+                          if (selectedContact) {
+                            const { firstName, lastName } = splitFullName(selectedContact.name || '');
+                            setEditForm({
+                              firstName,
+                              lastName,
+                              company: selectedContact.company || '',
+                              designation: selectedContact.designation || '',
+                              phone: selectedContact.phone || '',
+                              email: selectedContact.email || '',
+                              whatsapp: selectedContact.whatsapp || '',
+                              linkedin: selectedContact.linkedin || '',
+                              website: selectedContact.website || '',
+                              notes: '',
+                              tags: localContactTags,
+                            });
+                          }
+                        }}
+                        className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-95 transition-transform"
+                        disabled={editLoading}
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                      <h3 className="text-[17px] font-semibold">Edit Contact</h3>
+                      <button
+                        onClick={saveEditedContact}
+                        disabled={editLoading}
+                        className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-[15px] font-medium active:scale-95 transition-transform disabled:opacity-50"
+                      >
+                        {editLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                      </button>
+                    </div>
+
+                    {/* Profile Fields Only */}
                     <FloatingNameInput firstName={editForm.firstName} lastName={editForm.lastName} onFirstNameChange={(val) => updateEditField('firstName', val)} onLastNameChange={(val) => updateEditField('lastName', val)} />
                     <FloatingInput label="Company Name" value={editForm.company} onChange={(e) => updateEditField('company', e.target.value)} />
                     <FloatingInput label="Role" value={editForm.designation} onChange={(e) => updateEditField('designation', e.target.value)} />
                     <FloatingPhoneInput label="Phone Number" value={extractPhoneNumber(editForm.phone)} onChange={(e) => { const code = getCountryCode(editForm.phone); updateEditField('phone', code + e.target.value); }} countryCode={getCountryCode(editForm.phone)} onCountryCodeChange={(code) => { const number = extractPhoneNumber(editForm.phone); updateEditField('phone', code + number); }} />
-                    <FloatingInput label="Email" value={editForm.email} onChange={(e) => updateEditField('email', e.target.value)} inputMode="email" />
                     <FloatingPhoneInput label="WhatsApp" value={extractPhoneNumber(editForm.whatsapp)} onChange={(e) => { const code = getCountryCode(editForm.whatsapp); updateEditField('whatsapp', code + e.target.value); }} countryCode={getCountryCode(editForm.whatsapp)} onCountryCodeChange={(code) => { const number = extractPhoneNumber(editForm.whatsapp); updateEditField('whatsapp', code + number); }} />
+                    <FloatingInput label="Email" value={editForm.email} onChange={(e) => updateEditField('email', e.target.value)} inputMode="email" />
                     <FloatingInput label="LinkedIn" value={editForm.linkedin} onChange={(e) => updateEditField('linkedin', e.target.value)} />
                     <FloatingInput label="Website" value={editForm.website} onChange={(e) => updateEditField('website', e.target.value)} inputMode="url" />
-                    <div>
-                      <Label className="text-xs">Add Note</Label>
-                      <Textarea value={editForm.notes} onChange={(e) => updateEditField('notes', e.target.value)} placeholder="Add a new note..." rows={3} />
-                    </div>
+                    
                     {editError && <div className="text-sm text-destructive">{editError}</div>}
-                    <div className="border-t bg-background px-4 py-3 flex justify-between mt-6 mb-2">
-                      <Button variant="destructive" onClick={() => { setConfirmDialog({ open: true, title: `Delete ${selectedContact.name}`, description: 'This action cannot be undone.', onConfirm: async () => { const { error } = await deleteContact(selectedContact.id); if (!error) { setShowContactDetail(false); setSelectedContact(null); setIsEditOpen(false); setConfirmDialog(prev => ({ ...prev, open: false })); toast({ title: 'Contact deleted' }); } else { setConfirmDialog(prev => ({ ...prev, open: false })); toast({ title: 'Failed to delete contact', variant: 'destructive' }); } } }); }} disabled={editLoading}>
-                        <Trash2 className="w-4 h-4 mr-2" />Delete
+
+                    {/* Danger Zone */}
+                    <div className="pt-6 mt-6 border-t border-border/30">
+                      <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wider">Danger Zone</p>
+                      <Button
+                        variant="destructive"
+                        className="w-full"
+                        onClick={() => {
+                          setConfirmDialog({
+                            open: true,
+                            title: `Delete ${selectedContact.name}`,
+                            description: 'This action cannot be undone.',
+                            onConfirm: async () => {
+                              const { error } = await deleteContact(selectedContact.id);
+                              if (!error) {
+                                setShowContactDetail(false);
+                                setSelectedContact(null);
+                                setIsEditOpen(false);
+                                setConfirmDialog(prev => ({ ...prev, open: false }));
+                                toast({ title: 'Contact deleted' });
+                              } else {
+                                setConfirmDialog(prev => ({ ...prev, open: false }));
+                                toast({ title: 'Failed to delete contact', variant: 'destructive' });
+                              }
+                            }
+                          });
+                        }}
+                        disabled={editLoading}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete Contact
                       </Button>
-                      <div className="flex gap-2">
-                        <button onClick={() => { setIsEditOpen(false); if (selectedContact) { const { firstName, lastName } = splitFullName(selectedContact.name || ''); setEditForm({ firstName, lastName, company: selectedContact.company || '', designation: selectedContact.designation || '', phone: selectedContact.phone || '', email: selectedContact.email || '', whatsapp: selectedContact.whatsapp || '', linkedin: selectedContact.linkedin || '', website: selectedContact.website || '', notes: '', tags: localContactTags }); } }} className="px-4 py-2 rounded-md border" disabled={editLoading}>Cancel</button>
-                        <button onClick={saveEditedContact} disabled={editLoading} className="inline-flex items-center gap-2 px-5 py-2 rounded-md bg-primary text-white"><Save className="w-4 h-4" />Save</button>
-                      </div>
                     </div>
                   </div>
                 ) : (
