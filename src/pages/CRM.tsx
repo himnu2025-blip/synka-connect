@@ -438,10 +438,24 @@ const saveNote = async () => {
 
     if (anySheetOpen && isMobile) {
       setMobileSheetMounted(true);
+      // Lock body scroll to prevent background movement
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     } else if (!anySheetOpen) {
+      // Unlock body scroll
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
       const t = setTimeout(() => setMobileSheetMounted(false), 300);
       return () => clearTimeout(t);
     }
+
+    // Cleanup on unmount
+    return () => {
+      if (!anySheetOpen) {
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+      }
+    };
   }, [
     showAddContact,
     showScanCard,
