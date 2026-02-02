@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
 import { hapticFeedback } from '@/lib/haptics';
