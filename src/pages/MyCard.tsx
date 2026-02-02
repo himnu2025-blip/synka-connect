@@ -26,10 +26,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { FloatingInput, FloatingPhoneInput, FloatingNameInput, splitFullName, combineNames, COUNTRY_CODES, extractPhoneNumber, getCountryCode } from '@/components/ui/floating-input';
 import { formatPhoneByCountry, getWhatsAppNumber } from '@/lib/phoneFormat';
-import {
-  Drawer,
-  DrawerContent,
-} from '@/components/ui/drawer';
+// Native sheet replaces Drawer for mobile keyboard stability
 import {
   Dialog,
   DialogContent,
