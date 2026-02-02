@@ -566,23 +566,24 @@ export function ContactShareSheet({
         />
 
         {/* Bottom Sheet Shell (NO SCROLL HERE) */}
-        <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
-          {/* Sheet Body */}
-          <div
-            className="w-full max-w-md bg-background rounded-t-3xl shadow-2xl flex flex-col pointer-events-auto"
-            style={{
-              height: '85dvh',
-              maxHeight: '85dvh',
-            }}
-          >
-            {/* ONLY SCROLL AREA */}
-            <div
-  className="flex-1 overflow-y-auto"
-  style={{
-    WebkitOverflowScrolling: 'touch',
-    paddingBottom: 'env(safe-area-inset-bottom)',
-  }}
->
+<div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
+  {/* Sheet Body */}
+  <div
+    className="w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden"
+    style={{
+      height: '85dvh',
+      maxHeight: '85dvh',
+    }}
+  >
+    {/* ONLY SCROLL AREA */}
+    <div
+      className="overflow-y-auto"
+      style={{
+        maxHeight: '100%',
+        WebkitOverflowScrolling: 'touch',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
+    >
               <BlinqHeader />
               {FormContent}
             </div>
