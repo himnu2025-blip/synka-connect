@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Search,
   Filter,
@@ -75,6 +77,7 @@ import { useSignatures } from '@/hooks/useSignatures';
 import { supabase } from '@/integrations/supabase/client';
 import { TagSelectorDialog } from '@/components/crm/TagSelectorDialog';
 import { ContactAvatar } from '@/components/crm/ContactAvatar';
+import { CRMMobileSheet } from '@/components/crm/CRMMobileSheet';
 import {
   validateContactForm,
   normalizeContactData,
@@ -103,6 +106,7 @@ interface PendingInteraction {
 
 export default function CRM() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { user, loading: authLoading } = useAuth();
   const { profile } = useProfile();
   const { contacts, loading: contactsLoading, createContact, updateContact, deleteContact, addTagToContact, removeTagFromContact, addEventToContact, refetch } = useContacts();
@@ -112,6 +116,9 @@ export default function CRM() {
   const { events, getActiveEventsForDate } = useEvents();
   const { getSelectedEmailTemplate, getSelectedWhatsappTemplate, getEmailTemplates, getWhatsappTemplates } = useTemplates();
   const { getSelectedSignature } = useSignatures();
+
+  // Mobile sheet mount state for portal system
+  const [mobileSheetMounted, setMobileSheetMounted] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -401,6 +408,30 @@ const saveNote = async () => {
       navigate('/login');
     }
   }, [user, authLoading, navigate]);
+
+  // Mobile sheet mount/unmount effect for portal system
+  useEffect(() => {
+    const anySheetOpen =
+      showAddContact ||
+      showScanCard ||
+      showTemplateSelector ||
+      showNotesPopup ||
+      showContactDetail;
+
+    if (anySheetOpen && isMobile) {
+      setMobileSheetMounted(true);
+    } else if (!anySheetOpen) {
+      const t = setTimeout(() => setMobileSheetMounted(false), 300);
+      return () => clearTimeout(t);
+    }
+  }, [
+    showAddContact,
+    showScanCard,
+    showTemplateSelector,
+    showNotesPopup,
+    showContactDetail,
+    isMobile,
+  ]);
 
   // FIX: Remove stringify comparison
   useEffect(() => {
@@ -1803,12 +1834,13 @@ if (!contacts && contactsLoading) {
         )}
       </div>
 
-      {/* Add Contact Dialog */}
-      <Dialog open={showAddContact} onOpenChange={setShowAddContact}>
-        <DialogContent className="max-h-safe scroll-keyboard-safe">
-          <DialogHeader>
-            <DialogTitle>Add Contact</DialogTitle>
-          </DialogHeader>
+      {/* Add Contact - Mobile Portal */}
+      {isMobile && mobileSheetMounted && showAddContact && (
+        <CRMMobileSheet
+          open={showAddContact}
+          onClose={() => setShowAddContact(false)}
+          title="Add Contact"
+        >
           <div className="space-y-4">
             <FloatingNameInput
               firstName={newContact.firstName}
@@ -1887,8 +1919,97 @@ if (!contacts && contactsLoading) {
               Save Contact
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </CRMMobileSheet>
+      )}
+
+      {/* Add Contact Dialog - Desktop */}
+      {!isMobile && (
+        <Dialog open={showAddContact} onOpenChange={setShowAddContact}>
+          <DialogContent className="max-h-safe scroll-keyboard-safe">
+            <DialogHeader>
+              <DialogTitle>Add Contact</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <FloatingNameInput
+                firstName={newContact.firstName}
+                lastName={newContact.lastName}
+                onFirstNameChange={(val) => setNewContact(prev => ({ ...prev, firstName: val }))}
+                onLastNameChange={(val) => setNewContact(prev => ({ ...prev, lastName: val }))}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <FloatingInput
+                  label="Company Name"
+                  value={newContact.company}
+                  onChange={(e) => setNewContact(prev => ({ ...prev, company: e.target.value }))}
+                />
+                <FloatingInput
+                  label="Role"
+                  value={newContact.designation}
+                  onChange={(e) => setNewContact(prev => ({ ...prev, designation: e.target.value }))}
+                />
+              </div>
+              <FloatingInput
+                label="Email"
+                type="email"
+                inputMode="email"
+                value={newContact.email}
+                onChange={(e) => setNewContact(prev => ({ ...prev, email: e.target.value }))}
+              />
+              <FloatingPhoneInput
+                label="Phone Number"
+                value={extractPhoneNumber(newContact.phone)}
+                onChange={(e) => {
+                  const code = getCountryCode(newContact.phone);
+                  setNewContact(prev => ({ ...prev, phone: code + e.target.value }));
+                }}
+                countryCode={getCountryCode(newContact.phone)}
+                onCountryCodeChange={(code) => {
+                  const number = extractPhoneNumber(newContact.phone);
+                  setNewContact(prev => ({ ...prev, phone: code + number }));
+                }}
+              />
+              <FloatingPhoneInput
+                label="WhatsApp"
+                value={extractPhoneNumber(newContact.whatsapp)}
+                onChange={(e) => {
+                  const code = getCountryCode(newContact.whatsapp);
+                  setNewContact(prev => ({ ...prev, whatsapp: code + e.target.value }));
+                }}
+                countryCode={getCountryCode(newContact.whatsapp)}
+                onCountryCodeChange={(code) => {
+                  const number = extractPhoneNumber(newContact.whatsapp);
+                  setNewContact(prev => ({ ...prev, whatsapp: code + number }));
+                }}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <FloatingInput
+                  label="LinkedIn"
+                  value={newContact.linkedin}
+                  onChange={(e) => setNewContact(prev => ({ ...prev, linkedin: e.target.value }))}
+                />
+                <FloatingInput
+                  label="Website"
+                  inputMode="url"
+                  value={newContact.website}
+                  onChange={(e) => setNewContact(prev => ({ ...prev, website: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">Notes</Label>
+                <Textarea
+                  value={newContact.notes}
+                  onChange={(e) => setNewContact(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Any notes..."
+                  rows={3}
+                />
+              </div>
+              <Button variant="gradient" className="w-full" onClick={handleAddContact}>
+                Save Contact
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Scan Card Dialog */}
       <Dialog open={showScanCard} onOpenChange={setShowScanCard}>
@@ -2089,13 +2210,15 @@ if (!contacts && contactsLoading) {
         }}
       />
 
-      {/* Template Selector Dialog */}
-      <Dialog open={showTemplateSelector} onOpenChange={setShowTemplateSelector}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Choose Template</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+      {/* Template Selector - Mobile Portal */}
+      {isMobile && mobileSheetMounted && showTemplateSelector && (
+        <CRMMobileSheet
+          open={showTemplateSelector}
+          onClose={() => setShowTemplateSelector(false)}
+          title="Choose Template"
+          maxHeight="70dvh"
+        >
+          <div className="space-y-2">
             {/* No Template Option */}
             <button
               onClick={() => {
@@ -2105,7 +2228,7 @@ if (!contacts && contactsLoading) {
                     : sendWhatsapp(templateSelectorContact, null);
                 }
               }}
-              className="w-full p-3 rounded-lg border border-border hover:border-primary/50 text-left transition-all bg-muted/30"
+              className="w-full p-3 rounded-lg border border-border hover:border-primary/50 text-left transition-all bg-muted/30 active:scale-[0.98]"
             >
               <p className="font-medium">No Template</p>
               <p className="text-xs text-muted-foreground">Send without using a template</p>
@@ -2123,7 +2246,7 @@ if (!contacts && contactsLoading) {
                         : sendWhatsapp(templateSelectorContact, template);
                     }
                   }}
-                  className="w-full p-3 rounded-lg border border-border hover:border-primary/50 text-left transition-all"
+                  className="w-full p-3 rounded-lg border border-border hover:border-primary/50 text-left transition-all active:scale-[0.98]"
                 >
                   <div className="flex items-center justify-between mb-1">
                     <p className="font-medium">{template.name}</p>
@@ -2138,434 +2261,535 @@ if (!contacts && contactsLoading) {
                 </button>
               ))}
           </div>
-        </DialogContent>
-      </Dialog>
+        </CRMMobileSheet>
+      )}
 
-      {/* Contact Detail Drawer */}
-      <Drawer
-        open={showContactDetail}
-        handleOnly={isEditOpen}
-        shouldScaleBackground={false}
-        onOpenChange={(val) => {
-          setShowContactDetail(val);
-          if (!val) {
-            setIsEditOpen(false);
-            // Blur immediately - no delay needed
-            editNameRef.current?.blur();
-          }
-        }}
-      >
-        <DrawerContent 
-  hideHandle 
-  className="max-h-safe rounded-t-3xl border-0 shadow-none bg-background flex flex-col"
->
-  {/* Drag Handle */}
-  <div className="flex justify-center py-3">
-    <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
-  </div>
-  {selectedContact && (
-    <div className="px-4 pb-6 space-y-6 overflow-y-auto scroll-keyboard-safe flex-1">
-              <DrawerHeader className="text-center relative p-0">
-                <ContactAvatar 
-                  name={selectedContact.name}
-                  photoUrl={selectedContact.photo_url}
-                  sharedCardId={selectedContact.shared_card_id}
-                  size="lg"
-                  className="mx-auto mb-2"
-                />
-                <DrawerTitle className="text-[22px] font-semibold tracking-tight mt-1">
-  {selectedContact.name}
-</DrawerTitle>
-{(selectedContact.company || selectedContact.designation) && (
-  <p className="text-[14px] text-muted-foreground mt-0.5">
-    {selectedContact.company && selectedContact.designation
-      ? `${selectedContact.company} · ${selectedContact.designation}`
-      : selectedContact.company || selectedContact.designation}
-  </p>
-)}
-{selectedContact.about && (
-  <p className="text-[13px] text-muted-foreground mt-2 max-w-md mx-auto leading-relaxed">
-    {selectedContact.about}
-  </p>
-)}
-                {/* Right-side controls: edit + close (single X only) */}
-                <div className="absolute right-4 top-3 flex items-center gap-2">
-                  {/* Edit icon (hidden when editing) */}
+      {/* Template Selector Dialog - Desktop */}
+      {!isMobile && (
+        <Dialog open={showTemplateSelector} onOpenChange={setShowTemplateSelector}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Choose Template</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+              {/* No Template Option */}
+              <button
+                onClick={() => {
+                  if (templateSelectorContact) {
+                    templateSelectorType === 'email'
+                      ? sendEmail(templateSelectorContact, null)
+                      : sendWhatsapp(templateSelectorContact, null);
+                  }
+                }}
+                className="w-full p-3 rounded-lg border border-border hover:border-primary/50 text-left transition-all bg-muted/30"
+              >
+                <p className="font-medium">No Template</p>
+                <p className="text-xs text-muted-foreground">Send without using a template</p>
+              </button>
+
+              {/* All Templates for selected channel */}
+              {(templateSelectorType === 'email' ? getEmailTemplates() : getWhatsappTemplates())
+                .map((template) => (
+                  <button
+                    key={template.id}
+                    onClick={() => {
+                      if (templateSelectorContact) {
+                        templateSelectorType === 'email'
+                          ? sendEmail(templateSelectorContact, template)
+                          : sendWhatsapp(templateSelectorContact, template);
+                      }
+                    }}
+                    className="w-full p-3 rounded-lg border border-border hover:border-primary/50 text-left transition-all"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="font-medium">{template.name}</p>
+                      {(templateSelectorType === 'email' ? template.is_selected_for_email : template.is_selected_for_whatsapp) && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">Default</span>
+                      )}
+                    </div>
+                    {templateSelectorType === 'email' && template.subject && (
+                      <p className="text-xs text-muted-foreground mb-1">Subject: {template.subject}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground line-clamp-2">{template.body}</p>
+                  </button>
+                ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Contact Detail - Mobile Portal */}
+      {isMobile && mobileSheetMounted && showContactDetail && selectedContact && createPortal(
+        <>
+          {/* Backdrop */}
+          <div
+            className={`fixed inset-0 z-[1000] bg-black/30 transition-opacity duration-300 ${
+              showContactDetail ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+            onClick={() => {
+              if (!isEditOpen) {
+                setShowContactDetail(false);
+                setIsEditOpen(false);
+              }
+            }}
+            style={{ touchAction: 'none' }}
+          />
+
+          {/* Bottom Sheet */}
+          <div className="fixed inset-x-0 bottom-0 z-[1001] flex justify-center pointer-events-none">
+            <div
+              className={`w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden
+                transform transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
+                ${showContactDetail ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
+              `}
+              style={{ maxHeight: '90dvh' }}
+            >
+              {/* Drag Handle */}
+              <div className="flex justify-center py-3">
+                <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
+              </div>
+
+              {/* Scrollable Content */}
+              <div
+                className="overflow-y-auto px-4 pb-6 space-y-6"
+                style={{
+                  WebkitOverflowScrolling: 'touch',
+                  maxHeight: 'calc(90dvh - 60px)',
+                  paddingBottom: 'env(safe-area-inset-bottom)',
+                }}
+              >
+                {/* Header */}
+                <div className="text-center relative">
+                  <ContactAvatar 
+                    name={selectedContact.name}
+                    photoUrl={selectedContact.photo_url}
+                    sharedCardId={selectedContact.shared_card_id}
+                    size="lg"
+                    className="mx-auto mb-2"
+                  />
+                  <h2 className="text-[22px] font-semibold tracking-tight mt-1">
+                    {selectedContact.name}
+                  </h2>
+                  {(selectedContact.company || selectedContact.designation) && (
+                    <p className="text-[14px] text-muted-foreground mt-0.5">
+                      {selectedContact.company && selectedContact.designation
+                        ? `${selectedContact.company} · ${selectedContact.designation}`
+                        : selectedContact.company || selectedContact.designation}
+                    </p>
+                  )}
+                  {selectedContact.about && (
+                    <p className="text-[13px] text-muted-foreground mt-2 max-w-md mx-auto leading-relaxed">
+                      {selectedContact.about}
+                    </p>
+                  )}
                   {!isEditOpen && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        e.preventDefault();
-                        // FIX: Remove setTimeout
                         setIsEditOpen(true);
                       }}
-                      className="absolute right-4 top-4 h-9 w-9 rounded-full bg-background/80 backdrop-blur border border-border/40 flex items-center justify-center active:scale-95"
+                      className="absolute right-0 top-0 h-9 w-9 rounded-full bg-background/80 backdrop-blur border border-border/40 flex items-center justify-center active:scale-95"
                     >
                       <Edit2 className="w-5 h-5" />
                     </button>
                   )}
                 </div>
-              </DrawerHeader>
 
-              {/* --- Inline Edit Form inside Sheet --- */}
-              {isEditOpen && selectedContact ? (
-  <div className="space-y-4 pb-6">
-                  <FloatingNameInput
-  firstName={editForm.firstName}
-  lastName={editForm.lastName}
-  onFirstNameChange={(val) => updateEditField('firstName', val)}
-  onLastNameChange={(val) => updateEditField('lastName', val)}
-/>
-                  <FloatingInput
-                    label="Company Name"
-                    value={editForm.company}
-                    onChange={(e) => updateEditField('company', e.target.value)}
-                  />
-                  <FloatingInput
-                    label="Role"
-                    value={editForm.designation}
-                    onChange={(e) => updateEditField('designation', e.target.value)}
-                  />
-                  <FloatingPhoneInput
-                    label="Phone Number"
-                    value={extractPhoneNumber(editForm.phone)}
-                    onChange={(e) => {
-                      const code = getCountryCode(editForm.phone);
-                      updateEditField('phone', code + e.target.value);
-                    }}
-                    countryCode={getCountryCode(editForm.phone)}
-                    onCountryCodeChange={(code) => {
-                      const number = extractPhoneNumber(editForm.phone);
-                      updateEditField('phone', code + number);
-                    }}
-                  />
-                  <FloatingInput
-                    label="Email"
-                    value={editForm.email}
-                    onChange={(e) => updateEditField('email', e.target.value)}
-                    inputMode="email"
-                  />
-                  <FloatingPhoneInput
-                    label="WhatsApp"
-                    value={extractPhoneNumber(editForm.whatsapp)}
-                    onChange={(e) => {
-                      const code = getCountryCode(editForm.whatsapp);
-                      updateEditField('whatsapp', code + e.target.value);
-                    }}
-                    countryCode={getCountryCode(editForm.whatsapp)}
-                    onCountryCodeChange={(code) => {
-                      const number = extractPhoneNumber(editForm.whatsapp);
-                      updateEditField('whatsapp', code + number);
-                    }}
-                  />
-                  <FloatingInput
-                    label="LinkedIn"
-                    value={editForm.linkedin}
-                    onChange={(e) => updateEditField('linkedin', e.target.value)}
-                  />
-                  <FloatingInput
-                    label="Website"
-                    value={editForm.website}
-                    onChange={(e) => updateEditField('website', e.target.value)}
-                    inputMode="url"
-                  />
-
-                  <div>
-                    <Label className="text-xs">Add Note</Label>
-                    <Textarea
-                      value={editForm.notes}
-                      onChange={(e) => updateEditField('notes', e.target.value)}
-                      placeholder="Add a new note..."
-                      rows={3}
+                {/* Edit Form */}
+                {isEditOpen ? (
+                  <div className="space-y-4 pb-6">
+                    <FloatingNameInput
+                      firstName={editForm.firstName}
+                      lastName={editForm.lastName}
+                      onFirstNameChange={(val) => updateEditField('firstName', val)}
+                      onLastNameChange={(val) => updateEditField('lastName', val)}
                     />
+                    <FloatingInput
+                      label="Company Name"
+                      value={editForm.company}
+                      onChange={(e) => updateEditField('company', e.target.value)}
+                    />
+                    <FloatingInput
+                      label="Role"
+                      value={editForm.designation}
+                      onChange={(e) => updateEditField('designation', e.target.value)}
+                    />
+                    <FloatingPhoneInput
+                      label="Phone Number"
+                      value={extractPhoneNumber(editForm.phone)}
+                      onChange={(e) => {
+                        const code = getCountryCode(editForm.phone);
+                        updateEditField('phone', code + e.target.value);
+                      }}
+                      countryCode={getCountryCode(editForm.phone)}
+                      onCountryCodeChange={(code) => {
+                        const number = extractPhoneNumber(editForm.phone);
+                        updateEditField('phone', code + number);
+                      }}
+                    />
+                    <FloatingInput
+                      label="Email"
+                      value={editForm.email}
+                      onChange={(e) => updateEditField('email', e.target.value)}
+                      inputMode="email"
+                    />
+                    <FloatingPhoneInput
+                      label="WhatsApp"
+                      value={extractPhoneNumber(editForm.whatsapp)}
+                      onChange={(e) => {
+                        const code = getCountryCode(editForm.whatsapp);
+                        updateEditField('whatsapp', code + e.target.value);
+                      }}
+                      countryCode={getCountryCode(editForm.whatsapp)}
+                      onCountryCodeChange={(code) => {
+                        const number = extractPhoneNumber(editForm.whatsapp);
+                        updateEditField('whatsapp', code + number);
+                      }}
+                    />
+                    <FloatingInput
+                      label="LinkedIn"
+                      value={editForm.linkedin}
+                      onChange={(e) => updateEditField('linkedin', e.target.value)}
+                    />
+                    <FloatingInput
+                      label="Website"
+                      value={editForm.website}
+                      onChange={(e) => updateEditField('website', e.target.value)}
+                      inputMode="url"
+                    />
+                    <div>
+                      <Label className="text-xs">Add Note</Label>
+                      <Textarea
+                        value={editForm.notes}
+                        onChange={(e) => updateEditField('notes', e.target.value)}
+                        placeholder="Add a new note..."
+                        rows={3}
+                      />
+                    </div>
+                    {editError && <div className="text-sm text-destructive">{editError}</div>}
+
+                    {/* Edit Actions */}
+                    <div className="border-t bg-background py-3 flex justify-between mt-6">
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          setConfirmDialog({
+                            open: true,
+                            title: `Delete ${selectedContact.name}`,
+                            description: 'This action cannot be undone.',
+                            onConfirm: async () => {
+                              const { error } = await deleteContact(selectedContact.id);
+                              if (!error) {
+                                setShowContactDetail(false);
+                                setSelectedContact(null);
+                                setIsEditOpen(false);
+                                setConfirmDialog(prev => ({ ...prev, open: false }));
+                                toast({ title: 'Contact deleted' });
+                              } else {
+                                setConfirmDialog(prev => ({ ...prev, open: false }));
+                                toast({ title: 'Failed to delete contact', variant: 'destructive' });
+                              }
+                            }
+                          });
+                        }}
+                        disabled={editLoading}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </Button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setIsEditOpen(false);
+                            if (selectedContact) {
+                              const { firstName, lastName } = splitFullName(selectedContact.name || '');
+                              setEditForm({
+                                firstName,
+                                lastName,
+                                company: selectedContact.company || '',
+                                designation: selectedContact.designation || '',
+                                phone: selectedContact.phone || '',
+                                email: selectedContact.email || '',
+                                whatsapp: selectedContact.whatsapp || '',
+                                linkedin: selectedContact.linkedin || '',
+                                website: selectedContact.website || '',
+                                notes: '',
+                                tags: localContactTags,
+                              });
+                            }
+                          }}
+                          className="px-4 py-2 rounded-md border"
+                          disabled={editLoading}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={saveEditedContact}
+                          disabled={editLoading}
+                          className="inline-flex items-center gap-2 px-5 py-2 rounded-md bg-primary text-white"
+                        >
+                          <Save className="w-4 h-4" />
+                          Save
+                        </button>
+                      </div>
+                    </div>
                   </div>
+                ) : (
+                  <>
+                    {/* Action Buttons */}
+                    <div className="flex justify-center gap-2 mt-4">
+                      <button 
+                        onClick={() => {
+                          setTagSelectorContactId(selectedContact.id);
+                          setLocalContactTags(selectedContact.tags?.map(t => t.id) || []);
+                          setLocalContactEvents(selectedContact.events?.map(e => e.id) || []);
+                          setShowTagSelector(true);
+                        }}
+                        className="px-5 py-2 rounded-full bg-white text-black text-[14px] font-medium active:scale-95 transition-transform border border-border/50"
+                      >
+                        +Tag
+                      </button>
+                      <button 
+                        onClick={() => setShowNotesPopup(true)}
+                        className="px-5 py-2 rounded-full bg-white text-black text-[14px] font-medium active:scale-95 transition-transform border border-border/50"
+                      >
+                        +Notes
+                      </button>
+                    </div>
 
-                  {editError && <div className="text-sm text-destructive">{editError}</div>}
-                </div>
-              ) : null}
-{isEditOpen && (
-  <div className="border-t bg-background px-4 py-3 flex justify-between mt-6 mb-2">
-    <Button
-      variant="destructive"
-      onClick={() => {
-        setConfirmDialog({
-          open: true,
-          title: `Delete ${selectedContact.name}`,
-          description: 'This action cannot be undone.',
-          onConfirm: async () => {
-            const { error } = await deleteContact(selectedContact.id);
-            if (!error) {
-              setShowContactDetail(false);
-              setSelectedContact(null);
-              setIsEditOpen(false);
-              setConfirmDialog(prev => ({ ...prev, open: false }));
-              toast({ title: 'Contact deleted' });
-            } else {
-              setConfirmDialog(prev => ({ ...prev, open: false }));
-              toast({ title: 'Failed to delete contact', variant: 'destructive' });
-            }
-          }
-        });
-      }}
-      disabled={editLoading}
-    >
-      <Trash2 className="w-4 h-4 mr-2" />
-      Delete
-    </Button>
-    <div className="flex gap-2">
-      <button
-        onClick={() => {
-          setIsEditOpen(false);
-          if (selectedContact) {
-            const { firstName, lastName } = splitFullName(selectedContact.name || '');
-            setEditForm({
-              firstName,
-              lastName,
-              company: selectedContact.company || '',
-              designation: selectedContact.designation || '',
-              phone: selectedContact.phone || '',
-              email: selectedContact.email || '',
-              whatsapp: selectedContact.whatsapp || '',
-              linkedin: selectedContact.linkedin || '',
-              website: selectedContact.website || '',
-              notes: '',
-              tags: localContactTags,
-            });
-          }
-        }}
-        className="px-4 py-2 rounded-md border"
-        disabled={editLoading}
-      >
-        Cancel
-      </button>
+                    {/* Tags & Events */}
+                    {((selectedContact.tags && selectedContact.tags.length > 0) || (selectedContact.events && selectedContact.events.length > 0)) && (
+                      <div className="flex flex-wrap justify-center gap-1.5 mt-3">
+                        {selectedContact.tags?.map((tag) => (
+                          <span key={tag.id} className="px-3 py-1 rounded-full text-[11px] font-medium bg-primary/10 text-primary">
+                            {tag.name}
+                          </span>
+                        ))}
+                        {selectedContact.events?.map((event) => (
+                          <span key={event.id} className="px-3 py-1 rounded-full text-[11px] font-medium bg-muted text-muted-foreground">
+                            {event.title}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
-      <button
-        onClick={saveEditedContact}
-        disabled={editLoading}
-        className="inline-flex items-center gap-2 px-5 py-2 rounded-md bg-primary text-white"
-      >
-        <Save className="w-4 h-4" />
-        Save
-      </button>
-    </div>
-  </div>
-)}
-{!isEditOpen && (
-  <>
-<div className="flex justify-center gap-2 mt-4">
-  <button 
-    onClick={() => {
-      setTagSelectorContactId(selectedContact.id);
-      setLocalContactTags(selectedContact.tags?.map(t => t.id) || []);
-      setLocalContactEvents(selectedContact.events?.map(e => e.id) || []);
-      setShowTagSelector(true);
-    }}
-    className="px-5 py-2 rounded-full bg-white text-black text-[14px] font-medium active:scale-95 transition-transform border border-border/50"
-  >
-    +Tag
-  </button>
+                    {/* Contact Actions */}
+                    <div className="space-y-3">
+                      {selectedContact.phone && (
+                        <button onClick={() => handleCallClick(selectedContact)} className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform w-full text-left">
+                          <Phone className="h-5 w-5 text-foreground/70" strokeWidth={1.3} />
+                          <span className="text-foreground">{formatPhoneByCountry(selectedContact.phone)}</span>
+                        </button>
+                      )}
+                      {selectedContact.email && (
+                        <button onClick={() => handleEmailClick(selectedContact)} className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform w-full text-left">
+                          <Mail className="h-5 w-5 text-foreground/70" strokeWidth={1.3} />
+                          <span className="text-foreground">{selectedContact.email}</span>
+                        </button>
+                      )}
+                      {(selectedContact.whatsapp || selectedContact.phone) && (
+                        <button onClick={() => handleWhatsappClick(selectedContact)} className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform w-full text-left">
+                          <FaWhatsapp className="h-5 w-5 text-foreground/70" />
+                          <span className="text-foreground">Connect on WhatsApp</span>
+                        </button>
+                      )}
+                      {selectedContact.linkedin && (
+                        <a href={`https://linkedin.com/in/${selectedContact.linkedin}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform">
+                          <Linkedin className="h-5 w-5 text-foreground/70" strokeWidth={1.3} />
+                          <span className="text-foreground">Connect on LinkedIn</span>
+                        </a>
+                      )}
+                      {selectedContact.website && (
+                        <a href={`https://${selectedContact.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform">
+                          <Globe className="h-5 w-5 text-foreground/70" strokeWidth={1.3} />
+                          <span className="text-foreground">Visit Website</span>
+                        </a>
+                      )}
+                    </div>
 
-  <button 
-    onClick={() => setShowNotesPopup(true)}
-    className="px-5 py-2 rounded-full bg-white text-black text-[14px] font-medium active:scale-95 transition-transform border border-border/50"
-  >
-    +Notes
-  </button>
-</div>
-{/* Tags & Events - centered below buttons */}
-{((selectedContact.tags && selectedContact.tags.length > 0) || (selectedContact.events && selectedContact.events.length > 0)) && (
-  <div className="flex flex-wrap justify-center gap-1.5 mt-3">
-    {selectedContact.tags?.map((tag) => (
-      <span
-        key={tag.id}
-        className="px-3 py-1 rounded-full text-[11px] font-medium bg-primary/10 text-primary"
-      >
-        {tag.name}
-      </span>
-    ))}
-    {selectedContact.events?.map((event) => (
-      <span
-        key={event.id}
-        className="px-3 py-1 rounded-full text-[11px] font-medium bg-muted text-muted-foreground"
-      >
-        {event.title}
-      </span>
-    ))}
-  </div>
-)}
-    <div className="space-y-3">
-      {selectedContact.phone && (
-        <button 
-          onClick={() => handleCallClick(selectedContact)} 
-          className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform w-full text-left"
-        >
-          <Phone className="h-5 w-5 text-foreground/70" strokeWidth={1.3} />
-          <span className="text-foreground">{formatPhoneByCountry(selectedContact.phone)}</span>
-        </button>
-      )}
-      {selectedContact.email && (
-        <button 
-          onClick={() => handleEmailClick(selectedContact)} 
-          className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform w-full text-left"
-        >
-          <Mail className="h-5 w-5 text-foreground/70" strokeWidth={1.3} />
-          <span className="text-foreground">{selectedContact.email}</span>
-        </button>
-      )}
-      {(selectedContact.whatsapp || selectedContact.phone) && (
-        <button 
-          onClick={() => handleWhatsappClick(selectedContact)} 
-          className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform w-full text-left"
-        >
-          <FaWhatsapp className="h-5 w-5 text-foreground/70" />
-          <span className="text-foreground">Connect on WhatsApp</span>
-        </button>
-      )}
-      {selectedContact.linkedin && (
-        <a href={`https://linkedin.com/in/${selectedContact.linkedin}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform">
-          <Linkedin className="h-5 w-5 text-foreground/70" strokeWidth={1.3} />
-          <span className="text-foreground">Connect on LinkedIn</span>
-        </a>
-      )}
-      {selectedContact.website && (
-        <a href={`https://${selectedContact.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform">
-          <Globe className="h-5 w-5 text-foreground/70" strokeWidth={1.3} />
-          <span className="text-foreground">Visit Website</span>
-        </a>
-      )}
-    </div>
-{/* Contact Added Date */}
-<div className="text-center text-[10.5px] text-muted-foreground tracking-widest mt-4">
-  <span className="uppercase tracking-wider">Contact Added</span>
-  <span> · </span>
-  <span>{formatSmartDate(selectedContact.created_at)}</span>
-</div>
-{notesHistory.length > 0 && (
-  <div className="mx-2 mt-3 p-4 rounded-3xl bg-muted space-y-2">
-    <p className="text-[11px] tracking-wider text-muted-foreground mb-3">
-  NOTES
-</p>
+                    {/* Contact Added Date */}
+                    <div className="text-center text-[10.5px] text-muted-foreground tracking-widest mt-4">
+                      <span className="uppercase tracking-wider">Contact Added</span>
+                      <span> · </span>
+                      <span>{formatSmartDate(selectedContact.created_at)}</span>
+                    </div>
 
-    {notesHistory.map((entry, i) => (
-      <div key={i} className="flex items-start justify-between gap-2 border-b pb-2">
-        <div className="flex-1">
-          <p className="text-[15px] leading-relaxed text-foreground">{entry.text}</p>
-          <p className="text-[11px] text-muted-foreground mt-1">
-            {formatSmartTime(entry.timestamp)}
-          </p>
-        </div>
-        <div className="flex items-center gap-1 flex-shrink-0">
-          <button
-            onClick={() => {
-              const parsed = parseNoteForEdit(entry.text);
-              setEditNoteDialog({ open: true, index: i, systemText: parsed.systemText, userText: parsed.userText });
-            }}
-            className="p-1 rounded hover:bg-muted"
-            title="Edit note"
-          >
-            <Edit2 className="w-3.5 h-3.5 text-muted-foreground" />
-          </button>
-          <button
-            onClick={() => {
-              const noteIndex = i;
-              setConfirmDialog({
-                open: true,
-                title: 'Delete Note',
-                description: 'This action cannot be undone.',
-                onConfirm: () => {
-                  const updatedHistory = notesHistory.filter((_, idx) => idx !== noteIndex);
-                  updateContact(selectedContact.id, { notes_history: updatedHistory });
-                  setNotesHistory(updatedHistory);
-                  setConfirmDialog(prev => ({ ...prev, open: false }));
-                }
-              });
-            }}
-            className="p-1 rounded hover:bg-muted"
-            title="Delete note"
-          >
-            <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
-          </button>
-        </div>
-      </div>
-    ))}
-  </div>
-)}
-  </>
-)}
+                    {/* Notes History */}
+                    {notesHistory.length > 0 && (
+                      <div className="mx-2 mt-3 p-4 rounded-3xl bg-muted space-y-2">
+                        <p className="text-[11px] tracking-wider text-muted-foreground mb-3">NOTES</p>
+                        {notesHistory.map((entry, i) => (
+                          <div key={i} className="flex items-start justify-between gap-2 border-b pb-2">
+                            <div className="flex-1">
+                              <p className="text-[15px] leading-relaxed text-foreground">{entry.text}</p>
+                              <p className="text-[11px] text-muted-foreground mt-1">{formatSmartTime(entry.timestamp)}</p>
+                            </div>
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <button onClick={() => { const parsed = parseNoteForEdit(entry.text); setEditNoteDialog({ open: true, index: i, systemText: parsed.systemText, userText: parsed.userText }); }} className="p-1 rounded hover:bg-muted" title="Edit note">
+                                <Edit2 className="w-3.5 h-3.5 text-muted-foreground" />
+                              </button>
+                              <button onClick={() => { setConfirmDialog({ open: true, title: 'Delete Note', description: 'This action cannot be undone.', onConfirm: () => { const updatedHistory = notesHistory.filter((_, idx) => idx !== i); updateContact(selectedContact.id, { notes_history: updatedHistory }); setNotesHistory(updatedHistory); setConfirmDialog(prev => ({ ...prev, open: false })); } }); }} className="p-1 rounded hover:bg-muted" title="Delete note">
+                                <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          )}
-<Dialog open={showNotesPopup} onOpenChange={setShowNotesPopup}>
-  <DialogContent className="max-w-md">
-    <DialogHeader>
-      <DialogTitle>Notes</DialogTitle>
-    </DialogHeader>
-
-    <div className="flex gap-2">
-      <Textarea
-        value={notesInput}
-        onChange={(e) => setNotesInput(e.target.value)}
-        placeholder="Write a note..."
-        className="flex-1"
-      />
-      <Button variant="gradient" onClick={saveNote}>
-        <Save className="h-4 w-4" />
-      </Button>
-    </div>
-
-    <div className="mt-4 space-y-3 max-h-[200px] overflow-y-auto">
-      {notesHistory.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center">
-          No notes yet
-        </p>
+          </div>
+        </>,
+        document.body
       )}
 
-      {notesHistory.map((entry, i) => (
-        <div key={i} className="p-3 rounded-lg bg-muted/40 border flex items-start justify-between gap-2">
-          <div className="flex-1">
-            <p className="text-[15px] leading-relaxed">{entry.text}</p>
-            <p className="text-[10px] text-muted-foreground">
-              {formatSmartTime(entry.timestamp)}
-            </p>
+      {/* Contact Detail - Desktop Drawer */}
+      {!isMobile && (
+        <Drawer
+          open={showContactDetail}
+          handleOnly={isEditOpen}
+          shouldScaleBackground={false}
+          onOpenChange={(val) => {
+            setShowContactDetail(val);
+            if (!val) {
+              setIsEditOpen(false);
+              editNameRef.current?.blur();
+            }
+          }}
+        >
+          <DrawerContent hideHandle className="max-h-safe rounded-t-3xl border-0 shadow-none bg-background flex flex-col">
+            <div className="flex justify-center py-3">
+              <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
+            </div>
+            {selectedContact && (
+              <div className="px-4 pb-6 space-y-6 overflow-y-auto scroll-keyboard-safe flex-1">
+                <DrawerHeader className="text-center relative p-0">
+                  <ContactAvatar name={selectedContact.name} photoUrl={selectedContact.photo_url} sharedCardId={selectedContact.shared_card_id} size="lg" className="mx-auto mb-2" />
+                  <DrawerTitle className="text-[22px] font-semibold tracking-tight mt-1">{selectedContact.name}</DrawerTitle>
+                  {(selectedContact.company || selectedContact.designation) && (
+                    <p className="text-[14px] text-muted-foreground mt-0.5">
+                      {selectedContact.company && selectedContact.designation ? `${selectedContact.company} · ${selectedContact.designation}` : selectedContact.company || selectedContact.designation}
+                    </p>
+                  )}
+                  {selectedContact.about && <p className="text-[13px] text-muted-foreground mt-2 max-w-md mx-auto leading-relaxed">{selectedContact.about}</p>}
+                  {!isEditOpen && (
+                    <button onClick={(e) => { e.stopPropagation(); setIsEditOpen(true); }} className="absolute right-4 top-4 h-9 w-9 rounded-full bg-background/80 backdrop-blur border border-border/40 flex items-center justify-center active:scale-95">
+                      <Edit2 className="w-5 h-5" />
+                    </button>
+                  )}
+                </DrawerHeader>
+
+                {isEditOpen ? (
+                  <div className="space-y-4 pb-6">
+                    <FloatingNameInput firstName={editForm.firstName} lastName={editForm.lastName} onFirstNameChange={(val) => updateEditField('firstName', val)} onLastNameChange={(val) => updateEditField('lastName', val)} />
+                    <FloatingInput label="Company Name" value={editForm.company} onChange={(e) => updateEditField('company', e.target.value)} />
+                    <FloatingInput label="Role" value={editForm.designation} onChange={(e) => updateEditField('designation', e.target.value)} />
+                    <FloatingPhoneInput label="Phone Number" value={extractPhoneNumber(editForm.phone)} onChange={(e) => { const code = getCountryCode(editForm.phone); updateEditField('phone', code + e.target.value); }} countryCode={getCountryCode(editForm.phone)} onCountryCodeChange={(code) => { const number = extractPhoneNumber(editForm.phone); updateEditField('phone', code + number); }} />
+                    <FloatingInput label="Email" value={editForm.email} onChange={(e) => updateEditField('email', e.target.value)} inputMode="email" />
+                    <FloatingPhoneInput label="WhatsApp" value={extractPhoneNumber(editForm.whatsapp)} onChange={(e) => { const code = getCountryCode(editForm.whatsapp); updateEditField('whatsapp', code + e.target.value); }} countryCode={getCountryCode(editForm.whatsapp)} onCountryCodeChange={(code) => { const number = extractPhoneNumber(editForm.whatsapp); updateEditField('whatsapp', code + number); }} />
+                    <FloatingInput label="LinkedIn" value={editForm.linkedin} onChange={(e) => updateEditField('linkedin', e.target.value)} />
+                    <FloatingInput label="Website" value={editForm.website} onChange={(e) => updateEditField('website', e.target.value)} inputMode="url" />
+                    <div>
+                      <Label className="text-xs">Add Note</Label>
+                      <Textarea value={editForm.notes} onChange={(e) => updateEditField('notes', e.target.value)} placeholder="Add a new note..." rows={3} />
+                    </div>
+                    {editError && <div className="text-sm text-destructive">{editError}</div>}
+                    <div className="border-t bg-background px-4 py-3 flex justify-between mt-6 mb-2">
+                      <Button variant="destructive" onClick={() => { setConfirmDialog({ open: true, title: `Delete ${selectedContact.name}`, description: 'This action cannot be undone.', onConfirm: async () => { const { error } = await deleteContact(selectedContact.id); if (!error) { setShowContactDetail(false); setSelectedContact(null); setIsEditOpen(false); setConfirmDialog(prev => ({ ...prev, open: false })); toast({ title: 'Contact deleted' }); } else { setConfirmDialog(prev => ({ ...prev, open: false })); toast({ title: 'Failed to delete contact', variant: 'destructive' }); } } }); }} disabled={editLoading}>
+                        <Trash2 className="w-4 h-4 mr-2" />Delete
+                      </Button>
+                      <div className="flex gap-2">
+                        <button onClick={() => { setIsEditOpen(false); if (selectedContact) { const { firstName, lastName } = splitFullName(selectedContact.name || ''); setEditForm({ firstName, lastName, company: selectedContact.company || '', designation: selectedContact.designation || '', phone: selectedContact.phone || '', email: selectedContact.email || '', whatsapp: selectedContact.whatsapp || '', linkedin: selectedContact.linkedin || '', website: selectedContact.website || '', notes: '', tags: localContactTags }); } }} className="px-4 py-2 rounded-md border" disabled={editLoading}>Cancel</button>
+                        <button onClick={saveEditedContact} disabled={editLoading} className="inline-flex items-center gap-2 px-5 py-2 rounded-md bg-primary text-white"><Save className="w-4 h-4" />Save</button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-center gap-2 mt-4">
+                      <button onClick={() => { setTagSelectorContactId(selectedContact.id); setLocalContactTags(selectedContact.tags?.map(t => t.id) || []); setLocalContactEvents(selectedContact.events?.map(e => e.id) || []); setShowTagSelector(true); }} className="px-5 py-2 rounded-full bg-white text-black text-[14px] font-medium active:scale-95 transition-transform border border-border/50">+Tag</button>
+                      <button onClick={() => setShowNotesPopup(true)} className="px-5 py-2 rounded-full bg-white text-black text-[14px] font-medium active:scale-95 transition-transform border border-border/50">+Notes</button>
+                    </div>
+                    {((selectedContact.tags && selectedContact.tags.length > 0) || (selectedContact.events && selectedContact.events.length > 0)) && (
+                      <div className="flex flex-wrap justify-center gap-1.5 mt-3">
+                        {selectedContact.tags?.map((tag) => (<span key={tag.id} className="px-3 py-1 rounded-full text-[11px] font-medium bg-primary/10 text-primary">{tag.name}</span>))}
+                        {selectedContact.events?.map((event) => (<span key={event.id} className="px-3 py-1 rounded-full text-[11px] font-medium bg-muted text-muted-foreground">{event.title}</span>))}
+                      </div>
+                    )}
+                    <div className="space-y-3">
+                      {selectedContact.phone && (<button onClick={() => handleCallClick(selectedContact)} className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform w-full text-left"><Phone className="h-5 w-5 text-foreground/70" strokeWidth={1.3} /><span className="text-foreground">{formatPhoneByCountry(selectedContact.phone)}</span></button>)}
+                      {selectedContact.email && (<button onClick={() => handleEmailClick(selectedContact)} className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform w-full text-left"><Mail className="h-5 w-5 text-foreground/70" strokeWidth={1.3} /><span className="text-foreground">{selectedContact.email}</span></button>)}
+                      {(selectedContact.whatsapp || selectedContact.phone) && (<button onClick={() => handleWhatsappClick(selectedContact)} className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform w-full text-left"><FaWhatsapp className="h-5 w-5 text-foreground/70" /><span className="text-foreground">Connect on WhatsApp</span></button>)}
+                      {selectedContact.linkedin && (<a href={`https://linkedin.com/in/${selectedContact.linkedin}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform"><Linkedin className="h-5 w-5 text-foreground/70" strokeWidth={1.3} /><span className="text-foreground">Connect on LinkedIn</span></a>)}
+                      {selectedContact.website && (<a href={`https://${selectedContact.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 rounded-3xl bg-muted active:scale-[0.98] transition-transform"><Globe className="h-5 w-5 text-foreground/70" strokeWidth={1.3} /><span className="text-foreground">Visit Website</span></a>)}
+                    </div>
+                    <div className="text-center text-[10.5px] text-muted-foreground tracking-widest mt-4"><span className="uppercase tracking-wider">Contact Added</span><span> · </span><span>{formatSmartDate(selectedContact.created_at)}</span></div>
+                    {notesHistory.length > 0 && (
+                      <div className="mx-2 mt-3 p-4 rounded-3xl bg-muted space-y-2">
+                        <p className="text-[11px] tracking-wider text-muted-foreground mb-3">NOTES</p>
+                        {notesHistory.map((entry, i) => (
+                          <div key={i} className="flex items-start justify-between gap-2 border-b pb-2">
+                            <div className="flex-1"><p className="text-[15px] leading-relaxed text-foreground">{entry.text}</p><p className="text-[11px] text-muted-foreground mt-1">{formatSmartTime(entry.timestamp)}</p></div>
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <button onClick={() => { const parsed = parseNoteForEdit(entry.text); setEditNoteDialog({ open: true, index: i, systemText: parsed.systemText, userText: parsed.userText }); }} className="p-1 rounded hover:bg-muted" title="Edit note"><Edit2 className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                              <button onClick={() => { setConfirmDialog({ open: true, title: 'Delete Note', description: 'This action cannot be undone.', onConfirm: () => { const updatedHistory = notesHistory.filter((_, idx) => idx !== i); updateContact(selectedContact.id, { notes_history: updatedHistory }); setNotesHistory(updatedHistory); setConfirmDialog(prev => ({ ...prev, open: false })); } }); }} className="p-1 rounded hover:bg-muted" title="Delete note"><Trash2 className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+            <Dialog open={showNotesPopup} onOpenChange={setShowNotesPopup}>
+              <DialogContent className="max-w-md">
+                <DialogHeader><DialogTitle>Notes</DialogTitle></DialogHeader>
+                <div className="flex gap-2">
+                  <Textarea value={notesInput} onChange={(e) => setNotesInput(e.target.value)} placeholder="Write a note..." className="flex-1" />
+                  <Button variant="gradient" onClick={saveNote}><Save className="h-4 w-4" /></Button>
+                </div>
+                <div className="mt-4 space-y-3 max-h-[200px] overflow-y-auto">
+                  {notesHistory.length === 0 && (<p className="text-sm text-muted-foreground text-center">No notes yet</p>)}
+                  {notesHistory.map((entry, i) => (
+                    <div key={i} className="p-3 rounded-lg bg-muted/40 border flex items-start justify-between gap-2">
+                      <div className="flex-1"><p className="text-[15px] leading-relaxed">{entry.text}</p><p className="text-[10px] text-muted-foreground">{formatSmartTime(entry.timestamp)}</p></div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button onClick={() => { const parsed = parseNoteForEdit(entry.text); setEditNoteDialog({ open: true, index: i, systemText: parsed.systemText, userText: parsed.userText }); }} className="p-1 rounded hover:bg-muted" title="Edit note"><Edit2 className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                        <button onClick={() => { setConfirmDialog({ open: true, title: 'Delete Note', description: 'This action cannot be undone.', onConfirm: () => { const updatedHistory = notesHistory.filter((_, idx) => idx !== i); updateContact(selectedContact!.id, { notes_history: updatedHistory }); setNotesHistory(updatedHistory); setConfirmDialog(prev => ({ ...prev, open: false })); } }); }} className="p-1 rounded hover:bg-muted" title="Delete note"><Trash2 className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {/* Notes Popup - Mobile Portal */}
+      {isMobile && mobileSheetMounted && showNotesPopup && (
+        <CRMMobileSheet open={showNotesPopup} onClose={() => setShowNotesPopup(false)} title="Notes" maxHeight="70dvh">
+          <div className="flex gap-2">
+            <Textarea value={notesInput} onChange={(e) => setNotesInput(e.target.value)} placeholder="Write a note..." className="flex-1" />
+            <Button variant="gradient" onClick={saveNote}><Save className="h-4 w-4" /></Button>
           </div>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <button
-              onClick={() => {
-                const parsed = parseNoteForEdit(entry.text);
-                setEditNoteDialog({ open: true, index: i, systemText: parsed.systemText, userText: parsed.userText });
-              }}
-              className="p-1 rounded hover:bg-muted"
-              title="Edit note"
-            >
-              <Edit2 className="w-3.5 h-3.5 text-muted-foreground" />
-            </button>
-            <button
-              onClick={() => {
-                const noteIndex = i;
-                setConfirmDialog({
-                  open: true,
-                  title: 'Delete Note',
-                  description: 'This action cannot be undone.',
-                  onConfirm: () => {
-                    const updatedHistory = notesHistory.filter((_, idx) => idx !== noteIndex);
-                    updateContact(selectedContact!.id, { notes_history: updatedHistory });
-                    setNotesHistory(updatedHistory);
-                    setConfirmDialog(prev => ({ ...prev, open: false }));
-                  }
-                });
-              }}
-              className="p-1 rounded hover:bg-muted"
-              title="Delete note"
-            >
-              <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
-            </button>
+          <div className="mt-4 space-y-3 max-h-[200px] overflow-y-auto">
+            {notesHistory.length === 0 && (<p className="text-sm text-muted-foreground text-center">No notes yet</p>)}
+            {notesHistory.map((entry, i) => (
+              <div key={i} className="p-3 rounded-lg bg-muted/40 border flex items-start justify-between gap-2">
+                <div className="flex-1"><p className="text-[15px] leading-relaxed">{entry.text}</p><p className="text-[10px] text-muted-foreground">{formatSmartTime(entry.timestamp)}</p></div>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button onClick={() => { const parsed = parseNoteForEdit(entry.text); setEditNoteDialog({ open: true, index: i, systemText: parsed.systemText, userText: parsed.userText }); }} className="p-1 rounded hover:bg-muted" title="Edit note"><Edit2 className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                  <button onClick={() => { setConfirmDialog({ open: true, title: 'Delete Note', description: 'This action cannot be undone.', onConfirm: () => { const updatedHistory = notesHistory.filter((_, idx) => idx !== i); updateContact(selectedContact!.id, { notes_history: updatedHistory }); setNotesHistory(updatedHistory); setConfirmDialog(prev => ({ ...prev, open: false })); } }); }} className="p-1 rounded hover:bg-muted" title="Delete note"><Trash2 className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      ))}
-    </div>
-  </DialogContent>
-</Dialog>
-        </DrawerContent>
-      </Drawer>
+        </CRMMobileSheet>
+      )}
 
       {/* Confirm Dialog */}
       <ConfirmDialog
