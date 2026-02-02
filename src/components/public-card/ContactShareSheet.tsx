@@ -33,7 +33,7 @@ const BlinqInput = ({
   return (
     <div className="relative h-14">
       <input
-        name="no-autofill"
+        name={`field-${label.replace(/\s/g, '').toLowerCase()}`}
         type={type}
         inputMode={inputMode}
         autoComplete="off"
