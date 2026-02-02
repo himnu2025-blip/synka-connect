@@ -384,8 +384,11 @@ export function ContactShareSheet({
   // Common header component for both mobile and desktop
   const BlinqHeader = () => (
     <>
-      {/* EXACT BLINQ HEADER - NO BORDER AT BOTTOM */}
-      <div className="px-4 pt-5 pb-4">
+      {/* EXACT BLINQ HEADER with parallax effect */}
+      <div 
+        className="px-4 pt-5 pb-4"
+        style={{ transform: 'translateY(calc(var(--scrollY, 0px) * -0.2))' }}
+      >
         {/* SCAN & SKIP ROW - EXACTLY LIKE BLINQ */}
         <div className="flex justify-between items-center mb-5">
           {/* Scan button aligned left like Blinq */}
@@ -569,7 +572,7 @@ export function ContactShareSheet({
               ${open ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
             `}
           >
-            {/* SCROLLABLE CONTENT with staggered fade animation */}
+            {/* SCROLLABLE CONTENT with staggered fade animation + parallax */}
             <div
               className={`overflow-y-auto transition-all duration-500 delay-100
                 ${open ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
@@ -577,6 +580,10 @@ export function ContactShareSheet({
               style={{ 
                 WebkitOverflowScrolling: 'touch',
                 maxHeight: 'calc(85dvh - 120px)',
+              }}
+              onScroll={(e) => {
+                const y = e.currentTarget.scrollTop;
+                e.currentTarget.style.setProperty('--scrollY', `${Math.min(y, 20)}px`);
               }}
             >
               <BlinqHeader />
