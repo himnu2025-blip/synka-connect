@@ -498,14 +498,14 @@ const saveContactAndShare = async () => {
       toast({
         title: `${firstName}'s contact ready`,
         description: `Open the downloaded file to save to contacts.`,
-        duration: 5000,
+        duration: 2000,
       });
     } else if (result.method === 'native') {
       // Native save completed silently
       toast({
         title: 'Contact saved',
         description: `${firstName} added to your contacts.`,
-        duration: 3000,
+        duration: 2000,
       });
     }
     // No toast for 'share' method - Share sheet is self-explanatory
