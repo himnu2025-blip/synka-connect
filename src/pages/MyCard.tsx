@@ -1208,9 +1208,10 @@ useEffect(() => {
           </div>
         </div>
       </div>
-    </div>
-  </>
-)}
+    </>,
+    document.body
+  )
+}
 
 {!isMobile && (
   // 💻 DESKTOP: Centered Dialog
