@@ -961,7 +961,7 @@ useEffect(() => {
   style={{
     WebkitOverflowScrolling: 'touch',
     maxHeight: '85dvh',
-    paddingBottom: 'calc(env(safe-area-inset-bottom) + 90px)',
+    paddingBottom: 'env(safe-area-inset-bottom)',
   }}
 >
           <div className="space-y-6 px-6 pt-6 pb-6">
