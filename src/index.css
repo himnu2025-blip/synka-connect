@@ -348,19 +348,6 @@
   .touch-pan-y {
     touch-action: pan-y;
   }
-
-  .edit-sheet-scroll {
-  -webkit-overflow-scrolling: touch;
-  max-height: 85dvh;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* 📱 Keyboard is open when viewport height is small */
-@media (max-height: 600px) {
-  .edit-sheet-scroll {
-    max-height: 95dvh;
-  }
-}
 }
 
 @keyframes float {
