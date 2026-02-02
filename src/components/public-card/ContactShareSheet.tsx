@@ -35,7 +35,12 @@ const BlinqInput = ({
       <input
         type={type}
         inputMode={inputMode}
-        autoComplete={autoComplete}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="none"
+        spellCheck={false}
+        data-form-type="other"
+        enterKeyHint="next"
         value={value}
         onChange={onChange}
         placeholder=" "
