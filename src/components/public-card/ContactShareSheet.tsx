@@ -560,7 +560,6 @@ export function ContactShareSheet({
         <div
           className="fixed inset-0 bg-black/30 z-40"
           onClick={() => onOpenChange(false)}
-          style={{ touchAction: 'none' }}
         />
 
         {/* Bottom Sheet Shell (NO SCROLL HERE) */}
