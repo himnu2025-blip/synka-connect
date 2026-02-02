@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Send, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -228,6 +228,21 @@ export function ContactShareSheet({
     company: '',
     linkedin: '',
   });
+
+  useEffect(() => {
+  if (open) {
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+  } else {
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
+  }
+
+  return () => {
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
+  };
+}, [open]);
 
   const normalizeLinkedInUrl = (value: string) => {
     let v = value.trim();
