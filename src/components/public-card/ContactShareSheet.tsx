@@ -73,7 +73,7 @@ const PillInput = ({
   return (
     <div className="relative h-10">
       <input
-        name="no-autofill-pill"
+        name={`pill-${label.replace(/\s/g, '').toLowerCase()}`}
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="none"
