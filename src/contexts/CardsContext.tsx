@@ -267,12 +267,27 @@ export function CardsProvider({ children }: { children: ReactNode }) {
       return { error: 'A card with this name already exists' };
     }
 
+    // Determine default layout based on whether user has a photo
+    // Check the default card first, then any card with a photo
+    const defaultCard = cards.find(c => c.is_default);
+    const hasPhoto = defaultCard?.photo_url || cards.some(c => c.photo_url);
+    const defaultLayout = hasPhoto ? 'photo-logo' : 'color';
+    
+    // Copy photo_url from default card if it exists (for consistency)
+    const inheritedPhotoUrl = defaultCard?.photo_url || null;
+
     const { data, error } = await supabase
       .from('cards')
       .insert({
         user_id: user.id,
         name: name.trim(),
         is_default: false,
+        layout: defaultLayout,
+        photo_url: inheritedPhotoUrl,
+        // Also copy basic info from default card for convenience
+        full_name: defaultCard?.full_name || null,
+        email: defaultCard?.email || user.email || null,
+        phone: defaultCard?.phone || null,
       })
       .select()
       .single();
