@@ -644,16 +644,15 @@ const saveContactAndShare = async () => {
     <h2 className="text-[22px] font-semibold tracking-tight text-foreground">
       {displayData.name}
     </h2>
-    {displayData.designation && (
-      <p className="text-[14.5px] font-normal text-muted-foreground leading-tight">
-        {displayData.designation}
-      </p>
+    {(displayData.designation || displayData.company) && (
+  <p className="text-[14px] text-muted-foreground leading-tight">
+    {displayData.designation}
+    {displayData.designation && displayData.company && (
+      <span className="mx-1 opacity-60">•</span>
     )}
-    {displayData.company && (
-      <p className="text-[13.5px] text-muted-foreground/70 leading-tight">
-        {displayData.company}
-      </p>
-    )}
+    {displayData.company}
+  </p>
+)}
   </div>
 )}
           </div>
