@@ -265,14 +265,37 @@ serve(async (req) => {
         if (subscriptionEntity) {
           const razorpaySubId = subscriptionEntity.id;
           console.log("E-mandate authenticated for subscription:", razorpaySubId);
-          
-          await supabase
+
+          // IMPORTANT: For resumed subscriptions we often get `subscription.authenticated`
+          // immediately (₹5 auth), while the first paid cycle might be deferred.
+          // We must clear `cancelled_at` and re-enable `auto_renew` so the UI stops
+          // showing “Cancelled / Resume” right after mandate auth succeeds.
+          const { data: subscription, error: authUpdateErr } = await supabase
             .from("subscriptions")
             .update({
+              status: "active",
               mandate_created: true,
+              auto_renew: true,
+              cancelled_at: null,
+              cancellation_reason: null,
               updated_at: new Date().toISOString(),
             })
-            .eq("razorpay_subscription_id", razorpaySubId);
+            .eq("razorpay_subscription_id", razorpaySubId)
+            .select()
+            .maybeSingle();
+
+          if (authUpdateErr) {
+            console.error("Failed to update subscription on authenticated:", authUpdateErr);
+          }
+
+          // Keep user on Orange (idempotent)
+          if (subscription) {
+            await supabase.rpc("activate_user_subscription", {
+              p_user_id: subscription.user_id,
+              p_plan_type: subscription.plan_type,
+              p_end_date: subscription.end_date,
+            });
+          }
         }
         break;
       }
