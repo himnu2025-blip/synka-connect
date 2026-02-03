@@ -1,3 +1,7 @@
 node_modules
 android-sdk/
 android-sdk/
+*.tar.gz
+jdk*
+android-sdk/
+.gradle/
