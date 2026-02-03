@@ -253,6 +253,13 @@ const Upgrade = () => {
               </ul>
             </div>
 
+            <p className="text-xs text-muted-foreground">
+              Need help? Contact us at{" "}
+              <a href="mailto:orders@synka.in" className="text-orange-plan underline">
+                orders@synka.in
+              </a>
+            </p>
+
             <div className="flex flex-col gap-3">
               <Button 
                 className="w-full bg-orange-plan hover:bg-orange-plan/90"
@@ -316,6 +323,13 @@ const Upgrade = () => {
                 </li>
               </ul>
             </div>
+
+            <p className="text-xs text-muted-foreground">
+              Questions? Contact us at{" "}
+              <a href="mailto:orders@synka.in" className="text-orange-plan underline">
+                orders@synka.in
+              </a>
+            </p>
 
             <div className="flex flex-col gap-3">
               <Button 
