@@ -81,9 +81,13 @@ serve(async (req) => {
       console.log("Using Razorpay Subscriptions API with plan_id:", planId);
       
       // Use Razorpay Subscriptions API for e-mandate
-      const subscriptionPayload = {
+      // Do NOT send customer_notify here — it's a plan-level setting.
+      // Do NOT send recurring_token / max_amount here — those must come from the
+      // Razorpay checkout options, and only when the plan's type is "emandate".
+      // Sending them server-side causes: "The recurring token.max amount field
+      // may be sent only when method is emandate"
+      const subscriptionPayload: Record<string, any> = {
         plan_id: planId,
-        customer_notify: 1,
         total_count: plan_type === "annually" ? 10 : 120, // Max billing cycles
         notes: {
           user_id: user.id,
