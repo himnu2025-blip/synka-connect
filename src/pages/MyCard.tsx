@@ -950,13 +950,14 @@ useEffect(() => {
         onClick={() => setIsEditOpen(false)}
       />
 
-      {/* Bottom Sheet */}
+      {/* Bottom Sheet - NO transform in style to prevent iOS keyboard gap */}
       <div className="fixed inset-x-0 bottom-0 z-[1001] flex justify-center pointer-events-none">
       <div
         className={`w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden
-          transform transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
-          ${isEditOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
+          transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
+          ${isEditOpen ? 'opacity-100' : 'translate-y-full opacity-0'}
         `}
+        style={{ maxHeight: '95dvh' }}
       >
         <div
   className="overflow-y-auto"

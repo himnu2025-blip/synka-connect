@@ -2367,7 +2367,7 @@ if (!contacts && contactsLoading) {
             style={{ touchAction: 'none' }}
           />
 
-          {/* Bottom Sheet */}
+          {/* Bottom Sheet - NO transform in style to prevent iOS keyboard gap */}
           <div className="fixed inset-x-0 bottom-0 z-[1001] flex justify-center pointer-events-none">
             <div
               ref={sheetRef}
@@ -2375,13 +2375,13 @@ if (!contacts && contactsLoading) {
               onTouchMove={onSheetTouchMove}
               onTouchEnd={onSheetTouchEnd}
               className={`w-full max-w-md bg-background rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden
-                transform transition-transform ${isDragging ? 'duration-0' : 'duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]'}
+                ${isDragging ? '' : 'transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]'}
                 ${showContactDetail ? 'opacity-100' : 'translate-y-full opacity-0'}
               `}
-  style={{
-    transform: `translateY(${dragY}px)`,
-    maxHeight: isEditOpen ? '95dvh' : '90dvh'
-  }}
+              style={{
+                marginBottom: dragY > 0 ? `-${dragY}px` : undefined,
+                maxHeight: isEditOpen ? '95dvh' : '90dvh'
+              }}
             >
               {/* Drag Handle */}
               <div className="flex justify-center py-3">
