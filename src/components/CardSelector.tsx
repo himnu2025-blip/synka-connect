@@ -409,7 +409,6 @@ export function CardSelector({
         {isCreating && (
           <div 
             className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-            style={{ paddingTop: 'max(env(safe-area-inset-top), 60px)' }}
             onClick={() => setIsCreating(false)}
           >
             <div className="bg-background p-4 rounded-xl shadow-lg w-72 animate-scale-in mx-4" onClick={e => e.stopPropagation()}>
@@ -513,7 +512,6 @@ export function CardSelector({
       {isCreating && (
         <div 
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-          style={{ paddingTop: 'max(env(safe-area-inset-top), 20px)' }}
           onClick={() => setIsCreating(false)}
         >
           <div className="bg-background p-6 rounded-xl shadow-lg w-80 animate-scale-in mx-4" onClick={e => e.stopPropagation()}>
