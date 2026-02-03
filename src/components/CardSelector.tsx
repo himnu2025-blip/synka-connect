@@ -405,13 +405,17 @@ export function CardSelector({
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* New Card Creation Dialog - safe area aware positioning */}
+        {/* New Card Creation Dialog - renders above nav with safe-area positioning */}
         {isCreating && (
           <div 
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/50 z-[2000] flex justify-center"
             onClick={() => setIsCreating(false)}
           >
-            <div className="bg-background p-4 rounded-xl shadow-lg w-72 animate-scale-in mx-4" onClick={e => e.stopPropagation()}>
+            <div 
+              className="absolute left-1/2 -translate-x-1/2 bg-background p-4 rounded-xl shadow-lg w-72 animate-scale-in mx-4"
+              style={{ top: 'calc(env(safe-area-inset-top) + 12px)' }}
+              onClick={e => e.stopPropagation()}
+            >
               <h3 className="text-sm font-semibold mb-3">Create New Card</h3>
               <Input
                 value={newCardName}
@@ -508,13 +512,17 @@ export function CardSelector({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* New Card Creation Dialog - safe area aware positioning */}
+      {/* New Card Creation Dialog - renders above nav with safe-area positioning */}
       {isCreating && (
         <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/50 z-[2000] flex justify-center"
           onClick={() => setIsCreating(false)}
         >
-          <div className="bg-background p-6 rounded-xl shadow-lg w-80 animate-scale-in mx-4" onClick={e => e.stopPropagation()}>
+          <div 
+            className="absolute left-1/2 -translate-x-1/2 bg-background p-6 rounded-xl shadow-lg w-80 animate-scale-in mx-4"
+            style={{ top: 'calc(env(safe-area-inset-top) + 12px)' }}
+            onClick={e => e.stopPropagation()}
+          >
             <h3 className="text-base font-semibold mb-4">Create New Card</h3>
             <Input
               value={newCardName}
