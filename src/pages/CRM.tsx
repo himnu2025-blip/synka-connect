@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -387,7 +388,13 @@ const saveNote = async () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null); // For mobile browser native camera
   const streamRef = useRef<MediaStream | null>(null);
+  
+  // Detect mobile browser (not native Capacitor app)
+  const isMobileBrowser = typeof navigator !== 'undefined' && 
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) &&
+    !Capacitor.isNativePlatform();
   
   // CSV Import states
   const csvImportRef = useRef<HTMLInputElement>(null);
@@ -962,7 +969,13 @@ const getAvatarText = () => {
       return;
     }
     
-    // Fallback to web camera API
+    // Mobile browser - use file input with capture attribute for native camera
+    if (isMobileBrowser && cameraInputRef.current) {
+      cameraInputRef.current.click();
+      return;
+    }
+    
+    // Desktop fallback to web camera API
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         toast({ title: 'Camera not supported', description: 'Your browser does not support camera access.', variant: 'destructive' });
@@ -1006,7 +1019,22 @@ const getAvatarText = () => {
         toast({ title: 'Camera error', description: err.message || 'Could not access camera.', variant: 'destructive' });
       }
     }
-  }, []);
+  }, [isMobileBrowser]);
+  
+  // Handle camera file input (for mobile browser native camera)
+  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imageDataUrl = event.target?.result as string;
+        setCapturedImage(imageDataUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+    // Reset input so same file can be selected again
+    e.target.value = '';
+  };
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -2052,12 +2080,22 @@ if (!contacts && contactsLoading) {
           <div className="space-y-4">
             {/* Hidden canvas for image capture */}
             <canvas ref={canvasRef} className="hidden" />
+            {/* Hidden file input for gallery upload */}
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*"
               className="hidden"
               onChange={handleFileUpload}
+            />
+            {/* Hidden file input for mobile browser native camera */}
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handleCameraCapture}
             />
 
             {/* Camera / Captured Image View */}
