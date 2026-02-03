@@ -225,11 +225,6 @@ export function useRazorpay() {
 
         if (use_subscription_api && subscription.razorpay_subscription_id) {
           // Use Razorpay Subscription checkout (supports e-mandate)
-          // Note: Do NOT pass recurring_token / max_amount here.
-          // Razorpay only allows those when the payment method is emandate,
-          // but the method isn't known at checkout-open time.  The plan
-          // configured in the Razorpay Dashboard already defines the amount
-          // and recurrence rules.
           razorpayOptions = {
             key: key_id,
             subscription_id: subscription.razorpay_subscription_id,
@@ -243,6 +238,11 @@ export function useRazorpay() {
             theme: {
               color: "#F97316",
             },
+            // Note: Do NOT pass recurring_token / max_amount here.
+            // Razorpay only allows those when the payment method is emandate,
+            // but the method isn't known at checkout-open time.  The plan
+            // configured in the Razorpay Dashboard already defines the amount
+            // and recurrence rules.
             // Enable UPI intent for native apps (Android)
             ...(isNativePlatform() && {
               callback_url: getCallbackUrl(),
@@ -395,9 +395,185 @@ export function useRazorpay() {
     [loadRazorpayScript]
   );
 
+  // Resume a subscription whose e-mandate was cancelled but whose paid
+  // period is still active.  The server finds the old row and creates a
+  // fresh Razorpay subscription; we open the same checkout as a new sub.
+  const initiateResume = useCallback(
+    async (options: SubscriptionOptions) => {
+      setLoading(true);
+      try {
+        const scriptLoaded = await loadRazorpayScript();
+        if (!scriptLoaded) {
+          throw new Error("Failed to load Razorpay SDK");
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          throw new Error("Please login to continue");
+        }
+
+        // ── call resume-subscription (no body needed — server finds the sub) ─
+        const response = await supabase.functions.invoke("resume-subscription", {
+          body: {},
+        });
+
+        if (response.error) {
+          throw new Error(response.error.message || "Failed to resume subscription");
+        }
+
+        const { subscription, prefill, key_id, use_subscription_api } = response.data;
+
+        let razorpayOptions: any;
+
+        if (use_subscription_api && subscription.razorpay_subscription_id) {
+          // ── e-mandate checkout ──────────────────────────────────────────
+          razorpayOptions = {
+            key: key_id,
+            subscription_id: subscription.razorpay_subscription_id,
+            name: "Synka",
+            description: `Orange Plan - ${subscription.plan_type === "annually" ? "Annual" : "Monthly"} (Resume)`,
+            prefill: {
+              name:    prefill.name,
+              email:   prefill.email,
+              contact: prefill.contact,
+            },
+            theme: { color: "#F97316" },
+            ...(isNativePlatform() && {
+              callback_url: getCallbackUrl(),
+              redirect: false,
+            }),
+            handler: async (razorpayResponse: any) => {
+              try {
+                const verifyResponse = await supabase.functions.invoke("verify-payment", {
+                  body: {
+                    razorpay_subscription_id: razorpayResponse.razorpay_subscription_id,
+                    razorpay_payment_id:      razorpayResponse.razorpay_payment_id,
+                    razorpay_signature:       razorpayResponse.razorpay_signature,
+                    type:                     "subscription",
+                    subscription_id:          subscription.id,
+                  },
+                });
+                if (verifyResponse.error) throw new Error("Payment verification failed");
+                toast.success("Subscription resumed! Auto-renewal is back on.");
+                options.onSuccess?.(verifyResponse.data);
+              } catch (error) {
+                console.error("Resume verify error:", error);
+                toast.error("Payment verification failed. Please contact support.");
+                options.onFailure?.(error);
+              }
+            },
+            modal: {
+              ondismiss: () => {
+                setLoading(false);
+                toast.info("Payment cancelled");
+                options.onFailure?.({ message: "Payment cancelled by user" });
+              },
+              escape: !isNativePlatform(),
+              backdropclose: false,
+            },
+          };
+        } else {
+          // ── order-based fallback checkout ───────────────────────────────
+          razorpayOptions = {
+            key: key_id,
+            amount:      subscription.amount,
+            currency:    subscription.currency,
+            name:        "Synka",
+            description: `Orange Plan - ${subscription.plan_type === "annually" ? "Annual" : "Monthly"} (Resume)`,
+            order_id:    subscription.razorpay_order_id,
+            prefill: {
+              name:    prefill.name,
+              email:   prefill.email,
+              contact: prefill.contact,
+            },
+            config: {
+              display: {
+                hide: [{ method: "wallet" }],
+                preferences: { show_default_blocks: true },
+              },
+            },
+            theme: { color: "#F97316" },
+            ...(isNativePlatform() && {
+              callback_url: getCallbackUrl(),
+              redirect: false,
+            }),
+            handler: async (razorpayResponse: any) => {
+              try {
+                const verifyResponse = await supabase.functions.invoke("verify-payment", {
+                  body: {
+                    razorpay_order_id:  razorpayResponse.razorpay_order_id,
+                    razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                    razorpay_signature:  razorpayResponse.razorpay_signature,
+                    type:               "subscription",
+                    subscription_id:    subscription.id,
+                  },
+                });
+                if (verifyResponse.error) throw new Error("Payment verification failed");
+                toast.success("Subscription resumed! Welcome back to Orange.");
+                options.onSuccess?.(verifyResponse.data);
+              } catch (error) {
+                console.error("Resume verify error:", error);
+                toast.error("Payment verification failed. Please contact support.");
+                options.onFailure?.(error);
+              }
+            },
+            modal: {
+              ondismiss: () => {
+                setLoading(false);
+                toast.info("Payment cancelled");
+                options.onFailure?.({ message: "Payment cancelled by user" });
+              },
+              escape: !isNativePlatform(),
+              backdropclose: false,
+            },
+          };
+        }
+
+        const razorpay = new window.Razorpay(razorpayOptions);
+        razorpay.on("payment.failed", async (response: any) => {
+          console.error("Resume payment failed:", response.error);
+          toast.error(response.error.description || "Payment failed");
+
+          if (subscription.id) {
+            try {
+              await supabase
+                .from("subscriptions")
+                .update({ payment_status: "failed", updated_at: new Date().toISOString() })
+                .eq("id", subscription.id);
+
+              await supabase.from("payments").insert({
+                user_id:                  session.user.id,
+                subscription_id:          subscription.id,
+                razorpay_order_id:        subscription.razorpay_order_id || null,
+                razorpay_subscription_id: subscription.razorpay_subscription_id || null,
+                amount:                   subscription.amount / 100,
+                status:                   "failed",
+                error_code:               response.error?.code,
+                error_description:        response.error?.description,
+              });
+            } catch (err) {
+              console.error("Failed to record resume payment failure:", err);
+            }
+          }
+          options.onFailure?.(response.error);
+          setLoading(false);
+        });
+        razorpay.open();
+      } catch (error: any) {
+        console.error("Resume initiation error:", error);
+        toast.error(error.message || "Failed to resume subscription");
+        options.onFailure?.(error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loadRazorpayScript]
+  );
+
   return {
     loading,
     initiatePayment,
     initiateSubscription,
+    initiateResume,
   };
 }

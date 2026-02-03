@@ -67,7 +67,7 @@ const Upgrade = () => {
   const { profile, loading, refetch } = useProfile();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { initiateSubscription, loading: paymentLoading } = useRazorpay();
+  const { initiateSubscription, initiateResume, loading: paymentLoading } = useRazorpay();
   const [orangeOrderStatus, setOrangeOrderStatus] = useState<OrangeOrderStatus>("none");
   const [loadingOrder, setLoadingOrder] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -76,6 +76,14 @@ const Upgrade = () => {
   const [failedError, setFailedError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const hasFetchedRef = useRef(false);
+
+  // ── resume state ──────────────────────────────────────────────────
+  // true when the user has an active Orange plan but the e-mandate /
+  // auto-renew has been cancelled (cancelled_at is set).  The paid
+  // period is still running so the plan stays Orange, but we want to
+  // show "Resume Subscription" instead of "Current Plan".
+  const [needsResume, setNeedsResume] = useState(false);
+  const [resumePlanType, setResumePlanType] = useState<"monthly" | "annually">("annually");
 
   const userPlan = profile?.plan?.toLowerCase() || "free";
   const isOrange = userPlan === "orange";
@@ -134,6 +142,28 @@ const Upgrade = () => {
       } else {
         setOrangeOrderStatus("none");
       }
+
+      // ── Check for a resumable subscription ──────────────────────
+      // A subscription is "resumable" when:
+      //   status = active          (plan not downgraded yet)
+      //   cancelled_at IS NOT NULL (mandate / auto-renew was cancelled)
+      //   end_date >= now          (paid period hasn't expired)
+      const { data: resumableSub } = await supabase
+        .from("subscriptions")
+        .select("plan_type, end_date, cancelled_at")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .not("cancelled_at", "is", null)
+        .gte("end_date", new Date().toISOString())
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (resumableSub) {
+        setNeedsResume(true);
+        setResumePlanType(resumableSub.plan_type as "monthly" | "annually");
+      }
+
       setLoadingOrder(false);
     };
 
@@ -208,6 +238,34 @@ const Upgrade = () => {
   const handleRetryPayment = () => {
     setPaymentFailed(false);
     setFailedError(null);
+  };
+
+  // ── Resume a cancelled mandate while the paid period is still active ─
+  const handleResumeSubscription = () => {
+    if (!user) {
+      toast.error("Please log in to resume");
+      return;
+    }
+
+    setSubmitting(true);
+    setPaymentFailed(false);
+    setFailedError(null);
+
+    initiateResume({
+      plan_type: resumePlanType,
+      onSuccess: () => {
+        setNeedsResume(false);
+        setPaymentSuccess(true);
+        refetch();
+        setSubmitting(false);
+      },
+      onFailure: (error) => {
+        console.error("Resume payment failed:", error);
+        setPaymentFailed(true);
+        setFailedError(error?.message || "Payment could not be processed. Please try again.");
+        setSubmitting(false);
+      },
+    });
   };
 
   if (loading || loadingOrder) {
@@ -353,13 +411,17 @@ const Upgrade = () => {
   }
 
   const getOrangeButtonState = () => {
+    // ── mandate cancelled, paid period still running → offer resume ──
+    if (isOrange && needsResume) {
+      return { text: "Resume Subscription", disabled: false, variant: "default" as const, isResume: true };
+    }
     if (isOrange) {
-      return { text: "Current Plan", disabled: true, variant: "secondary" as const };
+      return { text: "Current Plan", disabled: true, variant: "secondary" as const, isResume: false };
     }
     if (orangeOrderStatus === "requested") {
-      return { text: "Requested", disabled: true, variant: "outline" as const };
+      return { text: "Requested", disabled: true, variant: "outline" as const, isResume: false };
     }
-    return { text: "Upgrade to Orange", disabled: false, variant: "default" as const };
+    return { text: "Upgrade to Orange", disabled: false, variant: "default" as const, isResume: false };
   };
 
   const orangeButton = getOrangeButtonState();
@@ -385,178 +447,193 @@ const Upgrade = () => {
         </div>
 
         {/* Pricing Cards */}
-<div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-  {/* ORANGE Plan */}
-  <div className="relative rounded-2xl border-2 border-orange-plan bg-card p-6 lg:p-8 shadow-lg shadow-orange-plan/10">
-    {/* Orange Badge */}
-    <div className="absolute -top-4 left-6 bg-orange-plan text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-md">
-      ORANGE
-    </div>
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* ORANGE Plan */}
+          <div className="relative rounded-2xl border-2 border-orange-plan bg-card p-6 lg:p-8 shadow-lg shadow-orange-plan/10">
+            {/* Orange Badge */}
+            <div className="absolute -top-4 left-6 bg-orange-plan text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-md">
+              ORANGE
+            </div>
 
-    <div className="mb-6 mt-2">
-      <h2 className="text-2xl font-bold text-foreground">ORANGE</h2>
-      
-      {/* Billing Toggle */}
-      <div className="flex items-center justify-center gap-3 mt-4 p-3 bg-muted/50 rounded-lg">
-        <span className={`text-sm font-medium ${!isAnnually ? 'text-foreground' : 'text-muted-foreground'}`}>
-          Monthly
-        </span>
-        <Switch
-          checked={isAnnually}
-          onCheckedChange={setIsAnnually}
-          className="data-[state=checked]:bg-orange-plan"
-        />
-        <span className={`text-sm font-medium ${isAnnually ? 'text-foreground' : 'text-muted-foreground'}`}>
-          Annually
-        </span>
-        {isAnnually && (
-          <span className="text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full font-medium">
-            Save 50%
-          </span>
-        )}
-      </div>
+            <div className="mb-6 mt-2">
+              <h2 className="text-2xl font-bold text-foreground">ORANGE</h2>
+              
+              {/* Billing Toggle */}
+              <div className="flex items-center justify-center gap-3 mt-4 p-3 bg-muted/50 rounded-lg">
+                <span className={`text-sm font-medium ${!isAnnually ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  Monthly
+                </span>
+                <Switch
+                  checked={isAnnually}
+                  onCheckedChange={setIsAnnually}
+                  className="data-[state=checked]:bg-orange-plan"
+                />
+                <span className={`text-sm font-medium ${isAnnually ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  Annually
+                </span>
+                {isAnnually && (
+                  <span className="text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full font-medium">
+                    Save 50%
+                  </span>
+                )}
+              </div>
 
-      {/* Pricing Display */}
-      <div className="mt-4 text-center">
-        <div className="flex items-baseline justify-center gap-1">
-          <span className="text-4xl font-bold text-orange-plan">₹{currentPricing.displayPrice}</span>
-          <span className="text-muted-foreground">/{currentPricing.period}</span>
-        </div>
-        
-        {isAnnually ? (
-          <p className="text-sm text-muted-foreground mt-1">
-            {currentPricing.billingNote}
-          </p>
-        ) : null}
+              {/* Pricing Display */}
+              <div className="mt-4 text-center">
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-4xl font-bold text-orange-plan">₹{currentPricing.displayPrice}</span>
+                  <span className="text-muted-foreground">/{currentPricing.period}</span>
+                </div>
+                
+                {isAnnually ? (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {currentPricing.billingNote}
+                  </p>
+                ) : null}
 
-        {/* Limited Period Offer */}
-        <div className="mt-3 flex items-center justify-center gap-2">
-          <span className="text-muted-foreground line-through text-lg">
-            ₹{currentPricing.originalPrice}
-          </span>
-          <span className="text-xs bg-red-500/20 text-red-600 px-2 py-1 rounded-full font-semibold animate-pulse">
-            Limited Period Offer!
-          </span>
-        </div>
-      </div>
-    </div>
+                {/* Limited Period Offer */}
+                <div className="mt-3 flex items-center justify-center gap-2">
+                  <span className="text-muted-foreground line-through text-lg">
+                    ₹{currentPricing.originalPrice}
+                  </span>
+                  <span className="text-xs bg-red-500/20 text-red-600 px-2 py-1 rounded-full font-semibold animate-pulse">
+                    Limited Period Offer!
+                  </span>
+                </div>
+              </div>
+            </div>
 
-    {/* Core Features */}
-    <div className="mb-5">
-      <h3 className="text-sm font-semibold text-orange-plan mb-3">
-        {orangeFeatures.core.title}
-      </h3>
-      <div className="space-y-2.5">
-        {orangeFeatures.core.items.map((feature, idx) => (
-          <FeatureItem key={idx} feature={feature} />
-        ))}
-      </div>
-    </div>
+            {/* Core Features */}
+            <div className="mb-5">
+              <h3 className="text-sm font-semibold text-orange-plan mb-3">
+                {orangeFeatures.core.title}
+              </h3>
+              <div className="space-y-2.5">
+                {orangeFeatures.core.items.map((feature, idx) => (
+                  <FeatureItem key={idx} feature={feature} />
+                ))}
+              </div>
+            </div>
 
-    {/* Communication Features */}
-    <div className="mb-5">
-      <h3 className="text-sm font-semibold text-orange-plan mb-3">
-        {orangeFeatures.communication.title}
-      </h3>
-      <div className="space-y-2.5">
-        {orangeFeatures.communication.items.map((feature, idx) => (
-          <FeatureItem key={idx} feature={feature} />
-        ))}
-      </div>
-    </div>
+            {/* Communication Features */}
+            <div className="mb-5">
+              <h3 className="text-sm font-semibold text-orange-plan mb-3">
+                {orangeFeatures.communication.title}
+              </h3>
+              <div className="space-y-2.5">
+                {orangeFeatures.communication.items.map((feature, idx) => (
+                  <FeatureItem key={idx} feature={feature} />
+                ))}
+              </div>
+            </div>
 
-    {/* Automation Features */}
-    <div className="mb-8">
-      <h3 className="text-sm font-semibold text-orange-plan mb-3">
-        {orangeFeatures.automation.title}
-      </h3>
-      <div className="space-y-2.5">
-        {orangeFeatures.automation.items.map((feature, idx) => (
-          <FeatureItem key={idx} feature={feature} />
-        ))}
-      </div>
-    </div>
+            {/* Automation Features */}
+            <div className="mb-8">
+              <h3 className="text-sm font-semibold text-orange-plan mb-3">
+                {orangeFeatures.automation.title}
+              </h3>
+              <div className="space-y-2.5">
+                {orangeFeatures.automation.items.map((feature, idx) => (
+                  <FeatureItem key={idx} feature={feature} />
+                ))}
+              </div>
+            </div>
 
-    {/* Payment Summary Box */}
-    {!isOrange && orangeOrderStatus !== "requested" && (
-      <div className="mb-4 p-4 bg-orange-plan/10 rounded-lg border border-orange-plan/20">
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-muted-foreground">Total to pay</span>
-          <div className="text-right">
-            <span className="text-2xl font-bold text-orange-plan">₹{currentPricing.totalPrice}</span>
-            <span className="text-xs text-muted-foreground ml-1">
-              {isAnnually ? "/year" : "/month"}
-            </span>
+            {/* Payment Summary Box */}
+            {!isOrange && orangeOrderStatus !== "requested" && (
+              <div className="mb-4 p-4 bg-orange-plan/10 rounded-lg border border-orange-plan/20">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Total to pay</span>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold text-orange-plan">₹{currentPricing.totalPrice}</span>
+                    <span className="text-xs text-muted-foreground ml-1">
+                      {isAnnually ? "/year" : "/month"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {/* ── Info banner: only when mandate is cancelled but plan is active ── */}
+              {needsResume && (
+                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-start gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-semibold text-amber-700">Auto-renewal cancelled</p>
+                    <p className="text-xs text-amber-600 mt-0.5">
+                      Your Orange plan is still active until the end of the current period. Resume to re-enable auto-renewal and keep your plan going.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <Button
+                className={
+                  orangeButton.variant === "default"
+                    ? "w-full bg-orange-plan hover:bg-orange-plan/90 text-white"
+                    : "w-full"
+                }
+                variant={orangeButton.variant}
+                disabled={orangeButton.disabled || submitting}
+                onClick={orangeButton.disabled ? undefined : (orangeButton.isResume ? handleResumeSubscription : handleUpgradeRequest)}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {orangeButton.isResume ? "Resuming..." : "Submitting..."}
+                  </>
+                ) : (
+                  orangeButton.text
+                )}
+              </Button>
+              {orangeOrderStatus === "requested" && (
+                <p className="text-xs text-muted-foreground text-center">
+                  Request under review
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* FREE Plan */}
+          <div className="rounded-2xl border border-border bg-card p-6 lg:p-8">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-foreground">FREE</h2>
+              <p className="text-muted-foreground mt-1">Get started with the basics</p>
+            </div>
+
+            <div className="space-y-3 mb-8">
+              {freeFeatures.map((feature, idx) => (
+                <div key={idx} className="flex items-start gap-3">
+                  {feature.included ? (
+                    <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  ) : (
+                    <X className="w-5 h-5 text-muted-foreground/50 mt-0.5 flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      feature.included
+                        ? "text-foreground"
+                        : "text-muted-foreground/50 line-through"
+                    }
+                  >
+                    {feature.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <Button
+              className="w-full"
+              variant={!isOrange && orangeOrderStatus !== "approved" ? "secondary" : "outline"}
+              disabled={!isOrange && orangeOrderStatus !== "approved"}
+            >
+              {!isOrange && orangeOrderStatus !== "approved" ? "Current Plan" : "Free Plan"}
+            </Button>
           </div>
         </div>
-      </div>
-    )}
-
-    <div className="space-y-2">
-      <Button
-        className={
-          orangeButton.variant === "default"
-            ? "w-full bg-orange-plan hover:bg-orange-plan/90 text-white"
-            : "w-full"
-        }
-        variant={orangeButton.variant}
-        disabled={orangeButton.disabled || submitting}
-        onClick={orangeButton.disabled ? undefined : handleUpgradeRequest}
-      >
-        {submitting ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Submitting...
-          </>
-        ) : (
-          orangeButton.text
-        )}
-      </Button>
-      {orangeOrderStatus === "requested" && (
-        <p className="text-xs text-muted-foreground text-center">
-          Request under review
-        </p>
-      )}
-    </div>
-  </div>
-
-  {/* FREE Plan */}
-  <div className="rounded-2xl border border-border bg-card p-6 lg:p-8">
-    <div className="mb-6">
-      <h2 className="text-2xl font-bold text-foreground">FREE</h2>
-      <p className="text-muted-foreground mt-1">Get started with the basics</p>
-    </div>
-
-    <div className="space-y-3 mb-8">
-      {freeFeatures.map((feature, idx) => (
-        <div key={idx} className="flex items-start gap-3">
-          {feature.included ? (
-            <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-          ) : (
-            <X className="w-5 h-5 text-muted-foreground/50 mt-0.5 flex-shrink-0" />
-          )}
-          <span
-            className={
-              feature.included
-                ? "text-foreground"
-                : "text-muted-foreground/50 line-through"
-            }
-          >
-            {feature.text}
-          </span>
-        </div>
-      ))}
-    </div>
-
-    <Button
-      className="w-full"
-      variant={!isOrange && orangeOrderStatus !== "approved" ? "secondary" : "outline"}
-      disabled={!isOrange && orangeOrderStatus !== "approved"}
-    >
-      {!isOrange && orangeOrderStatus !== "approved" ? "Current Plan" : "Free Plan"}
-    </Button>
-  </div>
-</div>
 
         {/* Footnote */}
         <p className="text-xs text-muted-foreground mt-8 text-center">
