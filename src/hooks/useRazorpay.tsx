@@ -249,8 +249,11 @@ export function useRazorpay() {
               redirect: false,
             }),
             handler: async (razorpayResponse: any) => {
+              // Payment was captured by Razorpay - now verify on server
+              // IMPORTANT: If verification fails due to network/timeout, the payment
+              // is still valid. The webhook will finalize the subscription. We should
+              // show success to the user since Razorpay captured the payment.
               try {
-                // Verify payment on server
                 const verifyResponse = await supabase.functions.invoke("verify-payment", {
                   body: {
                     razorpay_subscription_id: razorpayResponse.razorpay_subscription_id,
@@ -262,15 +265,21 @@ export function useRazorpay() {
                 });
 
                 if (verifyResponse.error) {
-                  throw new Error("Payment verification failed");
+                  // Verification failed but payment was captured - show success anyway
+                  // Webhook will handle the actual activation
+                  console.warn("Verification API returned error, but payment was captured:", verifyResponse.error);
+                  toast.success("Payment successful! Your subscription is being activated...");
+                  options.onSuccess?.({ pending: true, payment_id: razorpayResponse.razorpay_payment_id });
+                  return;
                 }
 
                 toast.success("Subscription activated with auto-renewal! Welcome to Orange!");
                 options.onSuccess?.(verifyResponse.data);
               } catch (error) {
-                console.error("Payment verification error:", error);
-                toast.error("Payment verification failed. Please contact support.");
-                options.onFailure?.(error);
+                // Network error or timeout during verification - payment was still captured
+                console.warn("Verification request failed, but payment was captured:", error);
+                toast.success("Payment successful! Your subscription is being activated...");
+                options.onSuccess?.({ pending: true, payment_id: razorpayResponse.razorpay_payment_id });
               }
             },
             modal: {
@@ -312,8 +321,10 @@ export function useRazorpay() {
               redirect: false,
             }),
             handler: async (razorpayResponse: any) => {
+              // Payment was captured by Razorpay - now verify on server
+              // IMPORTANT: If verification fails due to network/timeout, the payment
+              // is still valid. The webhook will finalize the subscription.
               try {
-                // Verify payment on server
                 const verifyResponse = await supabase.functions.invoke("verify-payment", {
                   body: {
                     razorpay_order_id: razorpayResponse.razorpay_order_id,
@@ -325,15 +336,20 @@ export function useRazorpay() {
                 });
 
                 if (verifyResponse.error) {
-                  throw new Error("Payment verification failed");
+                  // Verification failed but payment was captured - show success anyway
+                  console.warn("Verification API returned error, but payment was captured:", verifyResponse.error);
+                  toast.success("Payment successful! Your subscription is being activated...");
+                  options.onSuccess?.({ pending: true, payment_id: razorpayResponse.razorpay_payment_id });
+                  return;
                 }
 
                 toast.success("Subscription activated! Welcome to Orange!");
                 options.onSuccess?.(verifyResponse.data);
               } catch (error) {
-                console.error("Payment verification error:", error);
-                toast.error("Payment verification failed. Please contact support.");
-                options.onFailure?.(error);
+                // Network error or timeout during verification - payment was still captured
+                console.warn("Verification request failed, but payment was captured:", error);
+                toast.success("Payment successful! Your subscription is being activated...");
+                options.onSuccess?.({ pending: true, payment_id: razorpayResponse.razorpay_payment_id });
               }
             },
             modal: {
@@ -443,6 +459,7 @@ export function useRazorpay() {
               redirect: false,
             }),
             handler: async (razorpayResponse: any) => {
+              // Payment was captured - verify on server, but always show success
               try {
                 const verifyResponse = await supabase.functions.invoke("verify-payment", {
                   body: {
@@ -453,13 +470,18 @@ export function useRazorpay() {
                     subscription_id:          subscription.id,
                   },
                 });
-                if (verifyResponse.error) throw new Error("Payment verification failed");
+                if (verifyResponse.error) {
+                  console.warn("Resume verify API error, but payment was captured:", verifyResponse.error);
+                  toast.success("Payment successful! Your subscription is being activated...");
+                  options.onSuccess?.({ pending: true, payment_id: razorpayResponse.razorpay_payment_id });
+                  return;
+                }
                 toast.success("Subscription resumed! Auto-renewal is back on.");
                 options.onSuccess?.(verifyResponse.data);
               } catch (error) {
-                console.error("Resume verify error:", error);
-                toast.error("Payment verification failed. Please contact support.");
-                options.onFailure?.(error);
+                console.warn("Resume verify request failed, but payment was captured:", error);
+                toast.success("Payment successful! Your subscription is being activated...");
+                options.onSuccess?.({ pending: true, payment_id: razorpayResponse.razorpay_payment_id });
               }
             },
             modal: {
@@ -498,6 +520,7 @@ export function useRazorpay() {
               redirect: false,
             }),
             handler: async (razorpayResponse: any) => {
+              // Payment was captured - verify on server, but always show success
               try {
                 const verifyResponse = await supabase.functions.invoke("verify-payment", {
                   body: {
@@ -508,13 +531,18 @@ export function useRazorpay() {
                     subscription_id:    subscription.id,
                   },
                 });
-                if (verifyResponse.error) throw new Error("Payment verification failed");
+                if (verifyResponse.error) {
+                  console.warn("Resume verify API error, but payment was captured:", verifyResponse.error);
+                  toast.success("Payment successful! Your subscription is being activated...");
+                  options.onSuccess?.({ pending: true, payment_id: razorpayResponse.razorpay_payment_id });
+                  return;
+                }
                 toast.success("Subscription resumed! Welcome back to Orange.");
                 options.onSuccess?.(verifyResponse.data);
               } catch (error) {
-                console.error("Resume verify error:", error);
-                toast.error("Payment verification failed. Please contact support.");
-                options.onFailure?.(error);
+                console.warn("Resume verify request failed, but payment was captured:", error);
+                toast.success("Payment successful! Your subscription is being activated...");
+                options.onSuccess?.({ pending: true, payment_id: razorpayResponse.razorpay_payment_id });
               }
             },
             modal: {
