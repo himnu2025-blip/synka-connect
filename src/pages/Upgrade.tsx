@@ -39,7 +39,7 @@ const orangeFeatures = {
     ],
   },
   communication: {
-    title: "✉️ Communication & Growth",
+    title: "Communication & Growth",
     items: [
       { text: "Email Signature", included: true, sub: "Create using AI • Unlimited generations" },
       { text: "Prefilled WhatsApp & Email Templates", included: true, sub: "One-click touchbase" },
