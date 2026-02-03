@@ -225,6 +225,11 @@ export function useRazorpay() {
 
         if (use_subscription_api && subscription.razorpay_subscription_id) {
           // Use Razorpay Subscription checkout (supports e-mandate)
+          // Note: Do NOT pass recurring_token / max_amount here.
+          // Razorpay only allows those when the payment method is emandate,
+          // but the method isn't known at checkout-open time.  The plan
+          // configured in the Razorpay Dashboard already defines the amount
+          // and recurrence rules.
           razorpayOptions = {
             key: key_id,
             subscription_id: subscription.razorpay_subscription_id,
@@ -237,10 +242,6 @@ export function useRazorpay() {
             },
             theme: {
               color: "#F97316",
-            },
-            recurring_token: {
-              max_amount: options.plan_type === "annually" ? 199900 : 29900, // in paise
-              expire_by: Math.floor(Date.now() / 1000) + (365 * 24 * 60 * 60), // 1 year from now
             },
             // Enable UPI intent for native apps (Android)
             ...(isNativePlatform() && {
