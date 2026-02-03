@@ -25,13 +25,14 @@ export function CRMMobileSheet({
 
   return createPortal(
     <>
-      {/* Backdrop */}
+      {/* Backdrop - iOS scroll lock */}
       <div
         className={cn(
           "fixed inset-0 z-[1000] bg-black/30 transition-opacity duration-300",
           open ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
         onClick={onClose}
+        onTouchMove={(e) => e.preventDefault()}
         style={{ touchAction: 'none' }}
       />
 

@@ -942,12 +942,14 @@ useEffect(() => {
 {isMobile && editSheetMounted &&
   createPortal(
     <>
-      {/* Backdrop */}
+      {/* Backdrop - iOS scroll lock */}
       <div
         className={`fixed inset-0 z-[1000] transition-opacity duration-300 ${
-          isEditOpen ? 'bg-black/30 opacity-100' : 'opacity-0'
+          isEditOpen ? 'bg-black/30 opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsEditOpen(false)}
+        onTouchMove={(e) => e.preventDefault()}
+        style={{ touchAction: 'none' }}
       />
 
       {/* Bottom Sheet - NO transform in style to prevent iOS keyboard gap */}

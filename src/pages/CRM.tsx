@@ -2353,7 +2353,7 @@ if (!contacts && contactsLoading) {
       {/* Contact Detail - Mobile Portal */}
       {isMobile && mobileSheetMounted && showContactDetail && selectedContact && createPortal(
         <>
-          {/* Backdrop */}
+          {/* Backdrop - iOS scroll lock */}
           <div
             className={`fixed inset-0 z-[1000] bg-black/30 transition-opacity duration-300 ${
               showContactDetail ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -2364,6 +2364,7 @@ if (!contacts && contactsLoading) {
                 setIsEditOpen(false);
               }
             }}
+            onTouchMove={(e) => e.preventDefault()}
             style={{ touchAction: 'none' }}
           />
 
