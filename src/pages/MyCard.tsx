@@ -19,6 +19,7 @@ import {
   Briefcase,
   Palette,
   Star,
+  X,
 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { QRCodeSVG } from 'qrcode.react';
@@ -969,7 +970,15 @@ useEffect(() => {
     paddingBottom: 'env(safe-area-inset-bottom)',
   }}
 >
-          <div className="space-y-6 px-6 pt-6 pb-6">
+          <div className="space-y-6 px-6 pt-4 pb-6 relative">
+
+  {/* Close Button */}
+  <button
+    onClick={() => setIsEditOpen(false)}
+    className="absolute right-4 top-4 h-9 w-9 rounded-full bg-muted/60 backdrop-blur flex items-center justify-center active:scale-95"
+  >
+    <X className="h-5 w-5" />
+  </button>
             {/* Photo & Logo Upload */}
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
