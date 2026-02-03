@@ -77,13 +77,18 @@ serve(async (req) => {
 
     // ── Try Razorpay Subscriptions API first (e-mandate) ─────────────
     if (planId && planId.trim() !== "") {
+      // Schedule first charge at the END of the current paid period
+      // oldSub.end_date is when their current access expires
+      const startAtTimestamp = Math.floor(new Date(oldSub.end_date).getTime() / 1000);
+
       const payload: Record<string, any> = {
-        plan_id:    planId,
+        plan_id:     planId,
         total_count: plan_type === "annually" ? 10 : 120,
-        notes:      { user_id: user.id, plan_type, resumed_from: oldSub.id },
+        start_at:    startAtTimestamp, // Defer first charge to end of current period
+        notes:       { user_id: user.id, plan_type, resumed_from: oldSub.id },
       };
 
-      console.log("Resume — creating Razorpay subscription:", JSON.stringify(payload));
+      console.log("Resume — creating Razorpay subscription with deferred start:", JSON.stringify(payload));
 
       const rpRes = await fetch("https://api.razorpay.com/v1/subscriptions", {
         method: "POST",
