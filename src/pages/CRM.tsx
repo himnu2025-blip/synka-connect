@@ -943,11 +943,11 @@ const getAvatarText = () => {
   // Use native camera on Capacitor, fallback to web camera otherwise
   const startCamera = useCallback(async () => {
     // Check if we should use native camera
-    const { shouldUseNativeCamera, captureOrPickImage } = await import('@/lib/nativeCamera');
+    const { shouldUseNativeCamera, takePhoto } = await import('@/lib/nativeCamera');
     
     if (shouldUseNativeCamera()) {
-      // Use native camera plugin
-      const result = await captureOrPickImage();
+      // Use native camera plugin - takePhoto opens camera directly without prompt
+      const result = await takePhoto();
       
       if (result.error === 'cancelled') {
         return; // User cancelled, no error to show
