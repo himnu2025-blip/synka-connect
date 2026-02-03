@@ -141,6 +141,7 @@ export function useRazorpay() {
             ondismiss: () => {
               setLoading(false);
               toast.info("Payment cancelled");
+              options.onFailure?.({ message: "Payment cancelled by user" });
             },
             // Escape handling for native apps
             escape: !isNativePlatform(),
@@ -275,6 +276,7 @@ export function useRazorpay() {
               ondismiss: () => {
                 setLoading(false);
                 toast.info("Payment cancelled");
+                options.onFailure?.({ message: "Payment cancelled by user" });
               },
               escape: !isNativePlatform(),
               backdropclose: false,
@@ -337,6 +339,7 @@ export function useRazorpay() {
               ondismiss: () => {
                 setLoading(false);
                 toast.info("Payment cancelled");
+                options.onFailure?.({ message: "Payment cancelled by user" });
               },
               escape: !isNativePlatform(),
               backdropclose: false,
@@ -345,9 +348,37 @@ export function useRazorpay() {
         }
 
         const razorpay = new window.Razorpay(razorpayOptions);
-        razorpay.on("payment.failed", (response: any) => {
+        razorpay.on("payment.failed", async (response: any) => {
           console.error("Payment failed:", response.error);
           toast.error(response.error.description || "Payment failed");
+          
+          // Update subscription status to failed
+          if (subscription.id) {
+            try {
+              await supabase
+                .from("subscriptions")
+                .update({ 
+                  payment_status: "failed",
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("id", subscription.id);
+              
+              // Record failed payment
+              await supabase.from("payments").insert({
+                user_id: session.user.id,
+                subscription_id: subscription.id,
+                razorpay_order_id: subscription.razorpay_order_id || null,
+                razorpay_subscription_id: subscription.razorpay_subscription_id || null,
+                amount: subscription.amount / 100, // Convert from paise
+                status: "failed",
+                error_code: response.error?.code,
+                error_description: response.error?.description,
+              });
+            } catch (err) {
+              console.error("Failed to update subscription status:", err);
+            }
+          }
+          
           options.onFailure?.(response.error);
           setLoading(false);
         });
