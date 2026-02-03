@@ -407,14 +407,17 @@ export function CardSelector({
 
         {/* New Card Creation Dialog - safe area aware positioning */}
         {isCreating && (
-          <div 
-  className="fixed inset-0 bg-black/50 flex justify-center z-50"
-  style={{
-    paddingTop: 'clamp(80px, 18vh, 160px)',
-    paddingBottom: 'env(safe-area-inset-bottom)'
-  }}
+          <div
+  className="fixed inset-0 bg-black/50 z-50"
   onClick={() => setIsCreating(false)}
 >
+  <div
+    className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background rounded-xl shadow-2xl w-[90%] max-w-sm p-5 animate-scale-in"
+    style={{
+      top: 'calc(50% + env(safe-area-inset-top) / 2)'
+    }}
+    onClick={(e) => e.stopPropagation()}
+  >
             <div className="bg-background p-4 rounded-xl shadow-lg w-72 animate-scale-in mx-4" onClick={e => e.stopPropagation()}>
               <h3 className="text-sm font-semibold mb-3">Create New Card</h3>
               <Input
@@ -514,14 +517,17 @@ export function CardSelector({
 
       {/* New Card Creation Dialog - safe area aware positioning */}
       {isCreating && (
-        <div 
-  className="fixed inset-0 bg-black/50 flex justify-center z-50"
-  style={{
-    paddingTop: 'clamp(80px, 18vh, 160px)',
-    paddingBottom: 'env(safe-area-inset-bottom)'
-  }}
+        <div
+  className="fixed inset-0 bg-black/50 z-50"
   onClick={() => setIsCreating(false)}
 >
+  <div
+    className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background rounded-xl shadow-2xl w-[90%] max-w-sm p-5 animate-scale-in"
+    style={{
+      top: 'calc(50% + env(safe-area-inset-top) / 2)'
+    }}
+    onClick={(e) => e.stopPropagation()}
+  >
           <div className="bg-background p-6 rounded-xl shadow-lg w-80 animate-scale-in mx-4" onClick={e => e.stopPropagation()}>
             <h3 className="text-base font-semibold mb-4">Create New Card</h3>
             <Input
