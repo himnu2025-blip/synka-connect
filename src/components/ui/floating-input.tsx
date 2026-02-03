@@ -98,7 +98,7 @@ export const FloatingInput = ({
         autoCapitalize="off"
         spellCheck={false}
         data-form-type="other"
-        className="peer w-full h-full px-4 pt-4 pb-2 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground disabled:opacity-50"
+        className="peer w-full h-full px-4 text-base bg-transparent outline-none rounded-xl border border-border focus:border-foreground disabled:opacity-50"
         style={{ fontSize: '16px' }}
       />
       {/* Label uses CSS peer selectors only - no JS state changes during focus */}
@@ -232,7 +232,7 @@ export const FloatingPhoneInput = ({
           spellCheck={false}
           data-form-type="other"
           data-lpignore="true"
-          className="peer-phone flex-1 min-w-0 h-full px-3 pt-4 pb-2 text-base bg-transparent outline-none disabled:opacity-50"
+          className="peer-phone flex-1 min-w-0 h-full px-3 text-base bg-transparent outline-none disabled:opacity-50"
           style={{ fontSize: '16px' }}
         />
       </div>
