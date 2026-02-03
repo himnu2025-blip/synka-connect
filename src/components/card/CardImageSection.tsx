@@ -69,8 +69,14 @@ const getSmartFacePosition = (
   return `${x}% ${y}%`;
 };
 
+// Valid layout types for validation
+const VALID_LAYOUTS: LayoutType[] = [
+  'photo-logo', 'wave-split', 'minimal-circle', 'logo-photo',
+  'dark-professional', 'photo-only', 'logo-only', 'color'
+];
+
 export function CardImageSection({
-  layout,
+  layout: rawLayout,
   photoUrl,
   logoUrl,
   name,
@@ -85,6 +91,9 @@ export function CardImageSection({
   // ✅ ADDED: External photo loaded state
   isPhotoLoaded: externalPhotoLoaded = true,
 }: CardImageSectionProps) {
+  // ✅ FIX: Fallback to 'photo-logo' for invalid/legacy layout values like 'classic'
+  const layout: LayoutType = VALID_LAYOUTS.includes(rawLayout) ? rawLayout : 'photo-logo';
+  
   const [isPortrait, setIsPortrait] = useState(false);
   // ✅ ADDED: Internal photo loaded state
   const [internalPhotoLoaded, setInternalPhotoLoaded] = useState(false);
