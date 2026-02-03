@@ -97,20 +97,30 @@ serve(async (req) => {
       // For Razorpay Subscription API, signature is: subscription_id|payment_id
       const message = `${razorpay_subscription_id}|${razorpay_payment_id}`;
       const generatedSignatureBytes = await hmacSha256(razorpayKeySecret, message);
-      const providedSignatureBytes = new TextEncoder().encode(razorpay_signature);
       const generatedHex = toHexString(generatedSignatureBytes);
-      const generatedHexBytes = new TextEncoder().encode(generatedHex);
       
-      isValidSignature = timingSafeEqual(generatedHexBytes, providedSignatureBytes);
+      // Convert both hex strings to byte arrays for timing-safe comparison
+      const generatedHexBytes = new TextEncoder().encode(generatedHex);
+      const providedHexBytes = new TextEncoder().encode(razorpay_signature);
+      
+      // Only compare if lengths match (timing-safe)
+      if (generatedHexBytes.length === providedHexBytes.length) {
+        isValidSignature = timingSafeEqual(generatedHexBytes, providedHexBytes);
+      }
     } else if (razorpay_order_id) {
       // For standard orders, signature is: order_id|payment_id
       const message = `${razorpay_order_id}|${razorpay_payment_id}`;
       const generatedSignatureBytes = await hmacSha256(razorpayKeySecret, message);
-      const providedSignatureBytes = new TextEncoder().encode(razorpay_signature);
       const generatedHex = toHexString(generatedSignatureBytes);
-      const generatedHexBytes = new TextEncoder().encode(generatedHex);
       
-      isValidSignature = timingSafeEqual(generatedHexBytes, providedSignatureBytes);
+      // Convert both hex strings to byte arrays for timing-safe comparison
+      const generatedHexBytes = new TextEncoder().encode(generatedHex);
+      const providedHexBytes = new TextEncoder().encode(razorpay_signature);
+      
+      // Only compare if lengths match (timing-safe)
+      if (generatedHexBytes.length === providedHexBytes.length) {
+        isValidSignature = timingSafeEqual(generatedHexBytes, providedHexBytes);
+      }
     }
 
     if (!isValidSignature) {
