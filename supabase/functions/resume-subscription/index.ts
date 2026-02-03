@@ -110,7 +110,16 @@ serve(async (req) => {
         if (plan_type === "annually") endDate.setFullYear(endDate.getFullYear() + 1);
         else                           endDate.setMonth(endDate.getMonth() + 1);
 
-        // New subscription row — keeps the old cancelled one as history
+        // Mark old subscription as replaced so it won't show up in resume queries
+        await supabase
+          .from("subscriptions")
+          .update({ 
+            status: "replaced",
+            notes: { ...(oldSub.notes || {}), replaced_by_resume: true }
+          })
+          .eq("id", oldSub.id);
+
+        // New subscription row
         const { data: dbSub, error: dbErr } = await supabase
           .from("subscriptions")
           .insert({
@@ -194,6 +203,15 @@ serve(async (req) => {
     const endDate   = new Date();
     if (plan_type === "annually") endDate.setFullYear(endDate.getFullYear() + 1);
     else                           endDate.setMonth(endDate.getMonth() + 1);
+
+    // Mark old subscription as replaced (order fallback)
+    await supabase
+      .from("subscriptions")
+      .update({ 
+        status: "replaced",
+        notes: { ...(oldSub.notes || {}), replaced_by_resume: true }
+      })
+      .eq("id", oldSub.id);
 
     const { data: dbSub, error: dbErr } = await supabase
       .from("subscriptions")
