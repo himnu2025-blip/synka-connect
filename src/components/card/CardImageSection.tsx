@@ -493,17 +493,18 @@ export function CardImageSection({
           {/* TEXT */}
           <div className="absolute bottom-4 left-0 right-0 px-6 text-center z-20 pointer-events-none">
             <h2 className="text-xl font-semibold text-white drop-shadow-md">
-              {name}
-            </h2>
-            {designation && (
-              <p className="text-sm text-white/90 mt-1 drop-shadow-sm">
-                {designation}
-              </p>
-            )}
-            {company && (
-              <p className="text-xs text-white/80 mt-0.5 drop-shadow-sm">
-                {company}
-              </p>
+  {name}
+</h2>
+
+{(designation || company) && (
+  <p className="text-sm text-white/90 mt-1 drop-shadow-sm">
+    {designation}
+    {designation && company && (
+      <span className="mx-1 opacity-70">•</span>
+    )}
+    {company}
+  </p>
+)}
             )}
           </div>
         </>
