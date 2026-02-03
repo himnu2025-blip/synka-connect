@@ -18,9 +18,28 @@ const cleanInput = (input: string): string => {
 
 // ==================== NAME/TEXT CASE NORMALIZATION ====================
 /**
+ * Common acronyms/abbreviations that should stay UPPERCASE
+ */
+const UPPERCASE_WORDS = [
+  // Executive titles
+  'CEO', 'CFO', 'CTO', 'COO', 'CMO', 'CIO', 'CHRO', 'CLO', 'CPO', 'CSO',
+  'VP', 'SVP', 'EVP', 'AVP', 'MD', 'GM', 'ED',
+  // Business/Tech terms
+  'HR', 'IT', 'AI', 'ML', 'UI', 'UX', 'QA', 'PR', 'IR', 'BD',
+  'B2B', 'B2C', 'D2C', 'SaaS', 'PaaS', 'IaaS',
+  'USA', 'UK', 'UAE', 'EU', 'APAC', 'EMEA', 'LATAM',
+  'MBA', 'PhD', 'CPA', 'CFA', 'PMP',
+  'LLC', 'LLP', 'PLC', 'INC', 'LTD', 'PVT', 'CORP',
+  'R&D', 'M&A', 'P&L',
+  'SEO', 'SEM', 'SMM', 'CRM', 'ERP', 'HRM',
+  'API', 'SDK', 'SLA', 'KPI', 'ROI', 'OKR',
+  'AWS', 'GCP', 'IBM', 'SAP', 'HP', 'HCL', 'TCS', 'KPMG', 'PWC', 'EY',
+];
+
+/**
  * Convert text to proper title case (First Letter Capital, rest lowercase)
  * Handles: "JOHN SMITH" → "John Smith", "john doe" → "John Doe"
- * Preserves common name particles: van, de, von, etc.
+ * Preserves: Acronyms (CEO, CTO), name particles (van, de, von)
  */
 export const toProperCase = (text: string): string => {
   if (!text || !text.trim()) return '';
@@ -31,15 +50,32 @@ export const toProperCase = (text: string): string => {
   const particles = ['van', 'de', 'der', 'von', 'la', 'le', 'du', 'da', 'di', 'del', 'dos', 'das'];
   
   return cleaned
-    .toLowerCase()
     .split(' ')
     .map((word, index) => {
-      // Keep particles lowercase unless first word
-      if (index > 0 && particles.includes(word)) {
-        return word;
+      const upperWord = word.toUpperCase();
+      
+      // Check if it's a known acronym - preserve uppercase
+      if (UPPERCASE_WORDS.includes(upperWord)) {
+        return upperWord;
       }
-      // Capitalize first letter
-      return word.charAt(0).toUpperCase() + word.slice(1);
+      
+      // Check for compound acronyms like "Co-Founder" or "VP-Sales"
+      if (word.includes('-')) {
+        return word.split('-').map((part, partIndex) => {
+          const upperPart = part.toUpperCase();
+          if (UPPERCASE_WORDS.includes(upperPart)) return upperPart;
+          if (partIndex > 0 && particles.includes(part.toLowerCase())) return part.toLowerCase();
+          return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+        }).join('-');
+      }
+      
+      // Keep particles lowercase unless first word
+      if (index > 0 && particles.includes(word.toLowerCase())) {
+        return word.toLowerCase();
+      }
+      
+      // Capitalize first letter, lowercase rest
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
     })
     .join(' ');
 };
