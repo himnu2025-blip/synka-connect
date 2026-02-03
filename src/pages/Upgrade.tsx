@@ -219,25 +219,38 @@ const Upgrade = () => {
           table: "subscriptions",
           filter: `user_id=eq.${user.id}`,
         },
-        (payload) => {
+        async (payload) => {
           const newSub = payload.new as any;
           if (!newSub) return;
 
-          console.log("[Realtime] Subscription update:", newSub.status, newSub.cancelled_at, newSub.auto_renew);
+          console.log("[Realtime] Subscription update:", {
+            status: newSub.status,
+            cancelled_at: newSub.cancelled_at,
+            auto_renew: newSub.auto_renew,
+          });
 
-          // Check if this is a resumable subscription
+          // When subscription is resumed:
+          // - status = 'active'
+          // - cancelled_at = null (cleared by webhook)
+          // - auto_renew = true
           const isActive = newSub.status === "active";
-          const isCancelled = !!newSub.cancelled_at;
-          const endDate = newSub.end_date ? new Date(newSub.end_date) : null;
-          const isNotExpired = endDate && endDate >= new Date();
+          const isCancelled = newSub.cancelled_at !== null && newSub.cancelled_at !== undefined;
+          const hasAutoRenew = newSub.auto_renew === true;
 
-          if (isActive && isCancelled && isNotExpired) {
-            // Subscription is cancelled but still active - show Resume
-            setNeedsResume(true);
-            setResumePlanType(newSub.plan_type as "monthly" | "annually");
-          } else if (isActive && !isCancelled) {
-            // Subscription is fully active - show Current Plan
+          // If subscription is active with auto_renew enabled and no cancellation - it's fully active
+          if (isActive && hasAutoRenew && !isCancelled) {
+            console.log("[Realtime] Subscription is fully active - clearing needsResume");
             setNeedsResume(false);
+            setResumePlanType(newSub.plan_type as "monthly" | "annually");
+          } else if (isActive && isCancelled) {
+            // Subscription is cancelled but still active - show Resume
+            const endDate = newSub.end_date ? new Date(newSub.end_date) : null;
+            const isNotExpired = endDate && endDate >= new Date();
+            if (isNotExpired) {
+              console.log("[Realtime] Subscription cancelled but active - showing Resume");
+              setNeedsResume(true);
+              setResumePlanType(newSub.plan_type as "monthly" | "annually");
+            }
           }
 
           // Refetch profile to get latest plan status
