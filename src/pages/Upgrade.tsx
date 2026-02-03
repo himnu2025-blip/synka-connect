@@ -205,6 +205,52 @@ const Upgrade = () => {
     };
   }, [user, refetch]);
 
+  // Subscribe to realtime changes for subscriptions (webhook updates)
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel("upgrade-subscription-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "subscriptions",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newSub = payload.new as any;
+          if (!newSub) return;
+
+          console.log("[Realtime] Subscription update:", newSub.status, newSub.cancelled_at, newSub.auto_renew);
+
+          // Check if this is a resumable subscription
+          const isActive = newSub.status === "active";
+          const isCancelled = !!newSub.cancelled_at;
+          const endDate = newSub.end_date ? new Date(newSub.end_date) : null;
+          const isNotExpired = endDate && endDate >= new Date();
+
+          if (isActive && isCancelled && isNotExpired) {
+            // Subscription is cancelled but still active - show Resume
+            setNeedsResume(true);
+            setResumePlanType(newSub.plan_type as "monthly" | "annually");
+          } else if (isActive && !isCancelled) {
+            // Subscription is fully active - show Current Plan
+            setNeedsResume(false);
+          }
+
+          // Refetch profile to get latest plan status
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, refetch]);
+
   const handleUpgradeRequest = async () => {
     if (!user) {
       toast.error("Please log in to upgrade");

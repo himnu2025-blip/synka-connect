@@ -84,12 +84,59 @@ export default function ProfileSettings() {
       
       if (!error && data) {
         setActiveSubscription(data);
+      } else {
+        setActiveSubscription(null);
       }
       setSubscriptionLoading(false);
     };
     
     fetchSubscription();
   }, [user?.id]);
+
+  // Subscribe to realtime changes for subscriptions (webhook updates)
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel("profile-subscription-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "subscriptions",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newSub = payload.new as any;
+          if (!newSub) return;
+
+          console.log("[Realtime] ProfileSettings subscription update:", newSub.status, newSub.cancelled_at);
+
+          // Update local state if it's an active subscription
+          if (newSub.status === "active") {
+            setActiveSubscription({
+              id: newSub.id,
+              plan_type: newSub.plan_type,
+              end_date: newSub.end_date,
+              auto_renew: newSub.auto_renew,
+              cancelled_at: newSub.cancelled_at,
+            });
+          } else if (newSub.status === "completed" || newSub.status === "expired") {
+            // Subscription ended - clear it
+            setActiveSubscription(null);
+          }
+
+          // Refetch profile for plan status
+          refetchProfile();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, refetchProfile]);
   const handleSaveName = async () => {
     if (!fullName.trim()) {
       toast({
