@@ -29,7 +29,7 @@ const freeFeatures = [
 
 const orangeFeatures = {
   core: {
-    title: "🔥 Core Features",
+    title: "Core Features",
     items: [
       { text: "Multiple Digital Business Cards", included: true },
       { text: 'One-Click "Make Default" Card', included: true },
@@ -49,7 +49,7 @@ const orangeFeatures = {
     ],
   },
   automation: {
-    title: "📅 Automation & Intelligence",
+    title: "Automation & Intelligence",
     items: [
       { text: "Event Scheduling & Auto Tagging", included: true },
       { text: "Advanced Analytics & Reports", included: true },
