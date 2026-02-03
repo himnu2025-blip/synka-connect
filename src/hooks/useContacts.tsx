@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { persistForOffline, getOfflineData } from '@/lib/offlineSync';
+import { normalizeCRMContact } from '@/lib/inputValidation';
 
 export interface Contact {
   id: string;
@@ -182,6 +183,18 @@ export function useContacts() {
   const createContact = async (contactData: Partial<Contact>, eventIds?: string[]) => {
     if (!user) return { error: new Error('Not authenticated'), data: null };
 
+    // Normalize text fields to proper case (John Smith, not JOHN SMITH)
+    const normalized = normalizeCRMContact({
+      name: contactData.name,
+      company: contactData.company || undefined,
+      designation: contactData.designation || undefined,
+      email: contactData.email || undefined,
+      phone: contactData.phone || undefined,
+      whatsapp: contactData.whatsapp || undefined,
+      linkedin: contactData.linkedin || undefined,
+      website: contactData.website || undefined,
+    });
+
     // Build notes_history array if notes provided
     const notesHistory = contactData.notes 
       ? [{ text: contactData.notes, timestamp: new Date().toISOString() }]
@@ -191,14 +204,14 @@ export function useContacts() {
       .from('contacts')
       .insert({
         owner_id: user.id,
-        name: contactData.name || '',
-        company: contactData.company || null,
-        designation: contactData.designation || null,
-        email: contactData.email || null,
-        phone: contactData.phone || null,
-        whatsapp: contactData.whatsapp || null,
-        linkedin: contactData.linkedin || null,
-        website: contactData.website || null,
+        name: normalized.name || '',
+        company: normalized.company || null,
+        designation: normalized.designation || null,
+        email: normalized.email || null,
+        phone: normalized.phone || null,
+        whatsapp: normalized.whatsapp || null,
+        linkedin: normalized.linkedin || null,
+        website: normalized.website || null,
         notes_history: notesHistory,
         source: contactData.source || 'manual',
       })
@@ -223,7 +236,15 @@ export function useContacts() {
   };
 
   const updateContact = async (id: string, updates: Partial<Contact>) => {
-    const { notes, tags, events, ...dbUpdates } = updates as any;
+    const { notes, tags, events, ...rawUpdates } = updates as any;
+    
+    // Normalize text fields to proper case
+    const dbUpdates = {
+      ...rawUpdates,
+      ...(rawUpdates.name !== undefined && { name: normalizeCRMContact({ name: rawUpdates.name }).name }),
+      ...(rawUpdates.company !== undefined && { company: normalizeCRMContact({ company: rawUpdates.company }).company }),
+      ...(rawUpdates.designation !== undefined && { designation: normalizeCRMContact({ designation: rawUpdates.designation }).designation }),
+    };
     
     const { error } = await supabase
       .from('contacts')
@@ -231,7 +252,7 @@ export function useContacts() {
       .eq('id', id);
 
     if (!error) {
-      setContacts(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+      setContacts(prev => prev.map(c => c.id === id ? { ...c, ...dbUpdates } : c));
     }
 
     return { error };
@@ -321,9 +342,20 @@ export async function submitPublicContact(
     notes?: string;
   }
 ) {
+  // Normalize text fields to proper case
+  const normalized = normalizeCRMContact({
+    name: contactData.name,
+    company: contactData.company,
+    designation: contactData.designation,
+    email: contactData.email,
+    phone: contactData.phone,
+    whatsapp: contactData.whatsapp,
+    linkedin: contactData.linkedin,
+  });
+
   // Handle phone/whatsapp logic
-  const phone = contactData.phone || contactData.whatsapp || null;
-  const whatsapp = contactData.whatsapp || contactData.phone || null;
+  const phone = normalized.phone || normalized.whatsapp || null;
+  const whatsapp = normalized.whatsapp || normalized.phone || null;
 
   // Build notes_history array if notes provided - use 'text' and 'timestamp' to match CRM display
   const notesHistory = contactData.notes 
@@ -334,13 +366,13 @@ export async function submitPublicContact(
     .from('contacts')
     .insert({
       owner_id: ownerUserId,
-      name: contactData.name,
-      company: contactData.company || null,
-      designation: contactData.designation || null,
-      email: contactData.email || null,
+      name: normalized.name,
+      company: normalized.company || null,
+      designation: normalized.designation || null,
+      email: normalized.email || null,
       phone,
       whatsapp,
-      linkedin: contactData.linkedin || null,
+      linkedin: normalized.linkedin || null,
       notes_history: notesHistory,
       source: 'public_form',
     })

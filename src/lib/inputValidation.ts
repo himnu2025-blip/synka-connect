@@ -16,6 +16,55 @@ const cleanInput = (input: string): string => {
     .replace(/\/+$/, ''); // Remove trailing slashes
 };
 
+// ==================== NAME/TEXT CASE NORMALIZATION ====================
+/**
+ * Convert text to proper title case (First Letter Capital, rest lowercase)
+ * Handles: "JOHN SMITH" → "John Smith", "john doe" → "John Doe"
+ * Preserves common name particles: van, de, von, etc.
+ */
+export const toProperCase = (text: string): string => {
+  if (!text || !text.trim()) return '';
+  
+  const cleaned = text.trim().replace(/\s+/g, ' '); // Normalize whitespace
+  
+  // Common lowercase particles in names
+  const particles = ['van', 'de', 'der', 'von', 'la', 'le', 'du', 'da', 'di', 'del', 'dos', 'das'];
+  
+  return cleaned
+    .toLowerCase()
+    .split(' ')
+    .map((word, index) => {
+      // Keep particles lowercase unless first word
+      if (index > 0 && particles.includes(word)) {
+        return word;
+      }
+      // Capitalize first letter
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
+};
+
+/**
+ * Normalize a name field (full name, first name, last name)
+ */
+export const normalizeName = (name: string): string => {
+  return toProperCase(name);
+};
+
+/**
+ * Normalize company name - Title Case
+ */
+export const normalizeCompany = (company: string): string => {
+  return toProperCase(company);
+};
+
+/**
+ * Normalize designation/role - Title Case
+ */
+export const normalizeDesignation = (designation: string): string => {
+  return toProperCase(designation);
+};
+
 // ==================== EMAIL ====================
 export const isValidEmail = (email: string): boolean => {
   if (!email || !email.trim()) return true; // Empty is valid (optional field)
@@ -381,5 +430,32 @@ export const normalizeSocialData = (data: {
     facebook: data.facebook ? normalizeFacebook(data.facebook) : '',
     youtube: data.youtube ? normalizeYouTube(data.youtube) : '',
     calendly: data.calendly ? normalizeCalendly(data.calendly) : '',
+  };
+};
+
+/**
+ * Normalize CRM contact fields (name, company, designation + contact info)
+ * Applies proper case to text fields and standard normalization to contact fields
+ */
+export const normalizeCRMContact = (data: {
+  name?: string;
+  company?: string;
+  designation?: string;
+  email?: string;
+  phone?: string;
+  whatsapp?: string;
+  website?: string;
+  linkedin?: string;
+}): typeof data => {
+  return {
+    ...data,
+    name: data.name ? normalizeName(data.name) : data.name,
+    company: data.company ? normalizeCompany(data.company) : data.company,
+    designation: data.designation ? normalizeDesignation(data.designation) : data.designation,
+    email: data.email ? normalizeEmail(data.email) : data.email,
+    phone: data.phone ? normalizePhone(data.phone) : data.phone,
+    whatsapp: data.whatsapp ? normalizePhone(data.whatsapp) : data.whatsapp,
+    website: data.website ? normalizeWebsite(data.website) : data.website,
+    linkedin: data.linkedin ? normalizeLinkedIn(data.linkedin) : data.linkedin,
   };
 };
