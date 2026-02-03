@@ -217,7 +217,7 @@ const end_ts = toISTTimestamp(endDate);
       const mapped = rows.map((r: any) => ({
         id: String(r.id),
         title: r.title || r.name || `Event ${r.id}`,
-        views: Number(r.views ?? r.count ?? 0),
+        views: Number(r.unique_views ?? 0), // Fixed: RPC returns 'unique_views', not 'views'
         start_time: r.start_time || null,
         end_time: r.end_time || null
       }));
