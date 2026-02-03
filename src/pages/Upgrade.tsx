@@ -254,9 +254,9 @@ const Upgrade = () => {
     initiateResume({
       plan_type: resumePlanType,
       onSuccess: () => {
-        setNeedsResume(false);
+        setNeedsResume(false);   // Clear the resume state immediately
         setPaymentSuccess(true);
-        refetch();
+        refetch();               // Refetch profile for latest plan info
         setSubmitting(false);
       },
       onFailure: (error) => {
