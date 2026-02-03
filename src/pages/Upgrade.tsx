@@ -143,25 +143,31 @@ const Upgrade = () => {
         setOrangeOrderStatus("none");
       }
 
-      // ── Check for a resumable subscription ──────────────────────
-      // A subscription is "resumable" when:
-      //   status = active          (plan not downgraded yet)
-      //   cancelled_at IS NOT NULL (mandate / auto-renew was cancelled)
-      //   end_date >= now          (paid period hasn't expired)
-      const { data: resumableSub } = await supabase
+      // ── Check subscription status ──────────────────────
+      // Get the latest active subscription to determine if it needs resume
+      const { data: latestSub } = await supabase
         .from("subscriptions")
-        .select("plan_type, end_date, cancelled_at")
+        .select("plan_type, end_date, cancelled_at, auto_renew, status")
         .eq("user_id", user.id)
         .eq("status", "active")
-        .not("cancelled_at", "is", null)
         .gte("end_date", new Date().toISOString())
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      if (resumableSub) {
-        setNeedsResume(true);
-        setResumePlanType(resumableSub.plan_type as "monthly" | "annually");
+      if (latestSub) {
+        // Check if this subscription is fully active or needs resume
+        const isCancelled = latestSub.cancelled_at !== null && latestSub.cancelled_at !== undefined;
+        const hasAutoRenew = latestSub.auto_renew === true;
+        
+        if (isCancelled && !hasAutoRenew) {
+          // Cancelled but still in paid period - show Resume
+          setNeedsResume(true);
+          setResumePlanType(latestSub.plan_type as "monthly" | "annually");
+        } else {
+          // Fully active - no need to resume
+          setNeedsResume(false);
+        }
       }
 
       setLoadingOrder(false);
@@ -223,34 +229,40 @@ const Upgrade = () => {
           const newSub = payload.new as any;
           if (!newSub) return;
 
-          console.log("[Realtime] Subscription update:", {
+          console.log("[Realtime] Subscription update received:", {
+            id: newSub.id,
             status: newSub.status,
             cancelled_at: newSub.cancelled_at,
             auto_renew: newSub.auto_renew,
+            plan_type: newSub.plan_type,
           });
 
-          // When subscription is resumed:
-          // - status = 'active'
-          // - cancelled_at = null (cleared by webhook)
-          // - auto_renew = true
+          // Only process active subscriptions within valid period
           const isActive = newSub.status === "active";
+          const endDate = newSub.end_date ? new Date(newSub.end_date) : null;
+          const isNotExpired = endDate && endDate >= new Date();
+          
+          if (!isActive || !isNotExpired) {
+            console.log("[Realtime] Subscription not active or expired, ignoring");
+            return;
+          }
+
+          // Determine if subscription is fully active or needs resume
           const isCancelled = newSub.cancelled_at !== null && newSub.cancelled_at !== undefined;
           const hasAutoRenew = newSub.auto_renew === true;
 
-          // If subscription is active with auto_renew enabled and no cancellation - it's fully active
-          if (isActive && hasAutoRenew && !isCancelled) {
-            console.log("[Realtime] Subscription is fully active - clearing needsResume");
+          console.log("[Realtime] Subscription analysis:", { isCancelled, hasAutoRenew });
+
+          // If subscription has auto_renew=true and no cancellation - it's fully active
+          if (hasAutoRenew && !isCancelled) {
+            console.log("[Realtime] ✅ Subscription is FULLY ACTIVE - hiding Resume button");
             setNeedsResume(false);
             setResumePlanType(newSub.plan_type as "monthly" | "annually");
-          } else if (isActive && isCancelled) {
-            // Subscription is cancelled but still active - show Resume
-            const endDate = newSub.end_date ? new Date(newSub.end_date) : null;
-            const isNotExpired = endDate && endDate >= new Date();
-            if (isNotExpired) {
-              console.log("[Realtime] Subscription cancelled but active - showing Resume");
-              setNeedsResume(true);
-              setResumePlanType(newSub.plan_type as "monthly" | "annually");
-            }
+          } else if (isCancelled || !hasAutoRenew) {
+            // Subscription is cancelled or auto_renew disabled - show Resume
+            console.log("[Realtime] ⚠️ Subscription needs RESUME - showing Resume button");
+            setNeedsResume(true);
+            setResumePlanType(newSub.plan_type as "monthly" | "annually");
           }
 
           // Refetch profile to get latest plan status
