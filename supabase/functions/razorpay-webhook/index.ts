@@ -300,6 +300,63 @@ serve(async (req) => {
         break;
       }
 
+      case "subscription.resumed": {
+        // Subscription was resumed after being paused/cancelled
+        const subscriptionEntity = payload.subscription?.entity;
+        if (subscriptionEntity) {
+          const razorpaySubId = subscriptionEntity.id;
+          console.log("Subscription resumed:", razorpaySubId);
+
+          const { data: subscription, error: resumeErr } = await supabase
+            .from("subscriptions")
+            .update({
+              status: "active",
+              auto_renew: true,
+              cancelled_at: null,
+              cancellation_reason: null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("razorpay_subscription_id", razorpaySubId)
+            .select()
+            .maybeSingle();
+
+          if (resumeErr) {
+            console.error("Failed to update subscription on resumed:", resumeErr);
+          }
+
+          // Ensure user stays on Orange
+          if (subscription) {
+            await supabase.rpc("activate_user_subscription", {
+              p_user_id: subscription.user_id,
+              p_plan_type: subscription.plan_type,
+              p_end_date: subscription.end_date,
+            });
+          }
+        }
+        break;
+      }
+
+      case "subscription.paused": {
+        // Subscription was paused
+        const subscriptionEntity = payload.subscription?.entity;
+        if (subscriptionEntity) {
+          const razorpaySubId = subscriptionEntity.id;
+          console.log("Subscription paused:", razorpaySubId);
+
+          await supabase
+            .from("subscriptions")
+            .update({
+              status: "paused",
+              auto_renew: false,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("razorpay_subscription_id", razorpaySubId);
+
+          // User keeps access until end_date - no downgrade on pause
+        }
+        break;
+      }
+
       case "subscription.activated": {
         // Subscription is now active (first payment successful)
         const subscriptionEntity = payload.subscription?.entity;
