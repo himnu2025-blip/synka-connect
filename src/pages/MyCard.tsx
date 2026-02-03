@@ -767,17 +767,13 @@ useEffect(() => {
       {displayName}
     </h2>
 
-    {activeCard?.designation && (
-      <p className="text-[14.5px] font-normal text-muted-foreground leading-tight">
-        {activeCard.designation}
-      </p>
-    )}
-
-    {activeCard?.company && (
-      <p className="text-[13.5px] text-muted-foreground/70 leading-tight">
-        {activeCard.company}
-      </p>
-    )}
+    {(activeCard?.designation || activeCard?.company) && (
+  <p className="text-[14px] text-muted-foreground leading-tight">
+    {activeCard?.designation}
+    {activeCard?.designation && activeCard?.company && " • "}
+    {activeCard?.company}
+  </p>
+)}
   </div>
 ) : (
   /* ✅ Text skeleton – prevents YN flash */
