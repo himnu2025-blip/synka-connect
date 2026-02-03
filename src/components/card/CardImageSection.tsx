@@ -374,67 +374,90 @@ export function CardImageSection({
   }
 
   /* =====================================================
-   5. DARK EXECUTIVE — MATCHES PHOTO-ONLY BLUR SYSTEM
+   5. DARK EXECUTIVE — DESKTOP SQUARE BLUR, MOBILE SAME
    ===================================================== */
-if (layout === 'dark-professional') {
-  return (
-    <div
-      className={cn(
-        'relative w-full h-72 rounded-3xl overflow-hidden',
-        className
-      )}
-    >
-      {/* BLUR BACKGROUND — SAME AS PHOTO-ONLY */}
-      {photoUrl && (
-        <img
-          src={photoUrl}
-          aria-hidden
-          className={cn(
-            "absolute inset-0 w-full h-full object-cover blur-3xl scale-125 opacity-60 transition-opacity duration-300",
-            !photoLoaded && "opacity-0"
-          )}
-          style={{ objectPosition: facePosition }}
-        />
-      )}
+  if (layout === 'dark-professional') {
+    return (
+      <div
+        className={cn(
+          'relative w-full h-72 rounded-3xl bg-muted',
+          className
+        )}
+      >
+        {/* BLUR WRAPPER (LIMIT WIDTH ON DESKTOP) */}
+        <div
+          className="
+            absolute inset-0
+            overflow-hidden
+            rounded-3xl
 
-      {/* FOREGROUND IMAGE WRAPPER — SAME STRUCTURE AS PHOTO-ONLY */}
-      <div className="relative z-10 p-6 flex items-center justify-center h-full">
-        {!photoUrl ? (
-          <div className="w-32 h-32 rounded-2xl bg-muted-foreground/20 flex items-center justify-center">
-            <span className="text-3xl font-bold text-muted-foreground">
-              {getInitials(name)}
-            </span>
+            md:left-12
+            md:right-12
+          "
+        >
+          {photoUrl && (
+            <img
+              src={photoUrl}
+              aria-hidden
+              className={cn(
+                "absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-70 transition-opacity duration-300",
+                !photoLoaded && "opacity-0"
+              )}
+              style={{ objectPosition: facePosition }}
+            />
+          )}
+        </div>
+
+        {/* SHARP FOREGROUND IMAGE */}
+        <div className="absolute inset-0 flex items-center justify-center p-4 z-10">
+          {/* ✅ FIX: Show initials ONLY when no photoUrl */}
+          {!photoUrl ? (
+            <div className="w-32 h-32 rounded-2xl bg-muted-foreground/20 flex items-center justify-center">
+              <span className="text-3xl font-bold text-muted-foreground">
+                {getInitials(name)}
+              </span>
+            </div>
+          ) : (
+            /* Photo fades in when loaded - NO INITIALS FLASH */
+            <img
+              src={photoUrl}
+              alt={name}
+              className={cn(
+                "max-h-full max-w-full object-contain rounded-2xl shadow-xl transition-opacity duration-300",
+                !photoLoaded && "opacity-0"
+              )}
+              onLoad={() => {
+                // Backup loading trigger
+                if (!photoLoaded) {
+                  setInternalPhotoLoaded(true);
+                }
+              }}
+            />
+          )}
+        </div>
+
+        {/* LOGO */}
+        {logoUrl && (
+          <div
+            className="
+              absolute bottom-4 right-4
+              md:right-16
+              w-12 h-12
+              rounded-full overflow-hidden
+              shadow-lg z-20
+              bg-black/20 backdrop-blur-md
+            "
+          >
+            <img
+              src={logoUrl}
+              alt="Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
-        ) : (
-          <img
-            src={photoUrl}
-            alt={name}
-            className={cn(
-              "max-h-full w-auto object-contain rounded-2xl shadow-2xl transition-opacity duration-300",
-              !photoLoaded && "opacity-0"
-            )}
-            onLoad={() => {
-              if (!photoLoaded) {
-                setInternalPhotoLoaded(true);
-              }
-            }}
-          />
         )}
       </div>
-
-      {/* LOGO (unchanged) */}
-      {logoUrl && (
-        <div className="absolute bottom-4 right-4 w-12 h-12 rounded-full overflow-hidden shadow-lg z-20 bg-black/20 backdrop-blur-md">
-          <img
-            src={logoUrl}
-            alt="Logo"
-            className="w-full h-full object-contain"
-          />
-        </div>
-      )}
-    </div>
-  );
-}
+    );
+  }
 
   /* =====================================================
    6. PORTRAIT — HERO CARD WITH BLUR FILL (APPLE STYLE)
