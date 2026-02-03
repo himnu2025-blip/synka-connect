@@ -267,13 +267,34 @@ export function CardsProvider({ children }: { children: ReactNode }) {
       return { error: 'A card with this name already exists' };
     }
 
+    // Find default card to copy essential profile data (photo, logo, name, etc.)
+    const defaultCard = cards.find(c => c.is_default) || cards[0];
+    
+    // Create new card with copied profile data for better UX
+    const newCardData: Record<string, unknown> = {
+      user_id: user.id,
+      name: name.trim(),
+      is_default: false,
+    };
+
+    // Copy essential fields from default card if available
+    if (defaultCard) {
+      if (defaultCard.photo_url) newCardData.photo_url = defaultCard.photo_url;
+      if (defaultCard.logo_url) newCardData.logo_url = defaultCard.logo_url;
+      if (defaultCard.full_name) newCardData.full_name = defaultCard.full_name;
+      if (defaultCard.email) newCardData.email = defaultCard.email;
+      if (defaultCard.phone) newCardData.phone = defaultCard.phone;
+      if (defaultCard.company) newCardData.company = defaultCard.company;
+      if (defaultCard.designation) newCardData.designation = defaultCard.designation;
+      if (defaultCard.face_x !== null) newCardData.face_x = defaultCard.face_x;
+      if (defaultCard.face_y !== null) newCardData.face_y = defaultCard.face_y;
+      if (defaultCard.logo_x !== null) newCardData.logo_x = defaultCard.logo_x;
+      if (defaultCard.logo_y !== null) newCardData.logo_y = defaultCard.logo_y;
+    }
+
     const { data, error } = await supabase
       .from('cards')
-      .insert({
-        user_id: user.id,
-        name: name.trim(),
-        is_default: false,
-      })
+      .insert(newCardData)
       .select()
       .single();
 
