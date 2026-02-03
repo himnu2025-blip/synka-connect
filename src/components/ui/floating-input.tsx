@@ -215,10 +215,11 @@ export const FloatingPhoneInput = ({
           </select>
         </div>
         
-        {/* Phone input - with peer selector for floating label */}
+        {/* Phone input - use inputMode="numeric" to suppress iOS contacts bar */}
         <input
-          type="tel"
-          inputMode="tel"
+          type="text"
+          inputMode="numeric"
+          name={`phone-${Date.now()}`}
           value={value}
           onChange={onChange}
           onFocus={onFocus}
@@ -230,6 +231,7 @@ export const FloatingPhoneInput = ({
           autoCapitalize="off"
           spellCheck={false}
           data-form-type="other"
+          data-lpignore="true"
           className="peer-phone flex-1 min-w-0 h-full px-3 pt-4 pb-2 text-base bg-transparent outline-none disabled:opacity-50"
           style={{ fontSize: '16px' }}
         />
