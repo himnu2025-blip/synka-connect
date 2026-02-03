@@ -682,7 +682,7 @@ const FeatureItem = ({ feature }: FeatureItemProps) => {
           <p className={`text-xs mt-0.5 ${isComingSoon ? "text-muted-foreground/40" : "text-muted-foreground"}`}>
             {feature.sub}
           </p>
-        )}
+        )
       </div>
     </div>
   );
