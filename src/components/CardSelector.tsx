@@ -411,7 +411,7 @@ export function CardSelector({
             className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
             onClick={() => setIsCreating(false)}
           >
-            <div className="bg-background p-4 rounded-xl shadow-lg w-72 animate-scale-in mx-4 translate-y-8" onClick={e => e.stopPropagation()}>
+            <div className="bg-background p-4 rounded-xl shadow-lg w-72 animate-scale-in mx-4" onClick={e => e.stopPropagation()}>
               <h3 className="text-sm font-semibold mb-3">Create New Card</h3>
               <Input
                 value={newCardName}
