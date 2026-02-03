@@ -405,7 +405,7 @@ export function CardSelector({
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* New Card Creation Dialog - positioned at 25% from top for visibility */}
+        {/* New Card Creation Dialog - pinned just below the phone top safe-area */}
         {isCreating && (
           <div 
             className="fixed inset-0 bg-black/50 z-50"
@@ -413,7 +413,9 @@ export function CardSelector({
           >
             <div 
               className="absolute left-1/2 -translate-x-1/2 bg-background p-4 rounded-xl shadow-lg w-72 animate-scale-in mx-4"
-              style={{ top: 'max(25%, 120px)' }}
+              // Keep it just below the OS/browser top bar (safe-area), with a small gap.
+              // This prevents it from being hidden behind the status bar on mobile.
+              style={{ top: 'calc(env(safe-area-inset-top) + 12px)' }}
               onClick={e => e.stopPropagation()}
             >
               <h3 className="text-sm font-semibold mb-3">Create New Card</h3>
@@ -512,7 +514,7 @@ export function CardSelector({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* New Card Creation Dialog - positioned at 25% from top for visibility */}
+      {/* New Card Creation Dialog - pinned just below the phone top safe-area */}
       {isCreating && (
         <div 
           className="fixed inset-0 bg-black/50 z-50"
@@ -520,7 +522,8 @@ export function CardSelector({
         >
           <div 
             className="absolute left-1/2 -translate-x-1/2 bg-background p-6 rounded-xl shadow-lg w-80 animate-scale-in mx-4"
-            style={{ top: 'max(25%, 120px)' }}
+            // Keep it just below the OS/browser top bar (safe-area), with a small gap.
+            style={{ top: 'calc(env(safe-area-inset-top) + 12px)' }}
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-base font-semibold mb-4">Create New Card</h3>
