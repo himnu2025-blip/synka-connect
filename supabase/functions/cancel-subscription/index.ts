@@ -62,8 +62,8 @@ serve(async (req) => {
     // If subscription has a Razorpay subscription ID (e-mandate), cancel it in Razorpay
     if (subscription.razorpay_subscription_id && subscription.mandate_created) {
       try {
-        // Cancel at end of current billing period (cancel_at_cycle_end)
-        const razorpayResponse = await fetch(
+        // First, try to cancel at end of current billing period
+        let razorpayResponse = await fetch(
           `https://api.razorpay.com/v1/subscriptions/${subscription.razorpay_subscription_id}/cancel`,
           {
             method: "POST",
@@ -77,12 +77,38 @@ serve(async (req) => {
           }
         );
 
-        const responseText = await razorpayResponse.text();
+        let responseText = await razorpayResponse.text();
         console.log("Razorpay cancel response:", razorpayResponse.status, responseText);
 
+        // If cancel_at_cycle_end fails (e.g., deferred subscription with no active cycle),
+        // try immediate cancellation
         if (!razorpayResponse.ok) {
-          console.error("Razorpay cancellation failed:", responseText);
-          // Continue to update local subscription even if Razorpay fails
+          const errorData = JSON.parse(responseText);
+          if (errorData?.error?.description?.includes("no billing cycle is going on")) {
+            console.log("No active billing cycle, attempting immediate cancellation...");
+            
+            razorpayResponse = await fetch(
+              `https://api.razorpay.com/v1/subscriptions/${subscription.razorpay_subscription_id}/cancel`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Basic ${btoa(`${razorpayKeyId}:${razorpayKeySecret}`)}`,
+                },
+                body: JSON.stringify({
+                  cancel_at_cycle_end: 0, // Cancel immediately
+                }),
+              }
+            );
+            
+            responseText = await razorpayResponse.text();
+            console.log("Razorpay immediate cancel response:", razorpayResponse.status, responseText);
+          }
+
+          if (!razorpayResponse.ok) {
+            console.error("Razorpay cancellation failed:", responseText);
+            // Continue to update local subscription even if Razorpay fails
+          }
         }
       } catch (razorpayError) {
         console.error("Razorpay API error:", razorpayError);
