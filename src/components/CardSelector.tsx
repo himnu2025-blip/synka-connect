@@ -408,11 +408,11 @@ export function CardSelector({
         {/* New Card Creation Dialog - renders above nav with safe-area positioning */}
         {isCreating && (
           <div 
-            className="fixed inset-0 bg-black/50 z-[2000] flex justify-center"
+            className="fixed inset-0 bg-black/50 z-[2000] flex justify-center px-4"
             onClick={() => setIsCreating(false)}
           >
             <div 
-              className="absolute left-1/2 -translate-x-1/2 bg-background p-4 rounded-xl shadow-lg w-72 animate-scale-in mx-4"
+              className="absolute left-4 right-4 max-w-72 mx-auto bg-background p-4 rounded-xl shadow-lg animate-scale-in"
               style={{ top: 'calc(env(safe-area-inset-top) + 12px)' }}
               onClick={e => e.stopPropagation()}
             >
