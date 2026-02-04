@@ -655,7 +655,7 @@ export function AdminNFCOrdersTab() {
                     )}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent position="popper" sideOffset={4}>
+                <SelectContent position="popper" sideOffset={4} className="z-[2100]">
                   <SelectItem value="paid">Paid</SelectItem>
                   <SelectItem value="placed">Placed</SelectItem>
                   <SelectItem value="processing">Processing</SelectItem>
