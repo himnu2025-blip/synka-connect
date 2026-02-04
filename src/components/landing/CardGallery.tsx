@@ -16,9 +16,9 @@ const cardDesigns = [
   { id: 2, image: '/images/card/metal-nfc-business-card-silver.webp', name: 'Metal Silver' },
   { id: 3, image: '/images/card/metal-nfc-business-card-black.webp', name: 'Metal Black' },
   { id: 4, image: '/images/card/metal-nfc-card-rose-gold.webp', name: 'Metal Rose Gold' },
-  { id: 5, image: '/images/card/Pvc-nfc-business-card.webp', name: 'PVC White' },
-  { id: 6, image: '/images/card/Pvc-nfc-business-card-black.webp', name: 'PVC Black' },
-  { id: 7, image: '/images/card/Pvc-nfc-business-card-orange.webp', name: 'PVC Orange' },
+  { id: 5, image: '/images/card/Pvc-nfc-business-card.webp', name: 'NFC Card Designs' },
+  { id: 6, image: '/images/card/Pvc-nfc-business-card-black.webp', name: 'Black' },
+  { id: 7, image: '/images/card/Pvc-nfc-business-card-orange.webp', name: 'Orange' },
   { id: 8, image: '/images/card/metal-nfc-business-cards.webp', name: 'Collection' },
 ];
 
