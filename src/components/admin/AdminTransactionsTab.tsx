@@ -688,128 +688,259 @@ export function AdminTransactionsTab() {
           <ScrollArea className="flex-1 pr-4">
             {/* Payment History */}
             {selectedUserPayments && (
-              <div className="space-y-4">
-                {selectedUserPayments.history.map((payment, index) => (
-                  <div key={payment.id} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={index === 0 ? "default" : "outline"}>
-                          {index === 0 ? "Latest" : `#${selectedUserPayments.history.length - index}`}
-                        </Badge>
-                        {getStatusBadge(payment.status)}
-                        <Badge variant="outline" className="capitalize">
-                          {payment.method || "N/A"}
-                        </Badge>
+              <div className="space-y-6">
+                {/* Latest Successful Payment at Top */}
+                {(() => {
+                  const successfulPayment = selectedUserPayments.history.find(
+                    (p) => p.status === "captured"
+                  );
+                  const latestPayment = selectedUserPayments.latest;
+                  const highlightPayment = successfulPayment || latestPayment;
+                  
+                  return highlightPayment && (
+                    <div className="border-2 border-primary rounded-lg p-4 bg-primary/5">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="default" className="bg-primary">
+                            {successfulPayment ? "✓ Latest Successful" : "Latest"}
+                          </Badge>
+                          {getStatusBadge(highlightPayment.status)}
+                          <Badge variant="outline" className="capitalize">
+                            {highlightPayment.method || "N/A"}
+                          </Badge>
+                        </div>
+                        <p className="font-bold text-xl text-primary">₹{highlightPayment.amount.toFixed(2)}</p>
                       </div>
-                      <p className="font-semibold text-lg">₹{payment.amount.toFixed(2)}</p>
-                    </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                      <div>
-                        <Label className="text-muted-foreground text-xs">Date & Time</Label>
-                        <p className="font-medium">
-                          {format(new Date(payment.created_at), "dd MMM yyyy HH:mm:ss")}
-                        </p>
-                      </div>
-                      {payment.razorpay_payment_id && (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                         <div>
-                          <Label className="text-muted-foreground text-xs">Payment ID</Label>
-                          <p className="font-mono text-xs">{payment.razorpay_payment_id}</p>
-                        </div>
-                      )}
-                      {payment.razorpay_order_id && (
-                        <div>
-                          <Label className="text-muted-foreground text-xs">Order ID</Label>
-                          <p className="font-mono text-xs">{payment.razorpay_order_id}</p>
-                        </div>
-                      )}
-                      {payment.error_code && (
-                        <div className="col-span-full">
-                          <Label className="text-destructive text-xs">Error</Label>
-                          <p className="text-xs bg-destructive/10 p-2 rounded">
-                            {payment.error_code}: {payment.error_description}
+                          <Label className="text-muted-foreground text-xs">Date & Time</Label>
+                          <p className="font-medium">
+                            {format(new Date(highlightPayment.created_at), "dd MMM yyyy HH:mm:ss")}
                           </p>
                         </div>
-                      )}
+                        {highlightPayment.razorpay_payment_id && (
+                          <div>
+                            <Label className="text-muted-foreground text-xs">Payment ID</Label>
+                            <p className="font-mono text-xs">{highlightPayment.razorpay_payment_id}</p>
+                          </div>
+                        )}
+                        {highlightPayment.razorpay_order_id && (
+                          <div>
+                            <Label className="text-muted-foreground text-xs">Order ID</Label>
+                            <p className="font-mono text-xs">{highlightPayment.razorpay_order_id}</p>
+                          </div>
+                        )}
+                        {highlightPayment.error_code && (
+                          <div className="col-span-full">
+                            <Label className="text-destructive text-xs">Error</Label>
+                            <p className="text-xs bg-destructive/10 p-2 rounded">
+                              {highlightPayment.error_code}: {highlightPayment.error_description}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    {index < selectedUserPayments.history.length - 1 && (
-                      <Separator className="mt-4" />
-                    )}
-                  </div>
-                ))}
+                  );
+                })()}
+
+                {/* All Transactions History */}
+                {selectedUserPayments.history.length > 1 && (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Separator className="flex-1" />
+                      <span className="text-sm text-muted-foreground font-medium">
+                        All Transactions ({selectedUserPayments.history.length})
+                      </span>
+                      <Separator className="flex-1" />
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {selectedUserPayments.history.map((payment, index) => (
+                        <div key={payment.id} className="border rounded-lg p-3 bg-muted/30">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge variant="outline" className="text-xs">
+                                #{selectedUserPayments.history.length - index}
+                              </Badge>
+                              {getStatusBadge(payment.status)}
+                              <Badge variant="outline" className="capitalize text-xs">
+                                {payment.method || "N/A"}
+                              </Badge>
+                            </div>
+                            <p className="font-semibold">₹{payment.amount.toFixed(2)}</p>
+                          </div>
+
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                            <div>
+                              <span className="text-muted-foreground">Date:</span>{" "}
+                              <span className="font-medium">
+                                {format(new Date(payment.created_at), "dd MMM yyyy HH:mm")}
+                              </span>
+                            </div>
+                            {payment.razorpay_payment_id && (
+                              <div className="truncate">
+                                <span className="text-muted-foreground">Pay ID:</span>{" "}
+                                <span className="font-mono text-xs">{payment.razorpay_payment_id}</span>
+                              </div>
+                            )}
+                            {payment.razorpay_order_id && (
+                              <div className="truncate">
+                                <span className="text-muted-foreground">Order:</span>{" "}
+                                <span className="font-mono text-xs">{payment.razorpay_order_id}</span>
+                              </div>
+                            )}
+                            {payment.error_code && (
+                              <div className="col-span-full text-destructive">
+                                <span className="font-medium">Error:</span> {payment.error_code} - {payment.error_description}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
             {/* Subscription History */}
             {selectedUserSubscriptions && (
-              <div className="space-y-4">
-                {selectedUserSubscriptions.history.map((sub, index) => (
-                  <div key={sub.id} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={index === 0 ? "default" : "outline"}>
-                          {index === 0 ? "Current" : `#${selectedUserSubscriptions.history.length - index}`}
-                        </Badge>
-                        {getPlanBadge(sub.plan_type)}
-                        {getStatusBadge(sub.status)}
+              <div className="space-y-6">
+                {/* Latest Active/Successful Subscription at Top */}
+                {(() => {
+                  const activeSubscription = selectedUserSubscriptions.history.find(
+                    (s) => s.status === "active" && s.payment_status === "captured"
+                  );
+                  const latestSubscription = selectedUserSubscriptions.latest;
+                  const highlightSub = activeSubscription || latestSubscription;
+                  
+                  return highlightSub && (
+                    <div className="border-2 border-primary rounded-lg p-4 bg-primary/5">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="default" className="bg-primary">
+                            {activeSubscription ? "✓ Active Subscription" : "Current"}
+                          </Badge>
+                          {getPlanBadge(highlightSub.plan_type)}
+                          {getStatusBadge(highlightSub.status)}
+                        </div>
+                        <p className="font-bold text-xl text-primary">₹{highlightSub.amount.toFixed(2)}</p>
                       </div>
-                      <p className="font-semibold text-lg">₹{sub.amount.toFixed(2)}</p>
-                    </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                      <div>
-                        <Label className="text-muted-foreground text-xs">Start Date</Label>
-                        <p className="font-medium">
-                          {format(new Date(sub.start_date), "dd MMM yyyy")}
-                        </p>
-                      </div>
-                      <div>
-                        <Label className="text-muted-foreground text-xs">End Date</Label>
-                        <p className="font-medium">
-                          {format(new Date(sub.end_date), "dd MMM yyyy")}
-                        </p>
-                      </div>
-                      <div>
-                        <Label className="text-muted-foreground text-xs">Payment Status</Label>
-                        {getStatusBadge(sub.payment_status || "pending")}
-                      </div>
-                      <div>
-                        <Label className="text-muted-foreground text-xs">Auto-Renew</Label>
-                        <p className="font-medium">{sub.auto_renew ? "Yes" : "No"}</p>
-                      </div>
-                      <div>
-                        <Label className="text-muted-foreground text-xs">E-Mandate</Label>
-                        <p className="font-medium">{sub.mandate_created ? "Active" : "Not Set"}</p>
-                      </div>
-                      <div>
-                        <Label className="text-muted-foreground text-xs">Created</Label>
-                        <p className="font-medium text-xs">
-                          {format(new Date(sub.created_at), "dd MMM yyyy HH:mm")}
-                        </p>
-                      </div>
-                      {sub.razorpay_subscription_id && (
-                        <div className="col-span-full">
-                          <Label className="text-muted-foreground text-xs">Razorpay Sub ID</Label>
-                          <p className="font-mono text-xs bg-muted p-2 rounded">
-                            {sub.razorpay_subscription_id}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Start Date</Label>
+                          <p className="font-medium">
+                            {format(new Date(highlightSub.start_date), "dd MMM yyyy")}
                           </p>
                         </div>
-                      )}
-                      {sub.cancelled_at && (
-                        <div className="col-span-full">
-                          <Label className="text-destructive text-xs">Cancelled</Label>
-                          <p className="text-xs bg-destructive/10 p-2 rounded">
-                            {format(new Date(sub.cancelled_at), "dd MMM yyyy HH:mm")}
-                            {sub.cancellation_reason && ` - ${sub.cancellation_reason}`}
+                        <div>
+                          <Label className="text-muted-foreground text-xs">End Date</Label>
+                          <p className="font-medium">
+                            {format(new Date(highlightSub.end_date), "dd MMM yyyy")}
                           </p>
                         </div>
-                      )}
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Payment Status</Label>
+                          {getStatusBadge(highlightSub.payment_status || "pending")}
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Auto-Renew</Label>
+                          <p className="font-medium">{highlightSub.auto_renew ? "Yes" : "No"}</p>
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground text-xs">E-Mandate</Label>
+                          <p className="font-medium">{highlightSub.mandate_created ? "Active" : "Not Set"}</p>
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Created</Label>
+                          <p className="font-medium text-xs">
+                            {format(new Date(highlightSub.created_at), "dd MMM yyyy HH:mm")}
+                          </p>
+                        </div>
+                        {highlightSub.razorpay_subscription_id && (
+                          <div className="col-span-full">
+                            <Label className="text-muted-foreground text-xs">Razorpay Sub ID</Label>
+                            <p className="font-mono text-xs bg-muted p-2 rounded">
+                              {highlightSub.razorpay_subscription_id}
+                            </p>
+                          </div>
+                        )}
+                        {highlightSub.cancelled_at && (
+                          <div className="col-span-full">
+                            <Label className="text-destructive text-xs">Cancelled</Label>
+                            <p className="text-xs bg-destructive/10 p-2 rounded">
+                              {format(new Date(highlightSub.cancelled_at), "dd MMM yyyy HH:mm")}
+                              {highlightSub.cancellation_reason && ` - ${highlightSub.cancellation_reason}`}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    {index < selectedUserSubscriptions.history.length - 1 && (
-                      <Separator className="mt-4" />
-                    )}
-                  </div>
-                ))}
+                  );
+                })()}
+
+                {/* All Subscriptions History */}
+                {selectedUserSubscriptions.history.length > 1 && (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Separator className="flex-1" />
+                      <span className="text-sm text-muted-foreground font-medium">
+                        All Subscriptions ({selectedUserSubscriptions.history.length})
+                      </span>
+                      <Separator className="flex-1" />
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {selectedUserSubscriptions.history.map((sub, index) => (
+                        <div key={sub.id} className="border rounded-lg p-3 bg-muted/30">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge variant="outline" className="text-xs">
+                                #{selectedUserSubscriptions.history.length - index}
+                              </Badge>
+                              {getPlanBadge(sub.plan_type)}
+                              {getStatusBadge(sub.status)}
+                            </div>
+                            <p className="font-semibold">₹{sub.amount.toFixed(2)}</p>
+                          </div>
+
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                            <div>
+                              <span className="text-muted-foreground">Start:</span>{" "}
+                              <span className="font-medium">
+                                {format(new Date(sub.start_date), "dd MMM yyyy")}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">End:</span>{" "}
+                              <span className="font-medium">
+                                {format(new Date(sub.end_date), "dd MMM yyyy")}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Status:</span>{" "}
+                              {getStatusBadge(sub.payment_status || "pending")}
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Created:</span>{" "}
+                              <span className="font-medium">
+                                {format(new Date(sub.created_at), "dd MMM yyyy HH:mm")}
+                              </span>
+                            </div>
+                            {sub.cancelled_at && (
+                              <div className="col-span-full text-destructive">
+                                <span className="font-medium">Cancelled:</span> {format(new Date(sub.cancelled_at), "dd MMM yyyy")}
+                                {sub.cancellation_reason && ` - ${sub.cancellation_reason}`}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </ScrollArea>

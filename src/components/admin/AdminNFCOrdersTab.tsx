@@ -163,11 +163,19 @@ export function AdminNFCOrdersTab() {
     }
   };
 
-  // Group orders by user
+  // Successful order statuses - only show these
+  const successfulStatuses = ["paid", "processing", "shipped", "delivered", "placed", "dispatched"];
+  
+  // Filter only successful orders for display
+  const successfulOrders = useMemo(() => {
+    return orders.filter((order) => successfulStatuses.includes(order.status.toLowerCase()));
+  }, [orders]);
+
+  // Group orders by user (only successful orders)
   const userOrderSummaries = useMemo(() => {
     const grouped = new Map<string, NFCOrder[]>();
     
-    orders.forEach((order) => {
+    successfulOrders.forEach((order) => {
       const existing = grouped.get(order.user_id) || [];
       grouped.set(order.user_id, [...existing, order]);
     });
@@ -194,7 +202,7 @@ export function AdminNFCOrdersTab() {
     return summaries.sort((a, b) => 
       new Date(b.latest.created_at).getTime() - new Date(a.latest.created_at).getTime()
     );
-  }, [orders]);
+  }, [successfulOrders]);
 
   const updateOrderStatus = async () => {
     if (!selectedOrder) return;
@@ -226,8 +234,10 @@ export function AdminNFCOrdersTab() {
     const statusMap: Record<string, { variant: any; icon: any; label: string }> = {
       pending: { variant: "secondary", icon: Clock, label: "Pending" },
       paid: { variant: "default", icon: CheckCircle, label: "Paid" },
+      placed: { variant: "default", icon: CheckCircle, label: "Placed" },
       processing: { variant: "secondary", icon: Loader2, label: "Processing" },
       shipped: { variant: "default", icon: Truck, label: "Shipped" },
+      dispatched: { variant: "default", icon: Truck, label: "Dispatched" },
       delivered: { variant: "default", icon: CheckCircle, label: "Delivered" },
       cancelled: { variant: "destructive", icon: XCircle, label: "Cancelled" },
       payment_failed: { variant: "destructive", icon: AlertTriangle, label: "Payment Failed" },
@@ -339,13 +349,12 @@ export function AdminNFCOrdersTab() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="paid">Paid</SelectItem>
+            <SelectItem value="placed">Placed</SelectItem>
             <SelectItem value="processing">Processing</SelectItem>
             <SelectItem value="shipped">Shipped</SelectItem>
+            <SelectItem value="dispatched">Dispatched</SelectItem>
             <SelectItem value="delivered">Delivered</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-            <SelectItem value="payment_failed">Payment Failed</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -459,83 +468,153 @@ export function AdminNFCOrdersTab() {
 
           <ScrollArea className="flex-1 pr-4">
             {selectedUserOrders && (
-              <div className="space-y-4">
-                {selectedUserOrders.history.map((order, index) => (
-                  <div key={order.id} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant={index === 0 ? "default" : "outline"}>
-                          {index === 0 ? "Latest" : `#${selectedUserOrders.history.length - index}`}
-                        </Badge>
-                        {getTypeBadge(order.product_type)}
-                        {getStatusBadge(order.status)}
-                        {order.card_variant && (
-                          <Badge variant="outline" className="capitalize">
-                            {order.card_variant}
+              <div className="space-y-6">
+                {/* Latest Order at Top - with edit button prominent */}
+                {(() => {
+                  const latestOrder = selectedUserOrders.latest;
+                  
+                  return latestOrder && (
+                    <div className="border-2 border-primary rounded-lg p-4 bg-primary/5">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="default" className="bg-primary">
+                            ✓ Latest Order
                           </Badge>
+                          {getTypeBadge(latestOrder.product_type)}
+                          {getStatusBadge(latestOrder.status)}
+                          {latestOrder.card_variant && (
+                            <Badge variant="outline" className="capitalize">
+                              {latestOrder.card_variant}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-xl text-primary">₹{latestOrder.amount.toFixed(2)}</p>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => showEditStatus(latestOrder)}
+                          >
+                            <Edit className="w-4 h-4 mr-1" />
+                            Update Status
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Order Number</Label>
+                          <p className="font-mono font-medium">{latestOrder.order_number || "N/A"}</p>
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Date & Time</Label>
+                          <p className="font-medium">
+                            {format(new Date(latestOrder.created_at), "dd MMM yyyy HH:mm:ss")}
+                          </p>
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Quantity</Label>
+                          <p className="font-semibold">{latestOrder.quantity}</p>
+                        </div>
+                        {latestOrder.razorpay_order_id && (
+                          <div>
+                            <Label className="text-muted-foreground text-xs">Razorpay Order ID</Label>
+                            <p className="font-mono text-xs">{latestOrder.razorpay_order_id}</p>
+                          </div>
+                        )}
+                        {latestOrder.razorpay_payment_id && (
+                          <div>
+                            <Label className="text-muted-foreground text-xs">Razorpay Payment ID</Label>
+                            <p className="font-mono text-xs">{latestOrder.razorpay_payment_id}</p>
+                          </div>
+                        )}
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Updated</Label>
+                          <p className="text-xs">
+                            {format(new Date(latestOrder.updated_at), "dd MMM yyyy HH:mm")}
+                          </p>
+                        </div>
+                        {latestOrder.notes && Object.keys(latestOrder.notes).length > 0 && (
+                          <div className="col-span-full">
+                            <Label className="text-muted-foreground text-xs">Notes</Label>
+                            <div className="bg-muted p-2 rounded text-xs mt-1">
+                              <pre className="whitespace-pre-wrap">
+                                {JSON.stringify(latestOrder.notes, null, 2)}
+                              </pre>
+                            </div>
+                          </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold text-lg">₹{order.amount.toFixed(2)}</p>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => showEditStatus(order)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      </div>
                     </div>
+                  );
+                })()}
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                      <div>
-                        <Label className="text-muted-foreground text-xs">Order Number</Label>
-                        <p className="font-mono font-medium">{order.order_number || "N/A"}</p>
-                      </div>
-                      <div>
-                        <Label className="text-muted-foreground text-xs">Date & Time</Label>
-                        <p className="font-medium">
-                          {format(new Date(order.created_at), "dd MMM yyyy HH:mm:ss")}
-                        </p>
-                      </div>
-                      <div>
-                        <Label className="text-muted-foreground text-xs">Quantity</Label>
-                        <p className="font-semibold">{order.quantity}</p>
-                      </div>
-                      {order.razorpay_order_id && (
-                        <div>
-                          <Label className="text-muted-foreground text-xs">Razorpay Order ID</Label>
-                          <p className="font-mono text-xs">{order.razorpay_order_id}</p>
-                        </div>
-                      )}
-                      {order.razorpay_payment_id && (
-                        <div>
-                          <Label className="text-muted-foreground text-xs">Razorpay Payment ID</Label>
-                          <p className="font-mono text-xs">{order.razorpay_payment_id}</p>
-                        </div>
-                      )}
-                      <div>
-                        <Label className="text-muted-foreground text-xs">Updated</Label>
-                        <p className="text-xs">
-                          {format(new Date(order.updated_at), "dd MMM yyyy HH:mm")}
-                        </p>
-                      </div>
-                      {order.notes && Object.keys(order.notes).length > 0 && (
-                        <div className="col-span-full">
-                          <Label className="text-muted-foreground text-xs">Notes</Label>
-                          <div className="bg-muted p-2 rounded text-xs mt-1">
-                            <pre className="whitespace-pre-wrap">
-                              {JSON.stringify(order.notes, null, 2)}
-                            </pre>
+                {/* All Orders History */}
+                {selectedUserOrders.history.length > 1 && (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Separator className="flex-1" />
+                      <span className="text-sm text-muted-foreground font-medium">
+                        All Orders ({selectedUserOrders.history.length})
+                      </span>
+                      <Separator className="flex-1" />
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {selectedUserOrders.history.map((order, index) => (
+                        <div key={order.id} className="border rounded-lg p-3 bg-muted/30">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge variant="outline" className="text-xs">
+                                #{selectedUserOrders.history.length - index}
+                              </Badge>
+                              {getTypeBadge(order.product_type)}
+                              {getStatusBadge(order.status)}
+                              {order.card_variant && (
+                                <Badge variant="outline" className="capitalize text-xs">
+                                  {order.card_variant}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold">₹{order.amount.toFixed(2)}</p>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => showEditStatus(order)}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                            <div>
+                              <span className="text-muted-foreground">Order:</span>{" "}
+                              <span className="font-mono font-medium">{order.order_number || "N/A"}</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Date:</span>{" "}
+                              <span className="font-medium">
+                                {format(new Date(order.created_at), "dd MMM yyyy HH:mm")}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Qty:</span>{" "}
+                              <span className="font-semibold">{order.quantity}</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Updated:</span>{" "}
+                              <span className="font-medium">
+                                {format(new Date(order.updated_at), "dd MMM yyyy HH:mm")}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      )}
+                      ))}
                     </div>
-                    {index < selectedUserOrders.history.length - 1 && (
-                      <Separator className="mt-4" />
-                    )}
-                  </div>
-                ))}
+                  </>
+                )}
               </div>
             )}
           </ScrollArea>
@@ -571,13 +650,12 @@ export function AdminNFCOrdersTab() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="placed">Placed</SelectItem>
                   <SelectItem value="processing">Processing</SelectItem>
+                  <SelectItem value="dispatched">Dispatched</SelectItem>
                   <SelectItem value="shipped">Shipped</SelectItem>
                   <SelectItem value="delivered">Delivered</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                  <SelectItem value="payment_failed">Payment Failed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
