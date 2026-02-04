@@ -553,45 +553,50 @@ const [orderSuccess, setOrderSuccess] = useState(false);
           </RadioGroup>
         </div>
 
-        {/* Card Variant Selector */}
-        <div className="space-y-2">
-          <Label htmlFor="card-variant">Select Card Finish</Label>
-          <Select value={selectedVariant} onValueChange={setSelectedVariant}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a card variant">
-                {selectedVariant && (
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src={cardVariants.find(v => v.id === selectedVariant)?.image} 
-                      alt="" 
-                      className="w-10 h-6 object-cover rounded"
-                    />
-                    <span>{cardVariants.find(v => v.id === selectedVariant)?.name}</span>
-                  </div>
-                )}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {filteredVariants.map((variant) => (
-                <SelectItem key={variant.id} value={variant.id}>
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src={variant.image} 
-                      alt={variant.name} 
-                      className="w-12 h-8 object-cover rounded"
-                    />
-                    <div className="flex flex-col">
-                      <span>{variant.name}</span>
-                      {'hint' in variant && variant.hint && (
-                        <span className="text-xs text-muted-foreground">{variant.hint}</span>
-                      )}
+        {/* Card Variant Selector - Only show for Metal cards */}
+        {selectedCard === 'metal' && (
+          <div className="space-y-2">
+            <Label htmlFor="card-variant">Select Card Finish</Label>
+            <Select value={selectedVariant} onValueChange={setSelectedVariant}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a card variant">
+                  {selectedVariant && (
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={cardVariants.find(v => v.id === selectedVariant)?.image} 
+                        alt="" 
+                        className="w-10 h-6 object-cover rounded"
+                      />
+                      <span>{cardVariants.find(v => v.id === selectedVariant)?.name}</span>
                     </div>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground mt-2">
+                  )}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {filteredVariants.map((variant) => (
+                  <SelectItem key={variant.id} value={variant.id}>
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={variant.image} 
+                        alt={variant.name} 
+                        className="w-12 h-8 object-cover rounded"
+                      />
+                      <div className="flex flex-col">
+                        <span>{variant.name}</span>
+                        {'hint' in variant && variant.hint && (
+                          <span className="text-xs text-muted-foreground">{variant.hint}</span>
+                        )}
+                      </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">
             Our team will contact you to collect logo, design preferences & branding details.
           </p>
           <p className="text-xs text-muted-foreground">
@@ -700,11 +705,13 @@ const [orderSuccess, setOrderSuccess] = useState(false);
                   {cardOptions.find(c => c.id === selectedCard)?.priceDisplay}
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">
-                  Variant: {cardVariants.find(v => v.id === selectedVariant)?.name}
-                </span>
-              </div>
+              {selectedCard === 'metal' && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    Variant: {cardVariants.find(v => v.id === selectedVariant)?.name}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
                 <span className="font-medium text-primary">Free</span>
