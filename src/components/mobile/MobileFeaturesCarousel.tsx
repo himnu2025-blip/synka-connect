@@ -1,4 +1,5 @@
-// Compact features carousel for mobile landing
+// Compact features carousel for mobile landing - interactive like web version
+import { useEffect, useRef } from 'react';
 import {
   CreditCard,
   ScanLine,
@@ -22,13 +23,96 @@ const features = [
 ];
 
 export function MobileFeaturesCarousel() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const isDown = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+  const velocity = useRef(0);
+  const lastX = useRef(0);
+  const raf = useRef<number>();
+
+  const AUTO_SPEED = 1.0; // Normal speed
+  const FRICTION = 0.95;
+
+  const autoScroll = () => {
+    if (!trackRef.current || isDown.current) {
+      raf.current = requestAnimationFrame(autoScroll);
+      return;
+    }
+
+    trackRef.current.scrollLeft += AUTO_SPEED;
+
+    if (trackRef.current.scrollLeft >= trackRef.current.scrollWidth / 2) {
+      trackRef.current.scrollLeft = 0;
+    }
+
+    raf.current = requestAnimationFrame(autoScroll);
+  };
+
+  const glide = () => {
+    if (!trackRef.current) return;
+
+    velocity.current *= FRICTION;
+    trackRef.current.scrollLeft += velocity.current;
+
+    if (Math.abs(velocity.current) > 0.1) {
+      requestAnimationFrame(glide);
+    }
+  };
+
+  useEffect(() => {
+    raf.current = requestAnimationFrame(autoScroll);
+    return () => raf.current && cancelAnimationFrame(raf.current);
+  }, []);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (!trackRef.current) return;
+    isDown.current = true;
+    trackRef.current.setPointerCapture(e.pointerId);
+    startX.current = e.clientX;
+    lastX.current = e.clientX;
+    scrollLeft.current = trackRef.current.scrollLeft;
+    velocity.current = 0;
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!isDown.current || !trackRef.current) return;
+
+    const x = e.clientX;
+    const walk = startX.current - x;
+    trackRef.current.scrollLeft = scrollLeft.current + walk;
+
+    velocity.current = lastX.current - x;
+    lastX.current = x;
+  };
+
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (!trackRef.current) return;
+    isDown.current = false;
+    trackRef.current.releasePointerCapture(e.pointerId);
+    glide();
+  };
+
   return (
-    <div className="relative overflow-hidden py-2">
-      {/* Edge fades for Apple-style look */}
+    <div className="relative overflow-hidden py-2 select-none">
+      {/* Edge fades */}
       <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
       <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
-      <div className="flex gap-3 px-4 animate-mobile-scroll">
+      <div
+        ref={trackRef}
+        className="flex gap-3 px-4 overflow-hidden cursor-grab active:cursor-grabbing"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerLeave={onPointerUp}
+        style={{
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          WebkitTouchCallout: 'none',
+          touchAction: 'pan-y',
+        }}
+      >
         {/* Triple items for seamless loop */}
         {[...features, ...features, ...features].map((feature, index) => (
           <div

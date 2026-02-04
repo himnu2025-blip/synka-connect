@@ -177,7 +177,7 @@ export function MobileLanding({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.35 }}
-        className="px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
+        className="px-4 py-6"
       >
         <button
           onClick={() => handleNavigate('/order-nfc-card')}
@@ -195,6 +195,34 @@ export function MobileLanding({
           </div>
         </button>
       </motion.div>
+
+      {/* ===== FOOTER LINKS ===== */}
+      <div className="flex justify-center gap-6 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+        <button
+          onClick={() => handleNavigate('/support')}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Support
+        </button>
+        <button
+          onClick={() => handleNavigate('/privacy')}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Privacy
+        </button>
+        <button
+          onClick={() => handleNavigate('/terms')}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Terms
+        </button>
+        <button
+          onClick={() => handleNavigate('/contact')}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Contact
+        </button>
+      </div>
 
       {/* ===== CHAT ===== */}
       <SairaChatWidget />
