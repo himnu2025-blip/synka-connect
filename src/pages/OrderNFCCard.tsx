@@ -536,7 +536,7 @@ const [orderSuccess, setOrderSuccess] = useState(false);
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground line-through">{option.originalPriceDisplay}</p>
                     <p className="text-2xl font-bold text-primary">{option.priceDisplay}</p>
-                    <Badge variant="destructive" className="text-[10px] mt-1">
+                    <Badge className="text-[10px] mt-1 bg-green-600 hover:bg-green-600 text-white">
                       {option.discount} • Limited Time
                     </Badge>
                   </div>
@@ -552,8 +552,8 @@ const [orderSuccess, setOrderSuccess] = useState(false);
                 </ul>
 
                 {selectedCard === option.id && (
-                  <div className="absolute top-4 right-4">
-                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                  <div className="absolute -top-3 -right-3">
+                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center border-2 border-background">
                       <Check className="h-4 w-4 text-primary-foreground" />
                     </div>
                   </div>
