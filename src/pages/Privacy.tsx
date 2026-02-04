@@ -389,7 +389,7 @@ export default function Privacy() {
                 <ul className="space-y-1 text-sm text-muted-foreground">
                   <li className="flex items-center gap-2">
                     <span className="text-orange-500">→</span>
-                    <span>Email: <span className="font-medium text-foreground">privacy@synka.in</span></span>
+                    <span>Email: <span className="font-medium text-foreground">support@synka.in</span></span>
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="text-orange-500">→</span>
@@ -463,7 +463,7 @@ export default function Privacy() {
             
             <div className="p-5 rounded-xl bg-red-500/5 border border-red-500/20">
               <p className="text-muted-foreground">
-                SYNKA is not intended for users under 18 years of age. We do not knowingly collect personal information from children. If you believe we have inadvertently collected data from a minor, please contact us immediately at <span className="font-medium text-foreground">privacy@synka.in</span> and we will promptly delete it.
+                SYNKA is not intended for users under 18 years of age. We do not knowingly collect personal information from children. If you believe we have inadvertently collected data from a minor, please contact us immediately at <span className="font-medium text-foreground">support@synka.in</span> and we will promptly delete it.
               </p>
             </div>
           </section>
@@ -494,11 +494,7 @@ export default function Privacy() {
               <ul className="space-y-2 text-muted-foreground">
                 <li className="flex items-start gap-3">
                   <span className="text-orange-500 mt-0.5">→</span>
-                  <span>Email: <span className="font-medium text-foreground">privacy@synka.in</span></span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-orange-500 mt-0.5">→</span>
-                  <span>Support: <span className="font-medium text-foreground">support@synka.in</span></span>
+                  <span>Email: <span className="font-medium text-foreground">support@synka.in</span></span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-orange-500 mt-0.5">→</span>
