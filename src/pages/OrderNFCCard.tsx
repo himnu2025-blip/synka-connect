@@ -191,6 +191,7 @@ const [orderSuccess, setOrderSuccess] = useState(false);
         .from('orders')
         .select('id, order_number, product_type, quantity, amount, status, created_at')
         .eq('user_id', user.id)
+        .not('status', 'in', '(pending,created,failed,payment_failed)')
         .order('created_at', { ascending: false });
 
       if (!error && data) {
