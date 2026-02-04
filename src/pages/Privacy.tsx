@@ -391,10 +391,6 @@ export default function Privacy() {
                     <span className="text-orange-500">→</span>
                     <span>Email: <span className="font-medium text-foreground">support@synka.in</span></span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-orange-500">→</span>
-                    <span>Or use the "Account Settings" section in your dashboard</span>
-                  </li>
                 </ul>
               </div>
             </div>
@@ -495,10 +491,6 @@ export default function Privacy() {
                 <li className="flex items-start gap-3">
                   <span className="text-orange-500 mt-0.5">→</span>
                   <span>Email: <span className="font-medium text-foreground">support@synka.in</span></span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-orange-500 mt-0.5">→</span>
-                  <span>Dashboard: Account Settings → Privacy & Data</span>
                 </li>
               </ul>
               <p className="text-xs text-muted-foreground mt-4 pt-4 border-t border-orange-500/20">
