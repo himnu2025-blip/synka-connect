@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useAdmin } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -30,8 +30,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { Loader2, Plus, Edit, Calendar, Search, CheckCircle, XCircle, Clock, CreditCard, AlertTriangle, FileText } from 'lucide-react';
+import { Loader2, Plus, Edit, Calendar, Search, CheckCircle, XCircle, Clock, CreditCard, AlertTriangle, FileText, History, Eye, RefreshCw, Ban, Play } from 'lucide-react';
 import { format, addMonths, addYears } from 'date-fns';
 
 // Format date in Indian timezone (IST)
@@ -60,7 +61,7 @@ interface Subscription {
   id: string;
   user_id: string;
   plan_type: 'monthly' | 'annually';
-  status: 'active' | 'cancelled' | 'expired' | 'pending' | 'halted' | 'completed';
+  status: string;
   start_date: string;
   end_date: string;
   amount: number;
@@ -74,9 +75,120 @@ interface Subscription {
   razorpay_subscription_id: string | null;
   razorpay_payment_id: string | null;
   created_at: string;
+  updated_at: string;
   user_name?: string;
   user_email?: string;
   user_phone?: string;
+}
+
+interface UserSubscriptionSummary {
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  latest: Subscription;
+  history: Subscription[];
+  totalPaid: number;
+}
+
+// Derive timeline events from subscription data
+interface TimelineEvent {
+  id: string;
+  timestamp: string;
+  type: 'created' | 'paid' | 'activated' | 'cancelled' | 'halted' | 'resumed' | 'expired' | 'renewed' | 'replaced';
+  label: string;
+  description: string;
+  subscription: Subscription;
+}
+
+function deriveTimelineEvents(subscriptions: Subscription[]): TimelineEvent[] {
+  const events: TimelineEvent[] = [];
+  
+  subscriptions.forEach((sub, idx) => {
+    // Creation event
+    events.push({
+      id: `${sub.id}-created`,
+      timestamp: sub.created_at,
+      type: 'created',
+      label: 'Subscription Created',
+      description: `${sub.plan_type === 'monthly' ? 'Monthly' : 'Annual'} plan - ₹${sub.amount}`,
+      subscription: sub,
+    });
+    
+    // Payment event (if paid or admin)
+    if (sub.payment_status === 'paid' || sub.payment_status === 'admin') {
+      events.push({
+        id: `${sub.id}-paid`,
+        timestamp: sub.updated_at || sub.created_at,
+        type: 'paid',
+        label: sub.payment_status === 'admin' ? 'Admin Upgrade' : 'Payment Captured',
+        description: `₹${sub.amount} ${sub.payment_status === 'admin' ? '(Manual)' : 'via Razorpay'}`,
+        subscription: sub,
+      });
+    }
+    
+    // Mandate/E-mandate events
+    if (sub.mandate_created) {
+      events.push({
+        id: `${sub.id}-mandate`,
+        timestamp: sub.updated_at || sub.created_at,
+        type: 'activated',
+        label: 'E-Mandate Authenticated',
+        description: sub.mandate_id ? `Mandate: ${sub.mandate_id}` : 'Auto-renewal enabled',
+        subscription: sub,
+      });
+    }
+    
+    // Cancelled event
+    if (sub.cancelled_at) {
+      events.push({
+        id: `${sub.id}-cancelled`,
+        timestamp: sub.cancelled_at,
+        type: 'cancelled',
+        label: 'E-Mandate Cancelled',
+        description: sub.cancellation_reason || 'Auto-renewal disabled',
+        subscription: sub,
+      });
+    }
+    
+    // Halted event
+    if (sub.status === 'halted') {
+      events.push({
+        id: `${sub.id}-halted`,
+        timestamp: sub.updated_at,
+        type: 'halted',
+        label: 'Subscription Halted',
+        description: 'Payment retry failed',
+        subscription: sub,
+      });
+    }
+    
+    // Replaced event
+    if (sub.status === 'replaced') {
+      events.push({
+        id: `${sub.id}-replaced`,
+        timestamp: sub.updated_at,
+        type: 'replaced',
+        label: 'Subscription Replaced',
+        description: 'New subscription created',
+        subscription: sub,
+      });
+    }
+    
+    // Expired/Completed event
+    if (sub.status === 'expired' || sub.status === 'completed') {
+      events.push({
+        id: `${sub.id}-expired`,
+        timestamp: sub.end_date,
+        type: 'expired',
+        label: 'Subscription Expired',
+        description: 'Plan period ended',
+        subscription: sub,
+      });
+    }
+  });
+  
+  // Sort by timestamp descending
+  return events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 }
 
 export function AdminSubscriptionsTab() {
@@ -90,11 +202,13 @@ export function AdminSubscriptionsTab() {
   // Dialog states
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+  const [selectedUserSummary, setSelectedUserSummary] = useState<UserSubscriptionSummary | null>(null);
   const [formData, setFormData] = useState({
     user_id: '',
     plan_type: 'monthly' as 'monthly' | 'annually',
-    status: 'active' as 'active' | 'cancelled' | 'expired' | 'pending' | 'halted' | 'completed',
+    status: 'active' as string,
     amount: 299, // Default monthly price
     payment_status: 'admin',
     mandate_created: false,
@@ -113,34 +227,56 @@ export function AdminSubscriptionsTab() {
       return;
     }
 
-    // Enrich with user info
-    const enriched = await Promise.all(
-      (data || []).map(async (sub) => {
-        const [profileRes, cardRes] = await Promise.all([
-          supabase
-            .from('profiles')
-            .select('full_name, email, phone')
-            .eq('user_id', sub.user_id)
-            .maybeSingle(),
-          supabase
-            .from('cards')
-            .select('full_name, phone')
-            .eq('user_id', sub.user_id)
-            .eq('is_default', true)
-            .maybeSingle(),
-        ]);
+    // Batch fetch user info
+    const userIds = [...new Set((data || []).map(sub => sub.user_id))];
+    const [profilesRes, cardsRes] = await Promise.all([
+      supabase.from('profiles').select('user_id, full_name, email, phone').in('user_id', userIds),
+      supabase.from('cards').select('user_id, full_name, phone').eq('is_default', true).in('user_id', userIds),
+    ]);
 
-        return {
-          ...sub,
-          user_name: profileRes.data?.full_name || cardRes.data?.full_name || 'Unknown',
-          user_email: profileRes.data?.email || 'Unknown',
-          user_phone: profileRes.data?.phone || cardRes.data?.phone || null,
-        };
-      })
-    );
+    const profileMap = new Map((profilesRes.data || []).map(p => [p.user_id, p]));
+    const cardMap = new Map((cardsRes.data || []).map(c => [c.user_id, c]));
+
+    const enriched = (data || []).map(sub => {
+      const profile = profileMap.get(sub.user_id);
+      const card = cardMap.get(sub.user_id);
+      return {
+        ...sub,
+        user_name: profile?.full_name || card?.full_name || 'Unknown',
+        user_email: profile?.email || 'Unknown',
+        user_phone: profile?.phone || card?.phone || null,
+      };
+    });
 
     setSubscriptions(enriched as Subscription[]);
   };
+
+  // Group subscriptions by user for the main table
+  const userSummaries = useMemo(() => {
+    const map = new Map<string, UserSubscriptionSummary>();
+    
+    subscriptions.forEach(sub => {
+      const existing = map.get(sub.user_id);
+      if (existing) {
+        existing.history.push(sub);
+        if (sub.payment_status === 'paid' || sub.payment_status === 'admin') {
+          existing.totalPaid += Number(sub.amount);
+        }
+        // Keep the most recent as latest (already sorted by created_at desc)
+      } else {
+        map.set(sub.user_id, {
+          user_id: sub.user_id,
+          user_name: sub.user_name || 'Unknown',
+          user_email: sub.user_email || 'Unknown',
+          latest: sub,
+          history: [sub],
+          totalPaid: (sub.payment_status === 'paid' || sub.payment_status === 'admin') ? Number(sub.amount) : 0,
+        });
+      }
+    });
+    
+    return Array.from(map.values());
+  }, [subscriptions]);
 
   useEffect(() => {
     if (adminLoading) return;
@@ -163,7 +299,6 @@ export function AdminSubscriptionsTab() {
     };
 
     load();
-    // Fetch users for the create dialog
     fetchUsers();
 
     const channel = supabase
@@ -178,13 +313,14 @@ export function AdminSubscriptionsTab() {
   }, [adminLoading, isAdmin, fetchUsers]);
 
   // Filter subscriptions based on active tab and search
-  const filteredSubscriptions = subscriptions.filter(sub => {
+  const filteredSummaries = userSummaries.filter(summary => {
     const matchesSearch = 
-      sub.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sub.user_email?.toLowerCase().includes(searchTerm.toLowerCase());
+      summary.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      summary.user_email?.toLowerCase().includes(searchTerm.toLowerCase());
 
     if (!matchesSearch) return false;
 
+    const sub = summary.latest;
     switch (activeTab) {
       case 'payment_pending':
         return sub.payment_status === 'pending';
@@ -210,7 +346,8 @@ export function AdminSubscriptionsTab() {
   });
 
   const getTabCount = (tab: string) => {
-    return subscriptions.filter(sub => {
+    return userSummaries.filter(summary => {
+      const sub = summary.latest;
       switch (tab) {
         case 'payment_pending':
           return sub.payment_status === 'pending';
@@ -269,7 +406,6 @@ export function AdminSubscriptionsTab() {
       return;
     }
 
-    // If status is active and payment is paid or admin, upgrade user plan
     if (formData.status === 'active' && (formData.payment_status === 'paid' || formData.payment_status === 'admin')) {
       await upgradeUserPlan(formData.user_id, 'Orange');
     }
@@ -279,7 +415,6 @@ export function AdminSubscriptionsTab() {
     setSaving(false);
     fetchSubscriptions();
     
-    // Reset form
     setFormData({
       user_id: '',
       plan_type: 'monthly',
@@ -321,14 +456,10 @@ export function AdminSubscriptionsTab() {
       return;
     }
 
-    // Handle plan upgrade/downgrade based on status change
-    // Upgrade if status is active with paid/admin payment
     if (formData.status === 'active' && (formData.payment_status === 'paid' || formData.payment_status === 'admin') && 
         (editingSubscription.status !== 'active' || (editingSubscription.payment_status !== 'paid' && editingSubscription.payment_status !== 'admin'))) {
       await upgradeUserPlan(editingSubscription.user_id, 'Orange');
     } 
-    // Only downgrade if status is expired AND end_date has passed
-    // For cancelled/halted, user keeps access until end_date
     else if (formData.status === 'expired' && editingSubscription.status !== 'expired') {
       const endDate = new Date(editingSubscription.end_date);
       if (endDate <= new Date()) {
@@ -357,6 +488,11 @@ export function AdminSubscriptionsTab() {
     setIsEditOpen(true);
   };
 
+  const openHistoryDialog = (summary: UserSubscriptionSummary) => {
+    setSelectedUserSummary(summary);
+    setIsHistoryOpen(true);
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -370,6 +506,8 @@ export function AdminSubscriptionsTab() {
         return <Badge variant="outline"><Clock className="w-3 h-3 mr-1" />Expired</Badge>;
       case 'pending':
         return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+      case 'replaced':
+        return <Badge variant="outline"><RefreshCw className="w-3 h-3 mr-1" />Replaced</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -392,6 +530,48 @@ export function AdminSubscriptionsTab() {
     }
   };
 
+  const getEventIcon = (type: TimelineEvent['type']) => {
+    switch (type) {
+      case 'created':
+        return <Plus className="w-3 h-3" />;
+      case 'paid':
+        return <CreditCard className="w-3 h-3" />;
+      case 'activated':
+        return <CheckCircle className="w-3 h-3" />;
+      case 'cancelled':
+        return <Ban className="w-3 h-3" />;
+      case 'halted':
+        return <AlertTriangle className="w-3 h-3" />;
+      case 'resumed':
+        return <Play className="w-3 h-3" />;
+      case 'expired':
+        return <Clock className="w-3 h-3" />;
+      case 'renewed':
+        return <RefreshCw className="w-3 h-3" />;
+      case 'replaced':
+        return <RefreshCw className="w-3 h-3" />;
+      default:
+        return <FileText className="w-3 h-3" />;
+    }
+  };
+
+  const getEventColor = (type: TimelineEvent['type']) => {
+    switch (type) {
+      case 'paid':
+      case 'activated':
+      case 'resumed':
+        return 'bg-green-500 text-white';
+      case 'cancelled':
+      case 'halted':
+        return 'bg-destructive text-destructive-foreground';
+      case 'expired':
+      case 'replaced':
+        return 'bg-muted text-muted-foreground';
+      default:
+        return 'bg-primary text-primary-foreground';
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -406,7 +586,8 @@ export function AdminSubscriptionsTab() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Calendar className="h-5 w-5 text-orange-500" />
-          <Badge className="bg-orange-500 text-white">{subscriptions.length} Subscriptions</Badge>
+          <Badge className="bg-orange-500 text-white">{userSummaries.length} Users</Badge>
+          <Badge variant="outline">{subscriptions.length} Total Subscriptions</Badge>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -466,7 +647,7 @@ export function AdminSubscriptionsTab() {
         </TabsList>
 
         <TabsContent value={activeTab} className="mt-4">
-          <div className="rounded-md border">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -474,77 +655,202 @@ export function AdminSubscriptionsTab() {
                   <TableHead>Plan</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Payment</TableHead>
-                  <TableHead>Start</TableHead>
-                  <TableHead>End</TableHead>
+                  <TableHead>End Date</TableHead>
                   <TableHead>Amount</TableHead>
-                  <TableHead>Auto Renew</TableHead>
+                  <TableHead>Auto Renewal</TableHead>
                   <TableHead>E-Mandate</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSubscriptions.length === 0 ? (
+                {filteredSummaries.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                       No subscriptions found
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredSubscriptions.map((sub) => (
-                    <TableRow key={sub.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{sub.user_name}</p>
-                          <p className="text-xs text-muted-foreground">{sub.user_email}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={sub.plan_type === 'monthly' ? 'secondary' : 'default'}>
-                          {sub.plan_type === 'monthly' ? 'Monthly' : 'Annual'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(sub.status)}</TableCell>
-                      <TableCell>{getPaymentBadge(sub.payment_status)}</TableCell>
-                      <TableCell className="text-sm">
-                        {formatIndianDate(sub.start_date)}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {formatIndianDate(sub.end_date)}
-                      </TableCell>
-                      <TableCell>
-                        ₹{Number(sub.amount).toLocaleString()}
-                        <span className="text-xs text-muted-foreground">
-                          /{sub.plan_type === 'monthly' ? 'mo' : 'yr'}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={sub.auto_renew ? 'default' : 'outline'}>
-                          {sub.auto_renew ? 'Yes' : 'No'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={sub.mandate_created ? 'default' : 'outline'}>
-                          {sub.mandate_created ? 'Created' : 'No'}
-                        </Badge>
-                        {sub.mandate_id && (
-                          <p className="text-xs text-muted-foreground mt-1 font-mono truncate max-w-20">
-                            {sub.mandate_id}
-                          </p>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Button size="sm" variant="ghost" onClick={() => openEditDialog(sub)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  filteredSummaries.map((summary) => {
+                    const sub = summary.latest;
+                    return (
+                      <TableRow key={sub.id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{summary.user_name}</p>
+                            <p className="text-xs text-muted-foreground">{summary.user_email}</p>
+                            {summary.history.length > 1 && (
+                              <Badge variant="outline" className="text-xs mt-1">
+                                {summary.history.length} subs
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={sub.plan_type === 'monthly' ? 'secondary' : 'default'}>
+                            {sub.plan_type === 'monthly' ? 'Monthly' : 'Annual'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(sub.status)}</TableCell>
+                        <TableCell>{getPaymentBadge(sub.payment_status)}</TableCell>
+                        <TableCell className="text-sm">
+                          {formatIndianDate(sub.end_date)}
+                        </TableCell>
+                        <TableCell>
+                          ₹{Number(sub.amount).toLocaleString()}
+                          <span className="text-xs text-muted-foreground">
+                            /{sub.plan_type === 'monthly' ? 'mo' : 'yr'}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            <Badge variant={sub.auto_renew ? 'default' : 'outline'} className={sub.auto_renew ? 'bg-green-500' : ''}>
+                              {sub.auto_renew ? 'Yes' : 'No'}
+                            </Badge>
+                            {!sub.auto_renew && sub.cancelled_at && (
+                              <p className="text-xs text-muted-foreground">
+                                {formatIndianDate(sub.cancelled_at)}
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={sub.mandate_created ? 'default' : 'outline'}>
+                            {sub.mandate_created ? 'Created' : 'No'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Button size="sm" variant="ghost" onClick={() => openEditDialog(sub)} title="Edit">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => openHistoryDialog(summary)} title="View All">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* History Dialog */}
+      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+        <DialogContent className="w-[calc(100%-2rem)] max-w-4xl max-h-[85dvh] overflow-hidden flex flex-col p-4 sm:p-6">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <History className="w-4 h-4 sm:w-5 sm:h-5" />
+              Subscription History
+            </DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
+              {selectedUserSummary && (
+                <span className="break-words">
+                  {selectedUserSummary.user_name} ({selectedUserSummary.user_email}) - 
+                  Total Paid: ₹{selectedUserSummary.totalPaid.toLocaleString()}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto min-h-0 -mx-4 px-4 sm:-mx-6 sm:px-6">
+            {selectedUserSummary && (
+              <div className="space-y-4 sm:space-y-6 pb-4">
+                {/* Latest Subscription Highlight */}
+                {(() => {
+                  const latest = selectedUserSummary.latest;
+                  const isSuccess = latest.payment_status === 'paid' || latest.payment_status === 'admin';
+                  
+                  return (
+                    <div className={`border-2 rounded-lg p-3 sm:p-4 ${isSuccess ? 'border-primary bg-primary/5' : 'border-muted bg-muted/30'}`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <Badge variant="default" className={isSuccess ? 'bg-primary' : ''}>
+                            {isSuccess ? '✓ Latest Active' : 'Latest'}
+                          </Badge>
+                          <Badge variant={latest.plan_type === 'monthly' ? 'secondary' : 'default'}>
+                            {latest.plan_type === 'monthly' ? 'Monthly' : 'Annual'}
+                          </Badge>
+                          {getStatusBadge(latest.status)}
+                          {getPaymentBadge(latest.payment_status)}
+                        </div>
+                        <p className="font-bold text-lg sm:text-xl text-primary">₹{latest.amount.toLocaleString()}</p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Start Date</Label>
+                          <p className="font-medium">{formatIndianDate(latest.start_date)}</p>
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground text-xs">End Date</Label>
+                          <p className="font-medium">{formatIndianDate(latest.end_date)}</p>
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Auto Renewal</Label>
+                          <p className="font-medium">{latest.auto_renew ? 'Yes' : 'No'}</p>
+                          {!latest.auto_renew && latest.cancelled_at && (
+                            <p className="text-xs text-muted-foreground">
+                              Cancelled: {formatIndianDate(latest.cancelled_at, true)}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground text-xs">E-Mandate</Label>
+                          <p className="font-medium">{latest.mandate_created ? 'Created' : 'No'}</p>
+                        </div>
+                        {latest.razorpay_subscription_id && (
+                          <div className="col-span-2">
+                            <Label className="text-muted-foreground text-xs">Razorpay Sub ID</Label>
+                            <p className="font-mono text-xs break-all">{latest.razorpay_subscription_id}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Timeline Events */}
+                <div className="flex items-center gap-2">
+                  <Separator className="flex-1" />
+                  <span className="text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap">
+                    Activity Timeline
+                  </span>
+                  <Separator className="flex-1" />
+                </div>
+
+                <div className="space-y-2">
+                  {deriveTimelineEvents(selectedUserSummary.history).map((event) => (
+                    <div key={event.id} className="flex items-start gap-3 p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className={`rounded-full p-1.5 ${getEventColor(event.type)}`}>
+                        {getEventIcon(event.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                          <p className="font-medium text-sm">{event.label}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatIndianDate(event.timestamp, true)}
+                          </p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{event.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex-shrink-0 mt-4 pt-4 border-t">
+            <Button variant="outline" onClick={() => setIsHistoryOpen(false)} className="w-full sm:w-auto">
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Create Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -562,7 +868,7 @@ export function AdminSubscriptionsTab() {
                 <SelectTrigger>
                   <SelectValue placeholder="Select a user" />
                 </SelectTrigger>
-                <SelectContent className="max-h-60">
+                <SelectContent className="max-h-60 z-[2100]">
                   {users.map(user => (
                     <SelectItem key={user.user_id} value={user.user_id}>
                       <span className="truncate">
@@ -587,7 +893,7 @@ export function AdminSubscriptionsTab() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[2100]">
                     <SelectItem value="monthly">Monthly (₹299)</SelectItem>
                     <SelectItem value="annually">Annually (₹1999)</SelectItem>
                   </SelectContent>
@@ -612,7 +918,7 @@ export function AdminSubscriptionsTab() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[2100]">
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="halted">Halted</SelectItem>
@@ -630,7 +936,7 @@ export function AdminSubscriptionsTab() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[2100]">
                     <SelectItem value="admin">Admin (Manual)</SelectItem>
                     <SelectItem value="paid">Paid</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
@@ -694,7 +1000,7 @@ export function AdminSubscriptionsTab() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[2100]">
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="halted">Halted</SelectItem>
@@ -712,7 +1018,7 @@ export function AdminSubscriptionsTab() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[2100]">
                     <SelectItem value="admin">Admin (Manual)</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="paid">Paid</SelectItem>
