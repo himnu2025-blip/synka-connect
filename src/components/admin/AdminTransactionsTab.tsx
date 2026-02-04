@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { 
@@ -40,7 +42,8 @@ import {
   Eye,
   Calendar,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  History
 } from "lucide-react";
 
 interface Payment {
@@ -87,6 +90,28 @@ interface Subscription {
   user_phone?: string;
 }
 
+interface UserPaymentSummary {
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  user_phone: string;
+  latest: Payment;
+  history: Payment[];
+  totalAmount: number;
+  paymentCount: number;
+}
+
+interface UserSubscriptionSummary {
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  user_phone: string;
+  latest: Subscription;
+  history: Subscription[];
+  totalAmount: number;
+  subscriptionCount: number;
+}
+
 export function AdminTransactionsTab() {
   const [activeTab, setActiveTab] = useState("payments");
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -96,16 +121,16 @@ export function AdminTransactionsTab() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [planFilter, setPlanFilter] = useState<string>("all");
   
-  // Details dialog
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  // History dialog
+  const [selectedUserPayments, setSelectedUserPayments] = useState<UserPaymentSummary | null>(null);
+  const [selectedUserSubscriptions, setSelectedUserSubscriptions] = useState<UserSubscriptionSummary | null>(null);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const refreshTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     fetchData();
     
-    // Real-time subscription
     const paymentsChannel = supabase
       .channel("admin-payments")
       .on(
@@ -152,7 +177,6 @@ export function AdminTransactionsTab() {
 
       if (error) throw error;
 
-      // Enrich with user data
       const userIds = [...new Set(paymentsData?.map((p) => p.user_id) || [])];
       const { data: profiles } = await supabase
         .from("profiles")
@@ -193,7 +217,6 @@ export function AdminTransactionsTab() {
 
       if (error) throw error;
 
-      // Enrich with user data
       const userIds = [...new Set(subscriptionsData?.map((s) => s.user_id) || [])];
       const { data: profiles } = await supabase
         .from("profiles")
@@ -224,58 +247,82 @@ export function AdminTransactionsTab() {
     }
   };
 
+  // Group payments by user
+  const userPaymentSummaries = useMemo(() => {
+    const grouped = new Map<string, Payment[]>();
+    
+    payments.forEach((payment) => {
+      const existing = grouped.get(payment.user_id) || [];
+      grouped.set(payment.user_id, [...existing, payment]);
+    });
+
+    const summaries: UserPaymentSummary[] = [];
+    grouped.forEach((userPayments, userId) => {
+      const sorted = userPayments.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      const latest = sorted[0];
+      summaries.push({
+        user_id: userId,
+        user_name: latest.user_name || "Unknown",
+        user_email: latest.user_email || "",
+        user_phone: latest.user_phone || "",
+        latest,
+        history: sorted,
+        totalAmount: userPayments.reduce((sum, p) => sum + (p.status === "captured" ? p.amount : 0), 0),
+        paymentCount: userPayments.length,
+      });
+    });
+
+    return summaries.sort((a, b) => 
+      new Date(b.latest.created_at).getTime() - new Date(a.latest.created_at).getTime()
+    );
+  }, [payments]);
+
+  // Group subscriptions by user
+  const userSubscriptionSummaries = useMemo(() => {
+    const grouped = new Map<string, Subscription[]>();
+    
+    subscriptions.forEach((sub) => {
+      const existing = grouped.get(sub.user_id) || [];
+      grouped.set(sub.user_id, [...existing, sub]);
+    });
+
+    const summaries: UserSubscriptionSummary[] = [];
+    grouped.forEach((userSubs, userId) => {
+      const sorted = userSubs.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      const latest = sorted[0];
+      summaries.push({
+        user_id: userId,
+        user_name: latest.user_name || "Unknown",
+        user_email: latest.user_email || "",
+        user_phone: latest.user_phone || "",
+        latest,
+        history: sorted,
+        totalAmount: userSubs.reduce((sum, s) => sum + s.amount, 0),
+        subscriptionCount: userSubs.length,
+      });
+    });
+
+    return summaries.sort((a, b) => 
+      new Date(b.latest.created_at).getTime() - new Date(a.latest.created_at).getTime()
+    );
+  }, [subscriptions]);
+
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { variant: any; icon: any; label: string }> = {
-      captured: {
-        variant: "default",
-        icon: CheckCircle,
-        label: "Captured",
-      },
-      failed: {
-        variant: "destructive",
-        icon: XCircle,
-        label: "Failed",
-      },
-      created: {
-        variant: "secondary",
-        icon: Clock,
-        label: "Created",
-      },
-      active: {
-        variant: "default",
-        icon: CheckCircle,
-        label: "Active",
-      },
-      cancelled: {
-        variant: "secondary",
-        icon: XCircle,
-        label: "Cancelled",
-      },
-      expired: {
-        variant: "outline",
-        icon: XCircle,
-        label: "Expired",
-      },
-      pending: {
-        variant: "secondary",
-        icon: Clock,
-        label: "Pending",
-      },
-      halted: {
-        variant: "destructive",
-        icon: AlertTriangle,
-        label: "Halted",
-      },
-      completed: {
-        variant: "outline",
-        icon: CheckCircle,
-        label: "Completed",
-      },
-      admin: {
-        variant: "secondary",
-        icon: CheckCircle,
-        label: "Admin",
-      },
+      captured: { variant: "default", icon: CheckCircle, label: "Captured" },
+      failed: { variant: "destructive", icon: XCircle, label: "Failed" },
+      created: { variant: "secondary", icon: Clock, label: "Created" },
+      active: { variant: "default", icon: CheckCircle, label: "Active" },
+      cancelled: { variant: "secondary", icon: XCircle, label: "Cancelled" },
+      expired: { variant: "outline", icon: XCircle, label: "Expired" },
+      pending: { variant: "secondary", icon: Clock, label: "Pending" },
+      halted: { variant: "destructive", icon: AlertTriangle, label: "Halted" },
+      completed: { variant: "outline", icon: CheckCircle, label: "Completed" },
+      admin: { variant: "secondary", icon: CheckCircle, label: "Admin" },
     };
 
     const config = statusMap[status?.toLowerCase()] || {
@@ -285,7 +332,6 @@ export function AdminTransactionsTab() {
     };
 
     const Icon = config.icon;
-
     return (
       <Badge variant={config.variant} className="gap-1">
         <Icon className="w-3 h-3" />
@@ -302,35 +348,44 @@ export function AdminTransactionsTab() {
     );
   };
 
-  const filteredPayments = payments.filter((payment) => {
+  // Filter payment summaries
+  const filteredPaymentSummaries = userPaymentSummaries.filter((summary) => {
     const matchesSearch =
-      payment.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.user_phone?.includes(searchTerm) ||
-      payment.razorpay_payment_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.razorpay_order_id?.toLowerCase().includes(searchTerm.toLowerCase());
+      summary.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      summary.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      summary.user_phone?.includes(searchTerm) ||
+      summary.latest.razorpay_payment_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      summary.latest.razorpay_order_id?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === "all" || payment.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || summary.latest.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
 
-  const filteredSubscriptions = subscriptions.filter((sub) => {
+  // Filter subscription summaries
+  const filteredSubscriptionSummaries = userSubscriptionSummaries.filter((summary) => {
     const matchesSearch =
-      sub.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sub.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sub.user_phone?.includes(searchTerm) ||
-      sub.razorpay_subscription_id?.toLowerCase().includes(searchTerm.toLowerCase());
+      summary.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      summary.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      summary.user_phone?.includes(searchTerm) ||
+      summary.latest.razorpay_subscription_id?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === "all" || sub.status === statusFilter;
-    const matchesPlan = planFilter === "all" || sub.plan_type === planFilter;
+    const matchesStatus = statusFilter === "all" || summary.latest.status === statusFilter;
+    const matchesPlan = planFilter === "all" || summary.latest.plan_type === planFilter;
 
     return matchesSearch && matchesStatus && matchesPlan;
   });
 
-  const showDetails = (item: any, type: "payment" | "subscription") => {
-    setSelectedItem({ ...item, type });
-    setIsDetailsOpen(true);
+  const showPaymentHistory = (summary: UserPaymentSummary) => {
+    setSelectedUserPayments(summary);
+    setSelectedUserSubscriptions(null);
+    setIsHistoryOpen(true);
+  };
+
+  const showSubscriptionHistory = (summary: UserSubscriptionSummary) => {
+    setSelectedUserSubscriptions(summary);
+    setSelectedUserPayments(null);
+    setIsHistoryOpen(true);
   };
 
   if (loading && payments.length === 0 && subscriptions.length === 0) {
@@ -366,10 +421,10 @@ export function AdminTransactionsTab() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList>
           <TabsTrigger value="payments">
-            Payments ({filteredPayments.length})
+            Payments ({filteredPaymentSummaries.length} users)
           </TabsTrigger>
           <TabsTrigger value="subscriptions">
-            Subscriptions ({filteredSubscriptions.length})
+            Subscriptions ({filteredSubscriptionSummaries.length} users)
           </TabsTrigger>
         </TabsList>
 
@@ -420,74 +475,73 @@ export function AdminTransactionsTab() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[150px]">User</TableHead>
-                    <TableHead className="min-w-[200px]">Razorpay Details</TableHead>
+                    <TableHead>Latest Payment</TableHead>
                     <TableHead>Amount</TableHead>
-                    <TableHead>Method</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead>Total Paid</TableHead>
+                    <TableHead>History</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredPayments.map((payment) => (
-                    <TableRow key={payment.id}>
+                  {filteredPaymentSummaries.map((summary) => (
+                    <TableRow key={summary.user_id}>
                       <TableCell>
                         <div className="space-y-1">
-                          <p className="font-medium text-sm">{payment.user_name}</p>
-                          <p className="text-xs text-muted-foreground">{payment.user_email}</p>
-                          {payment.user_phone && (
-                            <p className="text-xs text-muted-foreground">{payment.user_phone}</p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1 font-mono text-xs">
-                          {payment.razorpay_payment_id && (
-                            <div>
-                              <span className="text-muted-foreground">Payment:</span>{" "}
-                              <span className="text-foreground">{payment.razorpay_payment_id}</span>
-                            </div>
-                          )}
-                          {payment.razorpay_order_id && (
-                            <div>
-                              <span className="text-muted-foreground">Order:</span>{" "}
-                              <span className="text-foreground">{payment.razorpay_order_id}</span>
-                            </div>
+                          <p className="font-medium text-sm">{summary.user_name}</p>
+                          <p className="text-xs text-muted-foreground">{summary.user_email}</p>
+                          {summary.user_phone && (
+                            <p className="text-xs text-muted-foreground">{summary.user_phone}</p>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
-                          <p className="font-semibold">₹{payment.amount.toFixed(2)}</p>
-                          <p className="text-xs text-muted-foreground uppercase">{payment.currency || "INR"}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="capitalize">
-                          {payment.method || "N/A"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <p className="text-sm">{format(new Date(payment.created_at), "dd MMM yyyy")}</p>
+                          <p className="text-sm">{format(new Date(summary.latest.created_at), "dd MMM yyyy")}</p>
                           <p className="text-xs text-muted-foreground">
-                            {format(new Date(payment.created_at), "HH:mm:ss")}
+                            {format(new Date(summary.latest.created_at), "HH:mm:ss")}
                           </p>
+                          {summary.latest.razorpay_payment_id && (
+                            <p className="font-mono text-xs text-muted-foreground">
+                              {summary.latest.razorpay_payment_id.slice(0, 15)}...
+                            </p>
+                          )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <p className="font-semibold">₹{summary.latest.amount.toFixed(2)}</p>
+                          <Badge variant="outline" className="capitalize text-xs">
+                            {summary.latest.method || "N/A"}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(summary.latest.status)}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <p className="font-semibold text-primary">₹{summary.totalAmount.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">{summary.paymentCount} payment(s)</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="gap-1">
+                          <History className="w-3 h-3" />
+                          {summary.paymentCount}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => showDetails(payment, "payment")}
+                          onClick={() => showPaymentHistory(summary)}
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-4 h-4 mr-1" />
+                          View All
                         </Button>
                       </TableCell>
                     </TableRow>
                   ))}
-                  {filteredPayments.length === 0 && (
+                  {filteredPaymentSummaries.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                         No payments found
@@ -507,57 +561,59 @@ export function AdminTransactionsTab() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[150px]">User</TableHead>
-                    <TableHead>Plan</TableHead>
-                    <TableHead>Amount</TableHead>
+                    <TableHead>Current Plan</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Payment</TableHead>
-                    <TableHead className="min-w-[150px]">Dates</TableHead>
+                    <TableHead>Dates</TableHead>
                     <TableHead>Auto-Renew</TableHead>
+                    <TableHead>History</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredSubscriptions.map((sub) => (
-                    <TableRow key={sub.id}>
+                  {filteredSubscriptionSummaries.map((summary) => (
+                    <TableRow key={summary.user_id}>
                       <TableCell>
                         <div className="space-y-1">
-                          <p className="font-medium text-sm">{sub.user_name}</p>
-                          <p className="text-xs text-muted-foreground">{sub.user_email}</p>
-                          {sub.user_phone && (
-                            <p className="text-xs text-muted-foreground">{sub.user_phone}</p>
+                          <p className="font-medium text-sm">{summary.user_name}</p>
+                          <p className="text-xs text-muted-foreground">{summary.user_email}</p>
+                          {summary.user_phone && (
+                            <p className="text-xs text-muted-foreground">{summary.user_phone}</p>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>{getPlanBadge(sub.plan_type)}</TableCell>
                       <TableCell>
                         <div className="space-y-1">
-                          <p className="font-semibold">₹{sub.amount.toFixed(2)}</p>
-                          <p className="text-xs text-muted-foreground">/{sub.plan_type === "monthly" ? "mo" : "yr"}</p>
+                          {getPlanBadge(summary.latest.plan_type)}
+                          <p className="font-semibold">₹{summary.latest.amount.toFixed(2)}</p>
                         </div>
                       </TableCell>
-                      <TableCell>{getStatusBadge(sub.status)}</TableCell>
-                      <TableCell>{getStatusBadge(sub.payment_status || "pending")}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {getStatusBadge(summary.latest.status)}
+                          {getStatusBadge(summary.latest.payment_status || "pending")}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <div className="space-y-1 text-xs">
                           <div>
                             <Calendar className="w-3 h-3 inline mr-1" />
-                            <span className="text-muted-foreground">Start:</span> {format(new Date(sub.start_date), "dd MMM yyyy")}
+                            <span className="text-muted-foreground">Start:</span> {format(new Date(summary.latest.start_date), "dd MMM yyyy")}
                           </div>
                           <div>
                             <Calendar className="w-3 h-3 inline mr-1" />
-                            <span className="text-muted-foreground">End:</span> {format(new Date(sub.end_date), "dd MMM yyyy")}
+                            <span className="text-muted-foreground">End:</span> {format(new Date(summary.latest.end_date), "dd MMM yyyy")}
                           </div>
-                          {sub.cancelled_at && (
+                          {summary.latest.cancelled_at && (
                             <div className="text-destructive">
                               <XCircle className="w-3 h-3 inline mr-1" />
-                              Cancelled: {format(new Date(sub.cancelled_at), "dd MMM yyyy")}
+                              Cancelled: {format(new Date(summary.latest.cancelled_at), "dd MMM")}
                             </div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
-                          {sub.auto_renew ? (
+                          {summary.latest.auto_renew ? (
                             <Badge variant="default" className="gap-1">
                               <CheckCircle className="w-3 h-3" />
                               Yes
@@ -568,25 +624,32 @@ export function AdminTransactionsTab() {
                               No
                             </Badge>
                           )}
-                          {sub.mandate_created && (
-                            <p className="text-xs text-muted-foreground">E-mandate active</p>
+                          {summary.latest.mandate_created && (
+                            <p className="text-xs text-muted-foreground">E-mandate</p>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="gap-1">
+                          <History className="w-3 h-3" />
+                          {summary.subscriptionCount}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => showDetails(sub, "subscription")}
+                          onClick={() => showSubscriptionHistory(summary)}
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-4 h-4 mr-1" />
+                          View All
                         </Button>
                       </TableCell>
                     </TableRow>
                   ))}
-                  {filteredSubscriptions.length === 0 && (
+                  {filteredSubscriptionSummaries.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                         No subscriptions found
                       </TableCell>
                     </TableRow>
@@ -598,235 +661,161 @@ export function AdminTransactionsTab() {
         </TabsContent>
       </Tabs>
 
-      {/* Details Dialog */}
-      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      {/* History Dialog */}
+      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>
-              {selectedItem?.type === "payment" ? "Payment Details" : "Subscription Details"}
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5" />
+              {selectedUserPayments ? "Payment History" : "Subscription History"}
             </DialogTitle>
             <DialogDescription>
-              Complete transaction information
+              {selectedUserPayments && (
+                <span>
+                  {selectedUserPayments.user_name} ({selectedUserPayments.user_email}) - 
+                  {selectedUserPayments.paymentCount} payments, Total: ₹{selectedUserPayments.totalAmount.toFixed(2)}
+                </span>
+              )}
+              {selectedUserSubscriptions && (
+                <span>
+                  {selectedUserSubscriptions.user_name} ({selectedUserSubscriptions.user_email}) - 
+                  {selectedUserSubscriptions.subscriptionCount} subscriptions
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
 
-          {selectedItem && (
-            <div className="space-y-6">
-              {/* User Information */}
-              <div>
-                <h3 className="font-semibold mb-3 text-sm">User Information</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <Label className="text-muted-foreground">Name</Label>
-                    <p className="font-medium">{selectedItem.user_name}</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Email</Label>
-                    <p className="font-medium">{selectedItem.user_email}</p>
-                  </div>
-                  {selectedItem.user_phone && (
-                    <div>
-                      <Label className="text-muted-foreground">Phone</Label>
-                      <p className="font-medium">{selectedItem.user_phone}</p>
-                    </div>
-                  )}
-                  <div>
-                    <Label className="text-muted-foreground">User ID</Label>
-                    <p className="font-mono text-xs">{selectedItem.user_id}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Transaction Details */}
-              <div>
-                <h3 className="font-semibold mb-3 text-sm">Transaction Details</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <Label className="text-muted-foreground">Amount</Label>
-                    <p className="font-semibold text-lg">₹{selectedItem.amount.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Currency</Label>
-                    <p className="font-medium uppercase">{selectedItem.currency || "INR"}</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Status</Label>
-                    <div className="mt-1">{getStatusBadge(selectedItem.status)}</div>
-                  </div>
-                  {selectedItem.type === "payment" && selectedItem.method && (
-                    <div>
-                      <Label className="text-muted-foreground">Payment Method</Label>
-                      <p className="font-medium capitalize">{selectedItem.method}</p>
-                    </div>
-                  )}
-                  {selectedItem.type === "subscription" && (
-                    <>
-                      <div>
-                        <Label className="text-muted-foreground">Plan Type</Label>
-                        <div className="mt-1">{getPlanBadge(selectedItem.plan_type)}</div>
+          <ScrollArea className="flex-1 pr-4">
+            {/* Payment History */}
+            {selectedUserPayments && (
+              <div className="space-y-4">
+                {selectedUserPayments.history.map((payment, index) => (
+                  <div key={payment.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={index === 0 ? "default" : "outline"}>
+                          {index === 0 ? "Latest" : `#${selectedUserPayments.history.length - index}`}
+                        </Badge>
+                        {getStatusBadge(payment.status)}
+                        <Badge variant="outline" className="capitalize">
+                          {payment.method || "N/A"}
+                        </Badge>
                       </div>
+                      <p className="font-semibold text-lg">₹{payment.amount.toFixed(2)}</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                       <div>
-                        <Label className="text-muted-foreground">Payment Status</Label>
-                        <div className="mt-1">{getStatusBadge(selectedItem.payment_status || "pending")}</div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Razorpay IDs */}
-              <div>
-                <h3 className="font-semibold mb-3 text-sm">Razorpay Information</h3>
-                <div className="space-y-2 text-sm">
-                  {selectedItem.razorpay_payment_id && (
-                    <div>
-                      <Label className="text-muted-foreground">Payment ID</Label>
-                      <p className="font-mono text-xs bg-muted p-2 rounded mt-1">
-                        {selectedItem.razorpay_payment_id}
-                      </p>
-                    </div>
-                  )}
-                  {selectedItem.razorpay_order_id && (
-                    <div>
-                      <Label className="text-muted-foreground">Order ID</Label>
-                      <p className="font-mono text-xs bg-muted p-2 rounded mt-1">
-                        {selectedItem.razorpay_order_id}
-                      </p>
-                    </div>
-                  )}
-                  {selectedItem.razorpay_subscription_id && (
-                    <div>
-                      <Label className="text-muted-foreground">Subscription ID</Label>
-                      <p className="font-mono text-xs bg-muted p-2 rounded mt-1">
-                        {selectedItem.razorpay_subscription_id}
-                      </p>
-                    </div>
-                  )}
-                  {selectedItem.razorpay_signature && (
-                    <div>
-                      <Label className="text-muted-foreground">Signature</Label>
-                      <p className="font-mono text-xs bg-muted p-2 rounded mt-1 break-all">
-                        {selectedItem.razorpay_signature}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Subscription Specific */}
-              {selectedItem.type === "subscription" && (
-                <div>
-                  <h3 className="font-semibold mb-3 text-sm">Subscription Details</h3>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <Label className="text-muted-foreground">Start Date</Label>
-                      <p className="font-medium">{format(new Date(selectedItem.start_date), "dd MMM yyyy")}</p>
-                    </div>
-                    <div>
-                      <Label className="text-muted-foreground">End Date</Label>
-                      <p className="font-medium">{format(new Date(selectedItem.end_date), "dd MMM yyyy")}</p>
-                    </div>
-                    <div>
-                      <Label className="text-muted-foreground">Auto-Renew</Label>
-                      <p className="font-medium">{selectedItem.auto_renew ? "Yes" : "No"}</p>
-                    </div>
-                    <div>
-                      <Label className="text-muted-foreground">E-Mandate</Label>
-                      <p className="font-medium">{selectedItem.mandate_created ? "Active" : "Not Set"}</p>
-                    </div>
-                    {selectedItem.cancelled_at && (
-                      <>
-                        <div>
-                          <Label className="text-muted-foreground">Cancelled At</Label>
-                          <p className="font-medium text-destructive">
-                            {format(new Date(selectedItem.cancelled_at), "dd MMM yyyy HH:mm")}
-                          </p>
-                        </div>
-                        {selectedItem.cancellation_reason && (
-                          <div className="col-span-2">
-                            <Label className="text-muted-foreground">Cancellation Reason</Label>
-                            <p className="font-medium">{selectedItem.cancellation_reason}</p>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Error Details */}
-              {selectedItem.error_code && (
-                <div>
-                  <h3 className="font-semibold mb-3 text-sm text-destructive">Error Information</h3>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <Label className="text-muted-foreground">Error Code</Label>
-                      <p className="font-mono text-xs bg-destructive/10 p-2 rounded mt-1">
-                        {selectedItem.error_code}
-                      </p>
-                    </div>
-                    {selectedItem.error_description && (
-                      <div>
-                        <Label className="text-muted-foreground">Description</Label>
-                        <p className="text-xs bg-destructive/10 p-2 rounded mt-1">
-                          {selectedItem.error_description}
+                        <Label className="text-muted-foreground text-xs">Date & Time</Label>
+                        <p className="font-medium">
+                          {format(new Date(payment.created_at), "dd MMM yyyy HH:mm:ss")}
                         </p>
                       </div>
+                      {payment.razorpay_payment_id && (
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Payment ID</Label>
+                          <p className="font-mono text-xs">{payment.razorpay_payment_id}</p>
+                        </div>
+                      )}
+                      {payment.razorpay_order_id && (
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Order ID</Label>
+                          <p className="font-mono text-xs">{payment.razorpay_order_id}</p>
+                        </div>
+                      )}
+                      {payment.error_code && (
+                        <div className="col-span-full">
+                          <Label className="text-destructive text-xs">Error</Label>
+                          <p className="text-xs bg-destructive/10 p-2 rounded">
+                            {payment.error_code}: {payment.error_description}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    {index < selectedUserPayments.history.length - 1 && (
+                      <Separator className="mt-4" />
                     )}
                   </div>
-                </div>
-              )}
-
-              {/* Timestamps */}
-              <div>
-                <h3 className="font-semibold mb-3 text-sm">Timestamps</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <Label className="text-muted-foreground">Created At</Label>
-                    <p className="font-medium">
-                      {format(new Date(selectedItem.created_at), "dd MMM yyyy HH:mm:ss")}
-                    </p>
-                  </div>
-                  {selectedItem.updated_at && (
-                    <div>
-                      <Label className="text-muted-foreground">Updated At</Label>
-                      <p className="font-medium">
-                        {format(new Date(selectedItem.updated_at), "dd MMM yyyy HH:mm:ss")}
-                      </p>
-                    </div>
-                  )}
-                </div>
+                ))}
               </div>
+            )}
 
-              {/* Internal IDs */}
-              <div>
-                <h3 className="font-semibold mb-3 text-sm">Internal References</h3>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <Label className="text-muted-foreground">
-                      {selectedItem.type === "payment" ? "Payment" : "Subscription"} ID
-                    </Label>
-                    <p className="font-mono text-xs bg-muted p-2 rounded mt-1">{selectedItem.id}</p>
+            {/* Subscription History */}
+            {selectedUserSubscriptions && (
+              <div className="space-y-4">
+                {selectedUserSubscriptions.history.map((sub, index) => (
+                  <div key={sub.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={index === 0 ? "default" : "outline"}>
+                          {index === 0 ? "Current" : `#${selectedUserSubscriptions.history.length - index}`}
+                        </Badge>
+                        {getPlanBadge(sub.plan_type)}
+                        {getStatusBadge(sub.status)}
+                      </div>
+                      <p className="font-semibold text-lg">₹{sub.amount.toFixed(2)}</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <Label className="text-muted-foreground text-xs">Start Date</Label>
+                        <p className="font-medium">
+                          {format(new Date(sub.start_date), "dd MMM yyyy")}
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="text-muted-foreground text-xs">End Date</Label>
+                        <p className="font-medium">
+                          {format(new Date(sub.end_date), "dd MMM yyyy")}
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="text-muted-foreground text-xs">Payment Status</Label>
+                        {getStatusBadge(sub.payment_status || "pending")}
+                      </div>
+                      <div>
+                        <Label className="text-muted-foreground text-xs">Auto-Renew</Label>
+                        <p className="font-medium">{sub.auto_renew ? "Yes" : "No"}</p>
+                      </div>
+                      <div>
+                        <Label className="text-muted-foreground text-xs">E-Mandate</Label>
+                        <p className="font-medium">{sub.mandate_created ? "Active" : "Not Set"}</p>
+                      </div>
+                      <div>
+                        <Label className="text-muted-foreground text-xs">Created</Label>
+                        <p className="font-medium text-xs">
+                          {format(new Date(sub.created_at), "dd MMM yyyy HH:mm")}
+                        </p>
+                      </div>
+                      {sub.razorpay_subscription_id && (
+                        <div className="col-span-full">
+                          <Label className="text-muted-foreground text-xs">Razorpay Sub ID</Label>
+                          <p className="font-mono text-xs bg-muted p-2 rounded">
+                            {sub.razorpay_subscription_id}
+                          </p>
+                        </div>
+                      )}
+                      {sub.cancelled_at && (
+                        <div className="col-span-full">
+                          <Label className="text-destructive text-xs">Cancelled</Label>
+                          <p className="text-xs bg-destructive/10 p-2 rounded">
+                            {format(new Date(sub.cancelled_at), "dd MMM yyyy HH:mm")}
+                            {sub.cancellation_reason && ` - ${sub.cancellation_reason}`}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    {index < selectedUserSubscriptions.history.length - 1 && (
+                      <Separator className="mt-4" />
+                    )}
                   </div>
-                  {selectedItem.order_id && (
-                    <div>
-                      <Label className="text-muted-foreground">Order ID</Label>
-                      <p className="font-mono text-xs bg-muted p-2 rounded mt-1">{selectedItem.order_id}</p>
-                    </div>
-                  )}
-                  {selectedItem.subscription_id && selectedItem.type === "payment" && (
-                    <div>
-                      <Label className="text-muted-foreground">Subscription ID</Label>
-                      <p className="font-mono text-xs bg-muted p-2 rounded mt-1">{selectedItem.subscription_id}</p>
-                    </div>
-                  )}
-                </div>
+                ))}
               </div>
-            </div>
-          )}
+            )}
+          </ScrollArea>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setIsHistoryOpen(false)}>
               Close
             </Button>
           </DialogFooter>

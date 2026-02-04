@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
@@ -27,6 +27,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import {
@@ -41,6 +43,7 @@ import {
   AlertTriangle,
   RefreshCw,
   Edit,
+  History
 } from "lucide-react";
 
 interface NFCOrder {
@@ -63,6 +66,18 @@ interface NFCOrder {
   user_phone?: string;
 }
 
+interface UserOrderSummary {
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  user_phone: string;
+  latest: NFCOrder;
+  history: NFCOrder[];
+  totalAmount: number;
+  orderCount: number;
+  totalQuantity: number;
+}
+
 export function AdminNFCOrdersTab() {
   const [orders, setOrders] = useState<NFCOrder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,9 +85,12 @@ export function AdminNFCOrdersTab() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
-  // Details/Edit dialog
+  // History dialog
+  const [selectedUserOrders, setSelectedUserOrders] = useState<UserOrderSummary | null>(null);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  
+  // Edit dialog
   const [selectedOrder, setSelectedOrder] = useState<NFCOrder | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editStatus, setEditStatus] = useState("");
   const [updating, setUpdating] = useState(false);
@@ -82,7 +100,6 @@ export function AdminNFCOrdersTab() {
   useEffect(() => {
     fetchOrders();
 
-    // Real-time subscription
     const channel = supabase
       .channel("admin-nfc-orders")
       .on(
@@ -116,7 +133,6 @@ export function AdminNFCOrdersTab() {
 
       if (error) throw error;
 
-      // Enrich with user data
       const userIds = [...new Set(ordersData?.map((o) => o.user_id) || [])];
       const { data: profiles } = await supabase
         .from("profiles")
@@ -147,6 +163,39 @@ export function AdminNFCOrdersTab() {
     }
   };
 
+  // Group orders by user
+  const userOrderSummaries = useMemo(() => {
+    const grouped = new Map<string, NFCOrder[]>();
+    
+    orders.forEach((order) => {
+      const existing = grouped.get(order.user_id) || [];
+      grouped.set(order.user_id, [...existing, order]);
+    });
+
+    const summaries: UserOrderSummary[] = [];
+    grouped.forEach((userOrders, userId) => {
+      const sorted = userOrders.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      const latest = sorted[0];
+      summaries.push({
+        user_id: userId,
+        user_name: latest.user_name || "Unknown",
+        user_email: latest.user_email || "",
+        user_phone: latest.user_phone || "",
+        latest,
+        history: sorted,
+        totalAmount: userOrders.reduce((sum, o) => sum + o.amount, 0),
+        orderCount: userOrders.length,
+        totalQuantity: userOrders.reduce((sum, o) => sum + o.quantity, 0),
+      });
+    });
+
+    return summaries.sort((a, b) => 
+      new Date(b.latest.created_at).getTime() - new Date(a.latest.created_at).getTime()
+    );
+  }, [orders]);
+
   const updateOrderStatus = async () => {
     if (!selectedOrder) return;
 
@@ -174,50 +223,15 @@ export function AdminNFCOrdersTab() {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusMap: Record<
-      string,
-      { variant: any; icon: any; label: string }
-    > = {
-      pending: {
-        variant: "secondary",
-        icon: Clock,
-        label: "Pending",
-      },
-      paid: {
-        variant: "default",
-        icon: CheckCircle,
-        label: "Paid",
-      },
-      processing: {
-        variant: "secondary",
-        icon: Loader2,
-        label: "Processing",
-      },
-      shipped: {
-        variant: "default",
-        icon: Truck,
-        label: "Shipped",
-      },
-      delivered: {
-        variant: "default",
-        icon: CheckCircle,
-        label: "Delivered",
-      },
-      cancelled: {
-        variant: "destructive",
-        icon: XCircle,
-        label: "Cancelled",
-      },
-      payment_failed: {
-        variant: "destructive",
-        icon: AlertTriangle,
-        label: "Payment Failed",
-      },
-      failed: {
-        variant: "destructive",
-        icon: XCircle,
-        label: "Failed",
-      },
+    const statusMap: Record<string, { variant: any; icon: any; label: string }> = {
+      pending: { variant: "secondary", icon: Clock, label: "Pending" },
+      paid: { variant: "default", icon: CheckCircle, label: "Paid" },
+      processing: { variant: "secondary", icon: Loader2, label: "Processing" },
+      shipped: { variant: "default", icon: Truck, label: "Shipped" },
+      delivered: { variant: "default", icon: CheckCircle, label: "Delivered" },
+      cancelled: { variant: "destructive", icon: XCircle, label: "Cancelled" },
+      payment_failed: { variant: "destructive", icon: AlertTriangle, label: "Payment Failed" },
+      failed: { variant: "destructive", icon: XCircle, label: "Failed" },
     };
 
     const config = statusMap[status?.toLowerCase()] || {
@@ -227,7 +241,6 @@ export function AdminNFCOrdersTab() {
     };
 
     const Icon = config.icon;
-
     return (
       <Badge variant={config.variant} className="gap-1">
         <Icon className={`w-3 h-3 ${status === "processing" ? "animate-spin" : ""}`} />
@@ -244,25 +257,24 @@ export function AdminNFCOrdersTab() {
     );
   };
 
-  const filteredOrders = orders.filter((order) => {
+  // Filter order summaries
+  const filteredOrderSummaries = userOrderSummaries.filter((summary) => {
     const matchesSearch =
-      order.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user_phone?.includes(searchTerm) ||
-      order.order_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.razorpay_order_id?.toLowerCase().includes(searchTerm.toLowerCase());
+      summary.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      summary.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      summary.user_phone?.includes(searchTerm) ||
+      summary.latest.order_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      summary.latest.razorpay_order_id?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus =
-      statusFilter === "all" || order.status === statusFilter;
-    const matchesType =
-      typeFilter === "all" || order.product_type === typeFilter;
+    const matchesStatus = statusFilter === "all" || summary.latest.status === statusFilter;
+    const matchesType = typeFilter === "all" || summary.latest.product_type === typeFilter;
 
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  const showDetails = (order: NFCOrder) => {
-    setSelectedOrder(order);
-    setIsDetailsOpen(true);
+  const showOrderHistory = (summary: UserOrderSummary) => {
+    setSelectedUserOrders(summary);
+    setIsHistoryOpen(true);
   };
 
   const showEditStatus = (order: NFCOrder) => {
@@ -284,7 +296,7 @@ export function AdminNFCOrdersTab() {
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <Package className="w-5 h-5" />
-          NFC Card Orders ({filteredOrders.length})
+          NFC Card Orders ({filteredOrderSummaries.length} users)
         </h2>
         <Button
           variant="outline"
@@ -343,98 +355,80 @@ export function AdminNFCOrdersTab() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[120px]">Order #</TableHead>
                 <TableHead className="min-w-[150px]">User</TableHead>
+                <TableHead>Latest Order</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>Variant</TableHead>
-                <TableHead>Qty</TableHead>
-                <TableHead>Amount</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>Total Orders</TableHead>
+                <TableHead>Total Spent</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.map((order) => (
-                <TableRow key={order.id}>
+              {filteredOrderSummaries.map((summary) => (
+                <TableRow key={summary.user_id}>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="font-mono text-sm font-medium">
-                        {order.order_number || "-"}
-                      </p>
-                      {order.razorpay_order_id && (
-                        <p className="font-mono text-xs text-muted-foreground">
-                          {order.razorpay_order_id.slice(0, 20)}...
-                        </p>
+                      <p className="font-medium text-sm">{summary.user_name}</p>
+                      <p className="text-xs text-muted-foreground">{summary.user_email}</p>
+                      {summary.user_phone && (
+                        <p className="text-xs text-muted-foreground">{summary.user_phone}</p>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="font-medium text-sm">{order.user_name}</p>
+                      <p className="font-mono text-sm font-medium">
+                        {summary.latest.order_number || "-"}
+                      </p>
                       <p className="text-xs text-muted-foreground">
-                        {order.user_email}
+                        {format(new Date(summary.latest.created_at), "dd MMM yyyy HH:mm")}
+                      </p>
+                      {summary.latest.card_variant && (
+                        <Badge variant="outline" className="capitalize text-xs">
+                          {summary.latest.card_variant}
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      {getTypeBadge(summary.latest.product_type)}
+                      <p className="text-xs text-muted-foreground">
+                        Qty: {summary.latest.quantity}
                       </p>
                     </div>
                   </TableCell>
-                  <TableCell>{getTypeBadge(order.product_type)}</TableCell>
+                  <TableCell>{getStatusBadge(summary.latest.status)}</TableCell>
                   <TableCell>
-                    {order.card_variant ? (
-                      <Badge variant="outline" className="capitalize">
-                        {order.card_variant}
+                    <div className="space-y-1">
+                      <Badge variant="secondary" className="gap-1">
+                        <History className="w-3 h-3" />
+                        {summary.orderCount} order(s)
                       </Badge>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-medium">{order.quantity}</span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <p className="font-semibold">₹{order.amount.toFixed(2)}</p>
-                      <p className="text-xs text-muted-foreground uppercase">
-                        {order.currency || "INR"}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell>{getStatusBadge(order.status)}</TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <p className="text-sm">
-                        {format(new Date(order.created_at), "dd MMM yyyy")}
-                      </p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(order.created_at), "HH:mm")}
+                        {summary.totalQuantity} cards total
                       </p>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => showDetails(order)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => showEditStatus(order)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    <p className="font-semibold text-primary">₹{summary.totalAmount.toFixed(2)}</p>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => showOrderHistory(summary)}
+                    >
+                      <Eye className="w-4 h-4 mr-1" />
+                      View All
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
-              {filteredOrders.length === 0 && (
+              {filteredOrderSummaries.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    colSpan={9}
-                    className="text-center py-8 text-muted-foreground"
-                  >
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     No orders found
                   </TableCell>
                 </TableRow>
@@ -444,162 +438,110 @@ export function AdminNFCOrdersTab() {
         </div>
       </div>
 
-      {/* Details Dialog */}
-      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      {/* History Dialog */}
+      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>Order Details</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5" />
+              Order History
+            </DialogTitle>
             <DialogDescription>
-              Complete order information for {selectedOrder?.order_number || "N/A"}
+              {selectedUserOrders && (
+                <span>
+                  {selectedUserOrders.user_name} ({selectedUserOrders.user_email}) - 
+                  {selectedUserOrders.orderCount} orders, {selectedUserOrders.totalQuantity} cards, 
+                  Total: ₹{selectedUserOrders.totalAmount.toFixed(2)}
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
 
-          {selectedOrder && (
-            <div className="space-y-6">
-              {/* Order Info */}
-              <div>
-                <h3 className="font-semibold mb-3 text-sm">Order Information</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <Label className="text-muted-foreground">Order Number</Label>
-                    <p className="font-mono font-medium">
-                      {selectedOrder.order_number || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Status</Label>
-                    <div className="mt-1">{getStatusBadge(selectedOrder.status)}</div>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Product Type</Label>
-                    <div className="mt-1">{getTypeBadge(selectedOrder.product_type)}</div>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Variant</Label>
-                    <p className="font-medium capitalize">
-                      {selectedOrder.card_variant || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Quantity</Label>
-                    <p className="font-semibold text-lg">{selectedOrder.quantity}</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Amount</Label>
-                    <p className="font-semibold text-lg">
-                      ₹{selectedOrder.amount.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* User Info */}
-              <div>
-                <h3 className="font-semibold mb-3 text-sm">Customer Information</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <Label className="text-muted-foreground">Name</Label>
-                    <p className="font-medium">{selectedOrder.user_name}</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Email</Label>
-                    <p className="font-medium">{selectedOrder.user_email}</p>
-                  </div>
-                  {selectedOrder.user_phone && (
-                    <div>
-                      <Label className="text-muted-foreground">Phone</Label>
-                      <p className="font-medium">{selectedOrder.user_phone}</p>
+          <ScrollArea className="flex-1 pr-4">
+            {selectedUserOrders && (
+              <div className="space-y-4">
+                {selectedUserOrders.history.map((order, index) => (
+                  <div key={order.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant={index === 0 ? "default" : "outline"}>
+                          {index === 0 ? "Latest" : `#${selectedUserOrders.history.length - index}`}
+                        </Badge>
+                        {getTypeBadge(order.product_type)}
+                        {getStatusBadge(order.status)}
+                        {order.card_variant && (
+                          <Badge variant="outline" className="capitalize">
+                            {order.card_variant}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-lg">₹{order.amount.toFixed(2)}</p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => showEditStatus(order)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                  )}
-                  <div>
-                    <Label className="text-muted-foreground">User ID</Label>
-                    <p className="font-mono text-xs">{selectedOrder.user_id}</p>
-                  </div>
-                </div>
-              </div>
 
-              {/* Razorpay Details */}
-              {selectedOrder.razorpay_order_id && (
-                <div>
-                  <h3 className="font-semibold mb-3 text-sm">
-                    Payment Information
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <Label className="text-muted-foreground">Razorpay Order ID</Label>
-                      <p className="font-mono text-xs bg-muted p-2 rounded mt-1">
-                        {selectedOrder.razorpay_order_id}
-                      </p>
-                    </div>
-                    {selectedOrder.razorpay_payment_id && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                       <div>
-                        <Label className="text-muted-foreground">
-                          Razorpay Payment ID
-                        </Label>
-                        <p className="font-mono text-xs bg-muted p-2 rounded mt-1">
-                          {selectedOrder.razorpay_payment_id}
+                        <Label className="text-muted-foreground text-xs">Order Number</Label>
+                        <p className="font-mono font-medium">{order.order_number || "N/A"}</p>
+                      </div>
+                      <div>
+                        <Label className="text-muted-foreground text-xs">Date & Time</Label>
+                        <p className="font-medium">
+                          {format(new Date(order.created_at), "dd MMM yyyy HH:mm:ss")}
                         </p>
                       </div>
+                      <div>
+                        <Label className="text-muted-foreground text-xs">Quantity</Label>
+                        <p className="font-semibold">{order.quantity}</p>
+                      </div>
+                      {order.razorpay_order_id && (
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Razorpay Order ID</Label>
+                          <p className="font-mono text-xs">{order.razorpay_order_id}</p>
+                        </div>
+                      )}
+                      {order.razorpay_payment_id && (
+                        <div>
+                          <Label className="text-muted-foreground text-xs">Razorpay Payment ID</Label>
+                          <p className="font-mono text-xs">{order.razorpay_payment_id}</p>
+                        </div>
+                      )}
+                      <div>
+                        <Label className="text-muted-foreground text-xs">Updated</Label>
+                        <p className="text-xs">
+                          {format(new Date(order.updated_at), "dd MMM yyyy HH:mm")}
+                        </p>
+                      </div>
+                      {order.notes && Object.keys(order.notes).length > 0 && (
+                        <div className="col-span-full">
+                          <Label className="text-muted-foreground text-xs">Notes</Label>
+                          <div className="bg-muted p-2 rounded text-xs mt-1">
+                            <pre className="whitespace-pre-wrap">
+                              {JSON.stringify(order.notes, null, 2)}
+                            </pre>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {index < selectedUserOrders.history.length - 1 && (
+                      <Separator className="mt-4" />
                     )}
                   </div>
-                </div>
-              )}
-
-              {/* Notes */}
-              {selectedOrder.notes && Object.keys(selectedOrder.notes).length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-3 text-sm">Notes</h3>
-                  <div className="bg-muted p-3 rounded text-sm">
-                    <pre className="whitespace-pre-wrap">
-                      {JSON.stringify(selectedOrder.notes, null, 2)}
-                    </pre>
-                  </div>
-                </div>
-              )}
-
-              {/* Timestamps */}
-              <div>
-                <h3 className="font-semibold mb-3 text-sm">Timestamps</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <Label className="text-muted-foreground">Created At</Label>
-                    <p className="font-medium">
-                      {format(
-                        new Date(selectedOrder.created_at),
-                        "dd MMM yyyy HH:mm:ss"
-                      )}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Updated At</Label>
-                    <p className="font-medium">
-                      {format(
-                        new Date(selectedOrder.updated_at),
-                        "dd MMM yyyy HH:mm:ss"
-                      )}
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
+            )}
+          </ScrollArea>
 
-              {/* Internal ID */}
-              <div>
-                <h3 className="font-semibold mb-3 text-sm">Internal Reference</h3>
-                <div>
-                  <Label className="text-muted-foreground">Order ID</Label>
-                  <p className="font-mono text-xs bg-muted p-2 rounded mt-1">
-                    {selectedOrder.id}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDetailsOpen(false)}
-            >
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setIsHistoryOpen(false)}>
               Close
             </Button>
           </DialogFooter>
