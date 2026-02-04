@@ -3,240 +3,422 @@ import { BrandLogo } from '@/components/BrandLogo';
 export default function Terms() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Header */}
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-center mb-12">
           <BrandLogo size="lg" asLink={true} />
         </div>
 
         {/* Content */}
-        <div className="space-y-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-foreground mb-2">📄 TERMS</h1>
-            <p className="text-xl text-muted-foreground">Welcome to SYNKA</p>
-            <p className="text-muted-foreground">By using SYNKA, you agree to the following terms.</p>
+        <div className="space-y-12">
+          {/* Hero Section */}
+          <div className="text-center space-y-3">
+            <h1 className="text-4xl font-bold text-foreground tracking-tight">Terms of Service</h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Welcome to SYNKA. By using our services, you agree to these terms.
+            </p>
           </div>
 
+          {/* Divider */}
+          <div className="border-t border-border/50" />
+
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">1. Service Overview</h2>
-            <p className="text-muted-foreground">
-              SYNKA provides digital business cards, CRM tools, NFC card services, analytics, and sharing features.
+            <h2 className="text-2xl font-semibold text-foreground">1. Service Overview</h2>
+            <p className="text-muted-foreground leading-relaxed">
+              SYNKA provides digital business cards, CRM tools, NFC card services, analytics, and sharing features to help you connect and grow your professional network.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">2. User Accounts</h2>
-            <ul className="list-disc list-inside text-muted-foreground space-y-2">
-              <li>You are responsible for maintaining the confidentiality of your account.</li>
-              <li>All information provided must be accurate.</li>
+            <h2 className="text-2xl font-semibold text-foreground">2. User Accounts</h2>
+            <ul className="space-y-3 text-muted-foreground">
+              <li className="flex items-start gap-3">
+                <span className="text-orange-500 mt-1">•</span>
+                <span>You are responsible for maintaining the confidentiality of your account credentials.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-orange-500 mt-1">•</span>
+                <span>All information provided during registration must be accurate and up to date.</span>
+              </li>
             </ul>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">3. Free & Orange Plans</h2>
-            <ul className="list-disc list-inside text-muted-foreground space-y-2">
-              <li>Free plan includes limited features.</li>
-              <li>Orange plan unlocks premium features including multiple cards, analytics, downloads, and documents.</li>
-              <li>Pricing and features may change with prior notice.</li>
+            <h2 className="text-2xl font-semibold text-foreground">3. Service Plans</h2>
+            <ul className="space-y-3 text-muted-foreground">
+              <li className="flex items-start gap-3">
+                <span className="text-orange-500 mt-1">•</span>
+                <span>Free plan includes essential features for getting started.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-orange-500 mt-1">•</span>
+                <span>Orange plan unlocks premium capabilities including multiple cards, advanced analytics, and exclusive benefits.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-orange-500 mt-1">•</span>
+                <span>Pricing and features may be updated with advance notice to users.</span>
+              </li>
             </ul>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">4. NFC Cards</h2>
-            <ul className="list-disc list-inside text-muted-foreground space-y-2">
-              <li>Physical cards are non-refundable once written or customized.</li>
-              <li>SYNKA is not responsible for device NFC limitations.</li>
+            <h2 className="text-2xl font-semibold text-foreground">4. NFC Cards</h2>
+            <ul className="space-y-3 text-muted-foreground">
+              <li className="flex items-start gap-3">
+                <span className="text-orange-500 mt-1">•</span>
+                <span>Physical cards are custom-made and non-refundable once production begins.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-orange-500 mt-1">•</span>
+                <span>SYNKA is not responsible for NFC compatibility limitations on certain devices.</span>
+              </li>
             </ul>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">5. Acceptable Use</h2>
-            <p className="text-muted-foreground">You agree not to:</p>
-            <ul className="list-disc list-inside text-muted-foreground space-y-2">
-              <li>Misuse the platform</li>
-              <li>Share illegal, harmful, or misleading content</li>
-              <li>Attempt to hack or disrupt the service</li>
+            <h2 className="text-2xl font-semibold text-foreground">5. Acceptable Use</h2>
+            <p className="text-muted-foreground">By using SYNKA, you agree not to:</p>
+            <ul className="space-y-3 text-muted-foreground mt-3">
+              <li className="flex items-start gap-3">
+                <span className="text-orange-500 mt-1">•</span>
+                <span>Misuse the platform or violate any applicable laws.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-orange-500 mt-1">•</span>
+                <span>Share illegal, harmful, defamatory, or misleading content.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-orange-500 mt-1">•</span>
+                <span>Attempt to compromise, hack, or disrupt the service.</span>
+              </li>
             </ul>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">6. Termination</h2>
-            <p className="text-muted-foreground">
-              We reserve the right to suspend or terminate accounts violating these terms.
+            <h2 className="text-2xl font-semibold text-foreground">6. Account Termination</h2>
+            <p className="text-muted-foreground leading-relaxed">
+              SYNKA reserves the right to suspend or terminate accounts that violate these terms or engage in activities that compromise the platform's integrity.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">7. Updates</h2>
-            <p className="text-muted-foreground">
-              Terms may be updated from time to time. Continued use means acceptance.
+            <h2 className="text-2xl font-semibold text-foreground">7. Updates to Terms</h2>
+            <p className="text-muted-foreground leading-relaxed">
+              These terms may be updated periodically. Continued use of SYNKA after changes constitutes acceptance of the updated terms.
             </p>
           </section>
+
+          {/* Divider */}
+          <div className="border-t border-border/50" />
 
           {/* Replacement Policy */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">8. Replacement Policy</h2>
+          <section className="space-y-6">
+            <h2 className="text-2xl font-semibold text-foreground">8. Replacement Policy</h2>
 
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground">Applicable to All NFC Cards (PVC & Metal)</h3>
-              <p className="text-muted-foreground">Replacement is provided free of cost only in the following cases:</p>
-              <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>NFC chip malfunction due to manufacturing defect</li>
-                <li>Card damaged during delivery</li>
-                <li>Printing or engraving error caused by SYNKA</li>
+            <div className="space-y-4 p-6 rounded-xl bg-muted/30 border border-border/50">
+              <h3 className="text-lg font-medium text-foreground">Applicable to All NFC Cards</h3>
+              <p className="text-muted-foreground text-sm">Free replacement is provided for:</p>
+              <ul className="space-y-2.5 text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 mt-1">✓</span>
+                  <span>NFC chip malfunction due to manufacturing defect</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 mt-1">✓</span>
+                  <span>Card damaged during delivery</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 mt-1">✓</span>
+                  <span>Printing or engraving errors caused by SYNKA</span>
+                </li>
               </ul>
-              <p className="text-muted-foreground mt-2">
-                No courier or shipping charges apply for the above cases. There is no time limit for reporting delivery damage or manufacturing defects.
+              <p className="text-sm text-muted-foreground pt-2 border-t border-border/30">
+                No courier charges apply. No time limit for reporting manufacturing defects or delivery damage.
               </p>
             </div>
 
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground">Cases Not Covered Under Free Replacement</h3>
-              <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>Lost or misplaced cards</li>
-                <li>Physical damage caused by bending, scratching, water exposure, or misuse</li>
-                <li>Design changes or reprints requested by the customer</li>
-                <li>Cosmetic wear over time (normal patina, light scratches on metal cards)</li>
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-foreground">Not Covered</h3>
+              <ul className="space-y-2.5 text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <span className="text-muted-foreground/40 mt-1">×</span>
+                  <span>Lost or misplaced cards</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-muted-foreground/40 mt-1">×</span>
+                  <span>Physical damage from bending, scratching, water exposure, or misuse</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-muted-foreground/40 mt-1">×</span>
+                  <span>Customer-requested design changes or reprints</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-muted-foreground/40 mt-1">×</span>
+                  <span>Normal cosmetic wear over time</span>
+                </li>
               </ul>
             </div>
 
-            <div className="space-y-3 p-4 rounded-xl bg-primary/10 border border-primary/20">
-              <h3 className="text-lg font-medium text-foreground">🟧 Orange Plan – Free PVC NFC Card Benefit</h3>
-              <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>A complimentary PVC NFC card is provided upon activation of the Annual Orange Plan.</li>
-                <li>One additional free PVC NFC card is available each year after successful annual renewal.</li>
-                <li>No courier charges apply for this benefit.</li>
-                <li>This benefit is valid only while the Orange Annual subscription remains active.</li>
+            <div className="space-y-4 p-6 rounded-xl bg-gradient-to-br from-orange-500/5 to-orange-500/10 border border-orange-500/20">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-6 bg-orange-500 rounded-full" />
+                <h3 className="text-lg font-medium text-foreground">Orange Plan – Free NFC Card Benefit</h3>
+              </div>
+              <ul className="space-y-2.5 text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <span className="text-orange-500 mt-1">•</span>
+                  <span>Complimentary PVC NFC card upon Annual Orange Plan activation</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-orange-500 mt-1">•</span>
+                  <span>One additional free card each year after successful renewal</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-orange-500 mt-1">•</span>
+                  <span>No courier charges for this benefit</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-orange-500 mt-1">•</span>
+                  <span>Valid only while Orange Annual subscription remains active</span>
+                </li>
               </ul>
-              <p className="text-muted-foreground text-sm mt-3">
-                To claim, email from your registered Orange account email ID to <span className="font-medium text-foreground">orders@synka.in</span>
-              </p>
+              <div className="pt-3 border-t border-orange-500/20">
+                <p className="text-sm text-muted-foreground">
+                  To claim: Email from your registered account to <span className="font-medium text-foreground">orders@synka.in</span>
+                </p>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground">⚠️ Important Notes</h3>
-              <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>All replacement requests must be made from the registered account email.</li>
-                <li>SYNKA reserves the right to verify eligibility before processing replacement.</li>
-                <li>Approved replacements are issued with the same design unless otherwise requested (charges may apply for design changes).</li>
+            <div className="space-y-3 text-sm text-muted-foreground p-4 rounded-lg bg-muted/20">
+              <p className="font-medium text-foreground">Important Notes</p>
+              <ul className="space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-500 mt-0.5">→</span>
+                  <span>Replacement requests must originate from the registered account email</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-500 mt-0.5">→</span>
+                  <span>SYNKA reserves the right to verify eligibility before processing</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-500 mt-0.5">→</span>
+                  <span>Replacements use the same design unless requested otherwise (charges may apply)</span>
+                </li>
               </ul>
             </div>
           </section>
 
+          {/* Divider */}
+          <div className="border-t border-border/50" />
+
           {/* Cancellation & Refund Policy */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">9. Cancellation & Refund Policy</h2>
+          <section className="space-y-6">
+            <h2 className="text-2xl font-semibold text-foreground">9. Cancellation & Refund Policy</h2>
             
-            <div className="space-y-3">
+            <div className="space-y-4">
               <h3 className="text-lg font-medium text-foreground">Order Cancellation</h3>
-              <p className="text-muted-foreground">Because all NFC cards are custom-made, cancellations depend on the order stage.</p>
+              <p className="text-muted-foreground text-sm">All NFC cards are custom-made. Cancellation eligibility depends on production stage:</p>
               
-              <div className="pl-4 space-y-3">
-                <div>
-                  <h4 className="font-medium text-foreground">Before Design Approval</h4>
-                  <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                    <li>Orders can be cancelled within 24 hours of placing the order or before design approval, whichever is earlier.</li>
-                    <li>A full refund will be issued (excluding payment gateway charges, if applicable).</li>
+              <div className="space-y-4 mt-4">
+                <div className="p-5 rounded-xl bg-green-500/5 border border-green-500/20">
+                  <h4 className="font-medium text-foreground mb-3">Before Design Approval</h4>
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li className="flex items-start gap-3">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      <span>Cancellable within 24 hours of order placement or before design approval (whichever is earlier)</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      <span>Full refund issued (excluding payment gateway charges if applicable)</span>
+                    </li>
                   </ul>
                 </div>
                 
-                <div>
-                  <h4 className="font-medium text-foreground">After Design Approval</h4>
-                  <p className="text-muted-foreground">Once the design is approved and production has started:</p>
-                  <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                    <li>❌ Order cannot be cancelled</li>
-                    <li>❌ No refunds will be provided</li>
+                <div className="p-5 rounded-xl bg-red-500/5 border border-red-500/20">
+                  <h4 className="font-medium text-foreground mb-3">After Design Approval</h4>
+                  <p className="text-muted-foreground text-sm mb-3">Once design is approved and production begins:</p>
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li className="flex items-start gap-3">
+                      <span className="text-red-500 mt-0.5">×</span>
+                      <span>Order cannot be cancelled</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-red-500 mt-0.5">×</span>
+                      <span>No refunds provided</span>
+                    </li>
                   </ul>
-                  <p className="text-muted-foreground text-sm mt-1">This applies to both PVC and Metal NFC cards.</p>
+                  <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-red-500/20">
+                    Applies to both PVC and Metal NFC cards
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 p-5 rounded-xl bg-muted/20 border border-border/50">
+              <h3 className="text-lg font-medium text-foreground">Design Approval Responsibility</h3>
+              <ul className="space-y-2.5 text-muted-foreground text-sm">
+                <li className="flex items-start gap-3">
+                  <span className="text-orange-500 mt-0.5">•</span>
+                  <span>Designs shared via WhatsApp, Email, or Dashboard for approval</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-orange-500 mt-0.5">•</span>
+                  <span>Customer assumes full responsibility for design accuracy post-approval</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-orange-500 mt-0.5">•</span>
+                  <span>Minor variations may occur due to material or production processes</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-lg font-medium text-foreground">Shipping & Delivery</h3>
+              <ul className="space-y-2.5 text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <span className="text-orange-500 mt-1">•</span>
+                  <span>Shipped orders cannot be cancelled or refunded</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-orange-500 mt-1">•</span>
+                  <span>Delivery timelines are estimates and may vary due to logistics</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-orange-500 mt-1">•</span>
+                  <span>Shipping delays do not qualify for refunds</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="space-y-3 p-4 rounded-lg bg-muted/20">
+              <h3 className="text-base font-medium text-foreground">Replacement vs Refund</h3>
+              <p className="text-muted-foreground text-sm">
+                For manufacturing defects or delivery damage, replacement is provided instead of refunds. Refer to Section 8 for full eligibility details.
+              </p>
+            </div>
+
+            <div className="space-y-4 p-6 rounded-xl bg-gradient-to-br from-orange-500/5 to-orange-500/10 border border-orange-500/20">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-6 bg-orange-500 rounded-full" />
+                <h3 className="text-lg font-medium text-foreground">Orange Plan – Subscription Policy</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium text-foreground mb-2 text-sm">Subscription Cancellation</h4>
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500 mt-0.5">•</span>
+                      <span>Cancel anytime from account settings</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500 mt-0.5">•</span>
+                      <span>Cancellation stops future billing only</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500 mt-0.5">•</span>
+                      <span>Paid periods are non-refundable</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="pt-3 border-t border-orange-500/20">
+                  <h4 className="font-medium text-foreground mb-2 text-sm">Refund Policy</h4>
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li className="flex items-start gap-2">
+                      <span className="text-muted-foreground/40 mt-0.5">×</span>
+                      <span>No refunds for partially used subscription periods</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-muted-foreground/40 mt-0.5">×</span>
+                      <span>No refunds for benefits already claimed (free cards, premium features)</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="pt-3 border-t border-orange-500/20">
+                  <h4 className="font-medium text-foreground mb-2 text-sm">Post-Cancellation</h4>
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500 mt-0.5">→</span>
+                      <span>Free NFC card benefit discontinued for future renewals</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500 mt-0.5">→</span>
+                      <span>Previously issued cards remain active</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 p-5 rounded-xl bg-red-500/5 border border-red-500/20">
+              <h3 className="text-base font-medium text-foreground">Non-Refundable Cases</h3>
+              <p className="text-sm text-muted-foreground mb-3">Refunds will not be issued for:</p>
+              <div className="grid sm:grid-cols-2 gap-2">
+                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span className="text-red-500 mt-0.5">×</span>
+                  <span>Change of mind</span>
+                </div>
+                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span className="text-red-500 mt-0.5">×</span>
+                  <span>Incorrect customer details</span>
+                </div>
+                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span className="text-red-500 mt-0.5">×</span>
+                  <span>Customer-approved designs</span>
+                </div>
+                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span className="text-red-500 mt-0.5">×</span>
+                  <span>Material color variations</span>
+                </div>
+                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span className="text-red-500 mt-0.5">×</span>
+                  <span>Device NFC compatibility</span>
+                </div>
+                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span className="text-red-500 mt-0.5">×</span>
+                  <span>Lost or misplaced cards</span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground">🎨 Design Approval Responsibility</h3>
-              <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>Designs are shared via WhatsApp / Email / Dashboard for approval.</li>
-                <li>Once approved by the customer, all responsibility for design accuracy rests with the customer.</li>
-                <li>Minor color or engraving variations may occur due to material or production processes.</li>
+              <h3 className="text-lg font-medium text-foreground">Refund Processing</h3>
+              <ul className="space-y-2.5 text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <span className="text-orange-500 mt-1">•</span>
+                  <span>Approved refunds processed within 5–7 business days</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-orange-500 mt-1">•</span>
+                  <span>Credited to original payment method</span>
+                </li>
               </ul>
             </div>
 
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground">🚚 Shipping & Delivery</h3>
-              <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>Orders already shipped cannot be cancelled or refunded.</li>
-                <li>Delivery timelines are estimates and may vary due to logistics or external factors.</li>
-                <li>Shipping delays do not qualify for refunds.</li>
+            <div className="p-5 rounded-xl bg-muted/30 border border-border/50">
+              <h3 className="text-base font-medium text-foreground mb-3">Support & Escalation</h3>
+              <p className="text-sm text-muted-foreground mb-3">For cancellation or refund requests:</p>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-500 mt-0.5">→</span>
+                  <span>Email <span className="font-medium text-foreground">support@synka.in</span></span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-orange-500 mt-0.5">→</span>
+                  <span>Raise a request from your dashboard</span>
+                </li>
               </ul>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground">🔁 Replacement vs Refund</h3>
-              <p className="text-muted-foreground">For manufacturing defects or delivery damage, replacement is provided instead of refunds.</p>
-              <p className="text-muted-foreground text-sm mt-1">Please refer to Section 8 (Replacement Policy) for full details on eligibility.</p>
-            </div>
-
-            <div className="space-y-3 p-4 rounded-xl bg-primary/10 border border-primary/20">
-              <h3 className="text-lg font-medium text-foreground">🟧 Orange Plan – Subscription Policy</h3>
-              
-              <div className="space-y-2">
-                <h4 className="font-medium text-foreground">Subscription Cancellation</h4>
-                <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                  <li>Orange plan can be cancelled anytime from account settings.</li>
-                  <li>Cancellation stops future billing only.</li>
-                  <li>Already paid subscription periods are non-refundable.</li>
-                </ul>
-              </div>
-              
-              <div className="space-y-2">
-                <h4 className="font-medium text-foreground">Orange Plan Refunds</h4>
-                <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                  <li>❌ No refunds for partially used subscription periods.</li>
-                  <li>❌ No refunds for benefits already availed (including free NFC cards or other premium features).</li>
-                </ul>
-              </div>
-              
-              <div className="space-y-2">
-                <h4 className="font-medium text-foreground">If Orange Plan Is Cancelled</h4>
-                <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                  <li>Free NFC card benefit is discontinued for future renewals.</li>
-                  <li>Previously issued cards remain active and functional.</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground">⚠️ Non-Refundable Cases</h3>
-              <p className="text-muted-foreground">Refunds will not be issued for:</p>
-              <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>Change of mind</li>
-                <li>Incorrect details shared by the customer</li>
-                <li>Design approved by customer</li>
-                <li>Color variation due to material differences</li>
-                <li>NFC compatibility issues caused by unsupported devices</li>
-                <li>Lost or misplaced cards</li>
-              </ul>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground">💳 Refund Processing Timeline</h3>
-              <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>Approved refunds (if applicable) are processed within 5–7 business days.</li>
-                <li>Refunds are credited to the original payment method.</li>
-              </ul>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground">📩 Support & Escalation</h3>
-              <p className="text-muted-foreground">For cancellation or refund requests:</p>
-              <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>Contact us at <span className="font-medium text-foreground">support@synka.in</span></li>
-                <li>Or raise a request from your dashboard</li>
-              </ul>
-              <p className="text-muted-foreground text-sm mt-2">All requests are reviewed on a case-by-case basis.</p>
+              <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border/30">
+                All requests are reviewed on a case-by-case basis
+              </p>
             </div>
           </section>
         </div>
+
+        {/* Footer spacing */}
+        <div className="h-16" />
       </div>
     </div>
   );
