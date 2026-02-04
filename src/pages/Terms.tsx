@@ -73,49 +73,52 @@ export default function Terms() {
             </p>
           </section>
 
-          {/* Free Replacement Policy */}
+          {/* Replacement Policy */}
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">8. Free Replacement Policy</h2>
-            
+            <h2 className="text-xl font-semibold text-foreground">8. Replacement Policy</h2>
+
             <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground">PVC NFC Cards</h3>
+              <h3 className="text-lg font-medium text-foreground">Applicable to All NFC Cards (PVC & Metal)</h3>
+              <p className="text-muted-foreground">Replacement is provided free of cost only in the following cases:</p>
               <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>One free replacement is provided within 6 months of delivery if the card is lost or misplaced.</li>
-                <li>Replacement is limited to one time per card.</li>
-                <li>Courier / shipping charges must be borne by the customer.</li>
-                <li>Damage due to misuse, bending, or intentional harm is not covered.</li>
+                <li>NFC chip malfunction due to manufacturing defect</li>
+                <li>Card damaged during delivery</li>
+                <li>Printing or engraving error caused by SYNKA</li>
               </ul>
+              <p className="text-muted-foreground mt-2">
+                No courier or shipping charges apply for the above cases. There is no time limit for reporting delivery damage or manufacturing defects.
+              </p>
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground">Metal NFC Cards</h3>
+              <h3 className="text-lg font-medium text-foreground">Cases Not Covered Under Free Replacement</h3>
               <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>Metal cards are built for lifetime durability.</li>
-                <li>One free replacement is available within 6 months of delivery in case of loss or manufacturing defects.</li>
-                <li>Courier charges apply.</li>
-                <li>Cosmetic wear over time (scratches, patina) is normal and not considered a defect.</li>
+                <li>Lost or misplaced cards</li>
+                <li>Physical damage caused by bending, scratching, water exposure, or misuse</li>
+                <li>Design changes or reprints requested by the customer</li>
+                <li>Cosmetic wear over time (normal patina, light scratches on metal cards)</li>
               </ul>
             </div>
 
             <div className="space-y-3 p-4 rounded-xl bg-primary/10 border border-primary/20">
-              <h3 className="text-lg font-medium text-foreground">🟧 Orange Plan – NFC Card Free Forever</h3>
-              <p className="text-muted-foreground">For Orange plan users, we go further:</p>
+              <h3 className="text-lg font-medium text-foreground">🟧 Orange Plan – Free PVC NFC Card Benefit</h3>
               <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>NFC card is free for life as long as the user remains on the Orange plan.</li>
-                <li>Includes free replacement or reprint every 6 months.</li>
-                <li>Covers: Lost card, Reprint due to design update, Wear & tear</li>
-                <li>Courier charges apply for each dispatch.</li>
-                <li>Replacement eligibility resets every 6 months.</li>
-                <li>Benefits stop if the Orange plan is cancelled or downgraded.</li>
+                <li>A complimentary PVC NFC card is provided upon activation of the Annual Orange Plan.</li>
+                <li>One additional free PVC NFC card is available each year after successful annual renewal.</li>
+                <li>No courier charges apply for this benefit.</li>
+                <li>This benefit is valid only while the Orange Annual subscription remains active.</li>
               </ul>
+              <p className="text-muted-foreground text-sm mt-3">
+                To claim, email from your registered Orange account email ID to <span className="font-medium text-foreground">orders@synka.in</span>
+              </p>
             </div>
 
             <div className="space-y-3">
               <h3 className="text-lg font-medium text-foreground">⚠️ Important Notes</h3>
               <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                <li>Replacement requests must be raised from the registered account.</li>
-                <li>Design approval is mandatory before reprint.</li>
-                <li>Synka reserves the right to verify eligibility before processing replacement.</li>
+                <li>All replacement requests must be made from the registered account email.</li>
+                <li>SYNKA reserves the right to verify eligibility before processing replacement.</li>
+                <li>Approved replacements are issued with the same design unless otherwise requested (charges may apply for design changes).</li>
               </ul>
             </div>
           </section>
@@ -169,13 +172,8 @@ export default function Terms() {
 
             <div className="space-y-3">
               <h3 className="text-lg font-medium text-foreground">🔁 Replacement vs Refund</h3>
-              <p className="text-muted-foreground">Replacement policies apply instead of refunds for:</p>
-              <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>Lost cards</li>
-                <li>Misplacement</li>
-                <li>Wear & tear</li>
-              </ul>
-              <p className="text-muted-foreground text-sm">Please refer to the Replacement Policy for eligibility.</p>
+              <p className="text-muted-foreground">For manufacturing defects or delivery damage, replacement is provided instead of refunds.</p>
+              <p className="text-muted-foreground text-sm mt-1">Please refer to Section 8 (Replacement Policy) for full details on eligibility.</p>
             </div>
 
             <div className="space-y-3 p-4 rounded-xl bg-primary/10 border border-primary/20">
@@ -194,15 +192,15 @@ export default function Terms() {
                 <h4 className="font-medium text-foreground">Orange Plan Refunds</h4>
                 <ul className="list-disc list-inside text-muted-foreground space-y-1">
                   <li>❌ No refunds for partially used subscription periods.</li>
-                  <li>❌ No refunds for benefits already availed (including free NFC cards, reprints, or replacements).</li>
+                  <li>❌ No refunds for benefits already availed (including free NFC cards or other premium features).</li>
                 </ul>
               </div>
               
               <div className="space-y-2">
                 <h4 className="font-medium text-foreground">If Orange Plan Is Cancelled</h4>
                 <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                  <li>Free NFC card and replacement benefits are discontinued.</li>
-                  <li>Previously issued cards remain active.</li>
+                  <li>Free NFC card benefit is discontinued for future renewals.</li>
+                  <li>Previously issued cards remain active and functional.</li>
                 </ul>
               </div>
             </div>
@@ -216,6 +214,7 @@ export default function Terms() {
                 <li>Design approved by customer</li>
                 <li>Color variation due to material differences</li>
                 <li>NFC compatibility issues caused by unsupported devices</li>
+                <li>Lost or misplaced cards</li>
               </ul>
             </div>
 
@@ -231,10 +230,10 @@ export default function Terms() {
               <h3 className="text-lg font-medium text-foreground">📩 Support & Escalation</h3>
               <p className="text-muted-foreground">For cancellation or refund requests:</p>
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>Contact us at support@synka.in</li>
+                <li>Contact us at <span className="font-medium text-foreground">support@synka.in</span></li>
                 <li>Or raise a request from your dashboard</li>
               </ul>
-              <p className="text-muted-foreground text-sm">All requests are reviewed on a case-by-case basis.</p>
+              <p className="text-muted-foreground text-sm mt-2">All requests are reviewed on a case-by-case basis.</p>
             </div>
           </section>
         </div>
