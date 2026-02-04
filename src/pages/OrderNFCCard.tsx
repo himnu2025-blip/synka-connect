@@ -31,7 +31,10 @@ const cardOptions = [
     id: 'pvc',
     name: 'NFC Business Card',
     price: 499,
+    originalPrice: 999,
     priceDisplay: '₹499',
+    originalPriceDisplay: '₹999',
+    discount: '50% OFF',
     description: 'Smart. Simple. Everyday use.',
     features: [
       'Tap to share (NFC + QR)',
@@ -46,7 +49,10 @@ const cardOptions = [
     id: 'metal',
     name: 'Metal NFC Card',
     price: 1499,
+    originalPrice: 2999,
     priceDisplay: '₹1,499',
+    originalPriceDisplay: '₹2,999',
+    discount: '50% OFF',
     description: 'Designed to impress. Built to last.',
     features: [
       'Tap to share (NFC + QR)',
@@ -528,7 +534,11 @@ const [orderSuccess, setOrderSuccess] = useState(false);
                     <p className="text-sm text-muted-foreground">{option.description}</p>
                   </div>
                   <div className="text-right">
+                    <p className="text-sm text-muted-foreground line-through">{option.originalPriceDisplay}</p>
                     <p className="text-2xl font-bold text-primary">{option.priceDisplay}</p>
+                    <Badge variant="destructive" className="text-[10px] mt-1">
+                      {option.discount} • Limited Time
+                    </Badge>
                   </div>
                 </div>
 
