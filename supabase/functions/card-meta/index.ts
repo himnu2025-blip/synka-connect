@@ -68,17 +68,19 @@ serve(async (req) => {
     const safeRole = escapeHtml(role);
     const safeCompany = escapeHtml(company);
 
-    // Subtitle shown as description where supported.
+    // Build subtitle for description (shown below name in WhatsApp preview)
     const subtitle = role && company ? `${safeRole} @ ${safeCompany}` : safeRole || safeCompany;
     const description = subtitle || "Digital Business Card";
 
-    // Twitter sometimes shows only the title; include role/company in title as a fallback.
-    const title = subtitle ? `${safeName} — ${subtitle}` : safeName;
+    // FIXED: Title should be JUST the name (no role/company duplication)
+    // WhatsApp shows: Title (bold) + Description (below)
+    // So we want: "Nitesh Vohra" as title, "Founder & CEO @ Synka" as description
+    const title = safeName;
 
     const ogImageUrl = photoUrl || DEFAULT_OG_IMAGE;
     const cardUrl = `https://synka.in/u/${slug}`;
 
-    console.log(`[card-meta] Meta for slug=${slug}: title="${title}" image=${ogImageUrl}`);
+    console.log(`[card-meta] Meta for slug=${slug}: title="${title}" desc="${description}" image=${ogImageUrl}`);
 
     const html = `<!doctype html>
 <html lang="en">
@@ -88,7 +90,7 @@ serve(async (req) => {
 <meta name="description" content="${description}" />
 
 <!-- Open Graph -->
-<meta property="og:type" content="website" />
+<meta property="og:type" content="profile" />
 <meta property="og:site_name" content="Synka" />
 <meta property="og:url" content="${cardUrl}" />
 <meta property="og:title" content="${title}" />
@@ -96,10 +98,11 @@ serve(async (req) => {
 <meta property="og:image" content="${ogImageUrl}" />
 <meta property="og:image:secure_url" content="${ogImageUrl}" />
 <meta property="og:image:type" content="image/jpeg" />
-<meta property="og:image:width" content="512" />
-<meta property="og:image:height" content="512" />
+<meta property="og:image:width" content="400" />
+<meta property="og:image:height" content="400" />
+<meta property="og:image:alt" content="${safeName}" />
 
-<!-- Twitter -->
+<!-- Twitter (small image on left, text on right) -->
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content="${title}" />
 <meta name="twitter:description" content="${description}" />
