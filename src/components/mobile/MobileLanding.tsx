@@ -184,7 +184,7 @@ export function MobileLanding({
           className="w-full overflow-hidden rounded-2xl shadow-lg active:scale-[0.98] transition-transform"
         >
           <img
-            src="/images/card/metal-nfc-business-cards.jpeg"
+            src="/images/card/metal-nfc-business-cards.webp"
             alt="Order premium metal NFC business cards"
             className="w-full h-auto object-cover"
           />

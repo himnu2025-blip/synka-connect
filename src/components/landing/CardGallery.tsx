@@ -12,18 +12,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
 const cardDesigns = [
-  { id: 1, image: '/images/card/metal-nfc-business-card-gold.jpeg', name: 'Metal Gold' },
-  { id: 2, image: '/images/card/metal-nfc-business-card-silver.jpeg', name: 'Metal Silver' },
-  { id: 3, image: '/images/card/metal-nfc-business-card-black.jpeg', name: 'Metal Black' },
-  { id: 4, image: '/images/card/metal-nfc-business-card-rose-gold.jpg', name: 'Metal Rose Gold' },
-  { id: 5, image: '/images/card/metal-nfc-card-gold.jpeg', name: 'Metal Gold Premium' },
-  { id: 6, image: '/images/card/metal-nfc-card-silver.jpeg', name: 'Metal Silver Premium' },
-  { id: 7, image: '/images/card/metal-nfc-card-black.jpeg', name: 'Metal Black Premium' },
-  { id: 8, image: '/images/card/metal-nfc-card-rose-gold.jpeg', name: 'Metal Rose Gold Premium' },
-  { id: 9, image: '/images/card/pvc-nfc-card-white-gloss.jpeg', name: 'PVC White Gloss' },
-  { id: 10, image: '/images/card/pvc-nfc-card-black-gloss.jpeg', name: 'PVC Black Gloss' },
-  { id: 11, image: '/images/card/pvc-nfc-card-black-matt.jpeg', name: 'PVC Black Matte' },
-  { id: 12, image: '/images/card/metal-nfc-business-cards.jpeg', name: 'Collection' },
+  { id: 1, image: '/images/card/metal-nfc-card-gold.webp', name: 'Metal Gold' },
+  { id: 2, image: '/images/card/metal-nfc-business-card-silver.webp', name: 'Metal Silver' },
+  { id: 3, image: '/images/card/metal-nfc-business-card-black.webp', name: 'Metal Black' },
+  { id: 4, image: '/images/card/metal-nfc-card-rose-gold.webp', name: 'Metal Rose Gold' },
+  { id: 5, image: '/images/card/Pvc-nfc-business-card.webp', name: 'PVC White' },
+  { id: 6, image: '/images/card/Pvc-nfc-business-card-black.webp', name: 'PVC Black' },
+  { id: 7, image: '/images/card/Pvc-nfc-business-card-orange.webp', name: 'PVC Orange' },
+  { id: 8, image: '/images/card/metal-nfc-business-cards.webp', name: 'Collection' },
 ];
 
 type Step = 'form' | 'otp_verify';
