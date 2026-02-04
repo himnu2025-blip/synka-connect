@@ -663,21 +663,21 @@ export function AdminTransactionsTab() {
 
       {/* History Dialog */}
       <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <History className="w-5 h-5" />
+        <DialogContent className="w-[calc(100%-2rem)] max-w-4xl max-h-[85dvh] sm:max-h-[85vh] overflow-hidden flex flex-col p-4 sm:p-6">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <History className="w-4 h-4 sm:w-5 sm:h-5" />
               {selectedUserPayments ? "Payment History" : "Subscription History"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               {selectedUserPayments && (
-                <span>
+                <span className="break-words">
                   {selectedUserPayments.user_name} ({selectedUserPayments.user_email}) - 
                   {selectedUserPayments.paymentCount} payments, Total: ₹{selectedUserPayments.totalAmount.toFixed(2)}
                 </span>
               )}
               {selectedUserSubscriptions && (
-                <span>
+                <span className="break-words">
                   {selectedUserSubscriptions.user_name} ({selectedUserSubscriptions.user_email}) - 
                   {selectedUserSubscriptions.subscriptionCount} subscriptions
                 </span>
@@ -685,10 +685,10 @@ export function AdminTransactionsTab() {
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="flex-1 pr-4">
+          <div className="flex-1 overflow-y-auto min-h-0 -mx-4 px-4 sm:-mx-6 sm:px-6">
             {/* Payment History */}
             {selectedUserPayments && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6 pb-4">
                 {/* Latest Successful Payment at Top */}
                 {(() => {
                   const successfulPayment = selectedUserPayments.history.find(
@@ -698,43 +698,43 @@ export function AdminTransactionsTab() {
                   const highlightPayment = successfulPayment || latestPayment;
                   
                   return highlightPayment && (
-                    <div className="border-2 border-primary rounded-lg p-4 bg-primary/5">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="default" className="bg-primary">
+                    <div className="border-2 border-primary rounded-lg p-3 sm:p-4 bg-primary/5">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <Badge variant="default" className="bg-primary text-xs">
                             {successfulPayment ? "✓ Latest Successful" : "Latest"}
                           </Badge>
                           {getStatusBadge(highlightPayment.status)}
-                          <Badge variant="outline" className="capitalize">
+                          <Badge variant="outline" className="capitalize text-xs">
                             {highlightPayment.method || "N/A"}
                           </Badge>
                         </div>
-                        <p className="font-bold text-xl text-primary">₹{highlightPayment.amount.toFixed(2)}</p>
+                        <p className="font-bold text-lg sm:text-xl text-primary">₹{highlightPayment.amount.toFixed(2)}</p>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                         <div>
                           <Label className="text-muted-foreground text-xs">Date & Time</Label>
-                          <p className="font-medium">
-                            {format(new Date(highlightPayment.created_at), "dd MMM yyyy HH:mm:ss")}
+                          <p className="font-medium text-xs sm:text-sm">
+                            {format(new Date(highlightPayment.created_at), "dd MMM yyyy HH:mm")}
                           </p>
                         </div>
                         {highlightPayment.razorpay_payment_id && (
-                          <div>
+                          <div className="col-span-2 sm:col-span-1">
                             <Label className="text-muted-foreground text-xs">Payment ID</Label>
-                            <p className="font-mono text-xs">{highlightPayment.razorpay_payment_id}</p>
+                            <p className="font-mono text-xs break-all">{highlightPayment.razorpay_payment_id}</p>
                           </div>
                         )}
                         {highlightPayment.razorpay_order_id && (
-                          <div>
+                          <div className="col-span-2 sm:col-span-1">
                             <Label className="text-muted-foreground text-xs">Order ID</Label>
-                            <p className="font-mono text-xs">{highlightPayment.razorpay_order_id}</p>
+                            <p className="font-mono text-xs break-all">{highlightPayment.razorpay_order_id}</p>
                           </div>
                         )}
                         {highlightPayment.error_code && (
-                          <div className="col-span-full">
+                          <div className="col-span-2">
                             <Label className="text-destructive text-xs">Error</Label>
-                            <p className="text-xs bg-destructive/10 p-2 rounded">
+                            <p className="text-xs bg-destructive/10 p-2 rounded break-words">
                               {highlightPayment.error_code}: {highlightPayment.error_description}
                             </p>
                           </div>
@@ -749,17 +749,17 @@ export function AdminTransactionsTab() {
                   <>
                     <div className="flex items-center gap-2">
                       <Separator className="flex-1" />
-                      <span className="text-sm text-muted-foreground font-medium">
+                      <span className="text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap">
                         All Transactions ({selectedUserPayments.history.length})
                       </span>
                       <Separator className="flex-1" />
                     </div>
                     
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       {selectedUserPayments.history.map((payment, index) => (
-                        <div key={payment.id} className="border rounded-lg p-3 bg-muted/30">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2 flex-wrap">
+                        <div key={payment.id} className="border rounded-lg p-2.5 sm:p-3 bg-muted/30">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                               <Badge variant="outline" className="text-xs">
                                 #{selectedUserPayments.history.length - index}
                               </Badge>
@@ -768,10 +768,10 @@ export function AdminTransactionsTab() {
                                 {payment.method || "N/A"}
                               </Badge>
                             </div>
-                            <p className="font-semibold">₹{payment.amount.toFixed(2)}</p>
+                            <p className="font-semibold text-sm">₹{payment.amount.toFixed(2)}</p>
                           </div>
 
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 text-xs">
                             <div>
                               <span className="text-muted-foreground">Date:</span>{" "}
                               <span className="font-medium">
@@ -779,19 +779,19 @@ export function AdminTransactionsTab() {
                               </span>
                             </div>
                             {payment.razorpay_payment_id && (
-                              <div className="truncate">
+                              <div>
                                 <span className="text-muted-foreground">Pay ID:</span>{" "}
-                                <span className="font-mono text-xs">{payment.razorpay_payment_id}</span>
+                                <span className="font-mono text-xs break-all">{payment.razorpay_payment_id}</span>
                               </div>
                             )}
                             {payment.razorpay_order_id && (
-                              <div className="truncate">
+                              <div>
                                 <span className="text-muted-foreground">Order:</span>{" "}
-                                <span className="font-mono text-xs">{payment.razorpay_order_id}</span>
+                                <span className="font-mono text-xs break-all">{payment.razorpay_order_id}</span>
                               </div>
                             )}
                             {payment.error_code && (
-                              <div className="col-span-full text-destructive">
+                              <div className="col-span-full text-destructive break-words">
                                 <span className="font-medium">Error:</span> {payment.error_code} - {payment.error_description}
                               </div>
                             )}
@@ -806,7 +806,7 @@ export function AdminTransactionsTab() {
 
             {/* Subscription History */}
             {selectedUserSubscriptions && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6 pb-4">
                 {/* Latest Active/Successful Subscription at Top */}
                 {(() => {
                   const activeSubscription = selectedUserSubscriptions.history.find(
@@ -816,28 +816,28 @@ export function AdminTransactionsTab() {
                   const highlightSub = activeSubscription || latestSubscription;
                   
                   return highlightSub && (
-                    <div className="border-2 border-primary rounded-lg p-4 bg-primary/5">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="default" className="bg-primary">
+                    <div className="border-2 border-primary rounded-lg p-3 sm:p-4 bg-primary/5">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <Badge variant="default" className="bg-primary text-xs">
                             {activeSubscription ? "✓ Active Subscription" : "Current"}
                           </Badge>
                           {getPlanBadge(highlightSub.plan_type)}
                           {getStatusBadge(highlightSub.status)}
                         </div>
-                        <p className="font-bold text-xl text-primary">₹{highlightSub.amount.toFixed(2)}</p>
+                        <p className="font-bold text-lg sm:text-xl text-primary">₹{highlightSub.amount.toFixed(2)}</p>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                         <div>
                           <Label className="text-muted-foreground text-xs">Start Date</Label>
-                          <p className="font-medium">
+                          <p className="font-medium text-xs sm:text-sm">
                             {format(new Date(highlightSub.start_date), "dd MMM yyyy")}
                           </p>
                         </div>
                         <div>
                           <Label className="text-muted-foreground text-xs">End Date</Label>
-                          <p className="font-medium">
+                          <p className="font-medium text-xs sm:text-sm">
                             {format(new Date(highlightSub.end_date), "dd MMM yyyy")}
                           </p>
                         </div>
@@ -860,17 +860,17 @@ export function AdminTransactionsTab() {
                           </p>
                         </div>
                         {highlightSub.razorpay_subscription_id && (
-                          <div className="col-span-full">
+                          <div className="col-span-2">
                             <Label className="text-muted-foreground text-xs">Razorpay Sub ID</Label>
-                            <p className="font-mono text-xs bg-muted p-2 rounded">
+                            <p className="font-mono text-xs bg-muted p-2 rounded break-all">
                               {highlightSub.razorpay_subscription_id}
                             </p>
                           </div>
                         )}
                         {highlightSub.cancelled_at && (
-                          <div className="col-span-full">
+                          <div className="col-span-2">
                             <Label className="text-destructive text-xs">Cancelled</Label>
-                            <p className="text-xs bg-destructive/10 p-2 rounded">
+                            <p className="text-xs bg-destructive/10 p-2 rounded break-words">
                               {format(new Date(highlightSub.cancelled_at), "dd MMM yyyy HH:mm")}
                               {highlightSub.cancellation_reason && ` - ${highlightSub.cancellation_reason}`}
                             </p>
@@ -886,27 +886,27 @@ export function AdminTransactionsTab() {
                   <>
                     <div className="flex items-center gap-2">
                       <Separator className="flex-1" />
-                      <span className="text-sm text-muted-foreground font-medium">
+                      <span className="text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap">
                         All Subscriptions ({selectedUserSubscriptions.history.length})
                       </span>
                       <Separator className="flex-1" />
                     </div>
                     
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       {selectedUserSubscriptions.history.map((sub, index) => (
-                        <div key={sub.id} className="border rounded-lg p-3 bg-muted/30">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2 flex-wrap">
+                        <div key={sub.id} className="border rounded-lg p-2.5 sm:p-3 bg-muted/30">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                               <Badge variant="outline" className="text-xs">
                                 #{selectedUserSubscriptions.history.length - index}
                               </Badge>
                               {getPlanBadge(sub.plan_type)}
                               {getStatusBadge(sub.status)}
                             </div>
-                            <p className="font-semibold">₹{sub.amount.toFixed(2)}</p>
+                            <p className="font-semibold text-sm">₹{sub.amount.toFixed(2)}</p>
                           </div>
 
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs">
                             <div>
                               <span className="text-muted-foreground">Start:</span>{" "}
                               <span className="font-medium">
@@ -930,7 +930,7 @@ export function AdminTransactionsTab() {
                               </span>
                             </div>
                             {sub.cancelled_at && (
-                              <div className="col-span-full text-destructive">
+                              <div className="col-span-2 text-destructive break-words">
                                 <span className="font-medium">Cancelled:</span> {format(new Date(sub.cancelled_at), "dd MMM yyyy")}
                                 {sub.cancellation_reason && ` - ${sub.cancellation_reason}`}
                               </div>
@@ -943,10 +943,10 @@ export function AdminTransactionsTab() {
                 )}
               </div>
             )}
-          </ScrollArea>
+          </div>
 
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setIsHistoryOpen(false)}>
+          <DialogFooter className="flex-shrink-0 mt-4 pt-4 border-t">
+            <Button variant="outline" onClick={() => setIsHistoryOpen(false)} className="w-full sm:w-auto">
               Close
             </Button>
           </DialogFooter>

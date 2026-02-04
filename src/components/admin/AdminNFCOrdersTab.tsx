@@ -449,15 +449,15 @@ export function AdminNFCOrdersTab() {
 
       {/* History Dialog */}
       <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <History className="w-5 h-5" />
+        <DialogContent className="w-[calc(100%-2rem)] max-w-4xl max-h-[85dvh] sm:max-h-[85vh] overflow-hidden flex flex-col p-4 sm:p-6">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <History className="w-4 h-4 sm:w-5 sm:h-5" />
               Order History
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               {selectedUserOrders && (
-                <span>
+                <span className="break-words">
                   {selectedUserOrders.user_name} ({selectedUserOrders.user_email}) - 
                   {selectedUserOrders.orderCount} orders, {selectedUserOrders.totalQuantity} cards, 
                   Total: ₹{selectedUserOrders.totalAmount.toFixed(2)}
@@ -466,79 +466,80 @@ export function AdminNFCOrdersTab() {
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="flex-1 pr-4">
+          <div className="flex-1 overflow-y-auto min-h-0 -mx-4 px-4 sm:-mx-6 sm:px-6">
             {selectedUserOrders && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6 pb-4">
                 {/* Latest Order at Top - with edit button prominent */}
                 {(() => {
                   const latestOrder = selectedUserOrders.latest;
                   
                   return latestOrder && (
-                    <div className="border-2 border-primary rounded-lg p-4 bg-primary/5">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge variant="default" className="bg-primary">
+                    <div className="border-2 border-primary rounded-lg p-3 sm:p-4 bg-primary/5">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <Badge variant="default" className="bg-primary text-xs">
                             ✓ Latest Order
                           </Badge>
                           {getTypeBadge(latestOrder.product_type)}
                           {getStatusBadge(latestOrder.status)}
                           {latestOrder.card_variant && (
-                            <Badge variant="outline" className="capitalize">
+                            <Badge variant="outline" className="capitalize text-xs">
                               {latestOrder.card_variant}
                             </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-bold text-xl text-primary">₹{latestOrder.amount.toFixed(2)}</p>
+                        <div className="flex items-center justify-between sm:justify-end gap-2">
+                          <p className="font-bold text-lg sm:text-xl text-primary">₹{latestOrder.amount.toFixed(2)}</p>
                           <Button
                             variant="default"
                             size="sm"
                             onClick={() => showEditStatus(latestOrder)}
+                            className="text-xs sm:text-sm"
                           >
-                            <Edit className="w-4 h-4 mr-1" />
+                            <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                             Update Status
                           </Button>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                         <div>
                           <Label className="text-muted-foreground text-xs">Order Number</Label>
-                          <p className="font-mono font-medium">{latestOrder.order_number || "N/A"}</p>
+                          <p className="font-mono font-medium text-xs sm:text-sm break-all">{latestOrder.order_number || "N/A"}</p>
                         </div>
                         <div>
                           <Label className="text-muted-foreground text-xs">Date & Time</Label>
-                          <p className="font-medium">
-                            {format(new Date(latestOrder.created_at), "dd MMM yyyy HH:mm:ss")}
+                          <p className="font-medium text-xs sm:text-sm">
+                            {format(new Date(latestOrder.created_at), "dd MMM yyyy HH:mm")}
                           </p>
                         </div>
                         <div>
                           <Label className="text-muted-foreground text-xs">Quantity</Label>
                           <p className="font-semibold">{latestOrder.quantity}</p>
                         </div>
-                        {latestOrder.razorpay_order_id && (
-                          <div>
-                            <Label className="text-muted-foreground text-xs">Razorpay Order ID</Label>
-                            <p className="font-mono text-xs">{latestOrder.razorpay_order_id}</p>
-                          </div>
-                        )}
-                        {latestOrder.razorpay_payment_id && (
-                          <div>
-                            <Label className="text-muted-foreground text-xs">Razorpay Payment ID</Label>
-                            <p className="font-mono text-xs">{latestOrder.razorpay_payment_id}</p>
-                          </div>
-                        )}
                         <div>
                           <Label className="text-muted-foreground text-xs">Updated</Label>
                           <p className="text-xs">
                             {format(new Date(latestOrder.updated_at), "dd MMM yyyy HH:mm")}
                           </p>
                         </div>
+                        {latestOrder.razorpay_order_id && (
+                          <div className="col-span-2">
+                            <Label className="text-muted-foreground text-xs">Razorpay Order ID</Label>
+                            <p className="font-mono text-xs break-all">{latestOrder.razorpay_order_id}</p>
+                          </div>
+                        )}
+                        {latestOrder.razorpay_payment_id && (
+                          <div className="col-span-2">
+                            <Label className="text-muted-foreground text-xs">Razorpay Payment ID</Label>
+                            <p className="font-mono text-xs break-all">{latestOrder.razorpay_payment_id}</p>
+                          </div>
+                        )}
                         {latestOrder.notes && Object.keys(latestOrder.notes).length > 0 && (
-                          <div className="col-span-full">
+                          <div className="col-span-2">
                             <Label className="text-muted-foreground text-xs">Notes</Label>
-                            <div className="bg-muted p-2 rounded text-xs mt-1">
-                              <pre className="whitespace-pre-wrap">
+                            <div className="bg-muted p-2 rounded text-xs mt-1 overflow-x-auto">
+                              <pre className="whitespace-pre-wrap text-xs">
                                 {JSON.stringify(latestOrder.notes, null, 2)}
                               </pre>
                             </div>
@@ -554,17 +555,17 @@ export function AdminNFCOrdersTab() {
                   <>
                     <div className="flex items-center gap-2">
                       <Separator className="flex-1" />
-                      <span className="text-sm text-muted-foreground font-medium">
+                      <span className="text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap">
                         All Orders ({selectedUserOrders.history.length})
                       </span>
                       <Separator className="flex-1" />
                     </div>
                     
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       {selectedUserOrders.history.map((order, index) => (
-                        <div key={order.id} className="border rounded-lg p-3 bg-muted/30">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2 flex-wrap">
+                        <div key={order.id} className="border rounded-lg p-2.5 sm:p-3 bg-muted/30">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                               <Badge variant="outline" className="text-xs">
                                 #{selectedUserOrders.history.length - index}
                               </Badge>
@@ -576,22 +577,23 @@ export function AdminNFCOrdersTab() {
                                 </Badge>
                               )}
                             </div>
-                            <div className="flex items-center gap-2">
-                              <p className="font-semibold">₹{order.amount.toFixed(2)}</p>
+                            <div className="flex items-center justify-between sm:justify-end gap-2">
+                              <p className="font-semibold text-sm">₹{order.amount.toFixed(2)}</p>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => showEditStatus(order)}
+                                className="h-7 px-2"
                               >
                                 <Edit className="w-3 h-3" />
                               </Button>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs">
                             <div>
                               <span className="text-muted-foreground">Order:</span>{" "}
-                              <span className="font-mono font-medium">{order.order_number || "N/A"}</span>
+                              <span className="font-mono font-medium break-all">{order.order_number || "N/A"}</span>
                             </div>
                             <div>
                               <span className="text-muted-foreground">Date:</span>{" "}
@@ -617,10 +619,10 @@ export function AdminNFCOrdersTab() {
                 )}
               </div>
             )}
-          </ScrollArea>
+          </div>
 
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setIsHistoryOpen(false)}>
+          <DialogFooter className="flex-shrink-0 mt-4 pt-4 border-t">
+            <Button variant="outline" onClick={() => setIsHistoryOpen(false)} className="w-full sm:w-auto">
               Close
             </Button>
           </DialogFooter>
@@ -629,49 +631,56 @@ export function AdminNFCOrdersTab() {
 
       {/* Edit Status Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
+        <DialogContent className="w-[calc(100%-2rem)] max-w-md p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle>Update Order Status</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base sm:text-lg">Update Order Status</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
               Change the status of order {selectedOrder?.order_number || "N/A"}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 py-2">
             <div>
-              <Label>Current Status</Label>
+              <Label className="text-sm">Current Status</Label>
               <div className="mt-2">{selectedOrder && getStatusBadge(selectedOrder.status)}</div>
             </div>
 
             <div>
-              <Label>New Status</Label>
+              <Label className="text-sm">New Status</Label>
               <Select value={editStatus} onValueChange={setEditStatus}>
-                <SelectTrigger>
-                  <SelectValue />
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select status">
+                    {editStatus && (
+                      <span className="capitalize">{editStatus}</span>
+                    )}
+                  </SelectValue>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" sideOffset={4}>
                   <SelectItem value="paid">Paid</SelectItem>
                   <SelectItem value="placed">Placed</SelectItem>
                   <SelectItem value="processing">Processing</SelectItem>
                   <SelectItem value="dispatched">Dispatched</SelectItem>
                   <SelectItem value="shipped">Shipped</SelectItem>
                   <SelectItem value="delivered">Delivered</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2 pt-4">
             <Button
               variant="outline"
               onClick={() => setIsEditOpen(false)}
               disabled={updating}
+              className="w-full sm:w-auto order-2 sm:order-1"
             >
               Cancel
             </Button>
             <Button
               onClick={updateOrderStatus}
-              disabled={updating || editStatus === selectedOrder?.status}
+              disabled={updating || !editStatus || editStatus === selectedOrder?.status}
+              className="w-full sm:w-auto order-1 sm:order-2"
             >
               {updating ? (
                 <>
