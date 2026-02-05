@@ -129,6 +129,7 @@ async function searchKnowledgeByKeywords(
   }
   
   const allKeywords = [...new Set([...keywords, ...topicKeywords])];
+  const isPricingQuery = /price|pricing|cost|₹|rupee|how much|rate|plan|monthly|yearly|annual/.test(lowerQuery);
   
   if (allKeywords.length === 0) {
     return [];
@@ -158,6 +159,16 @@ async function searchKnowledgeByKeywords(
       if (text.includes(kw)) score += 1;
       if (item.title.toLowerCase().includes(kw)) score += 2;
     }
+
+    // Extra confidence boost for pricing answers so we don't incorrectly fall back
+    // when the KB has the exact price but the user's query doesn't include the same tokens (e.g., "price" vs "₹").
+    if (isPricingQuery && item.category === "pricing") {
+      score += 4;
+    }
+    if (isPricingQuery && item.title.toLowerCase().includes("pricing")) {
+      score += 2;
+    }
+
     // Convert score to similarity (0-1 range)
     const maxPossibleScore = allKeywords.length * 3;
     const similarity = Math.min(0.95, 0.5 + (score / maxPossibleScore) * 0.5);
