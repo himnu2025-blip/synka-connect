@@ -35,6 +35,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Contact from "./pages/Contact";
 import Support from "./pages/Support";
+import Welcome from "./pages/Welcome";
 
 import { createContext, useContext } from "react";
 
@@ -133,6 +134,7 @@ function RouterContent() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/support" element={<Support />} />
+        <Route path="/welcome" element={<Welcome />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
