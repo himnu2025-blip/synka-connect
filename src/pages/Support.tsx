@@ -293,7 +293,7 @@ export default function Support() {
             </AccordionItem>
 
             <AccordionItem value="email-signature" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">✉️ Email Signature</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">Email Signature</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-4">
                 <div>
                   <p className="font-medium text-foreground">Available Formats</p>
@@ -331,7 +331,7 @@ export default function Support() {
             </AccordionItem>
 
             <AccordionItem value="templates" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">🧠 One-Click Templates & AI</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">One-Click Templates & AI</AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 <p className="font-medium text-foreground">What You Can Do</p>
                 <ul className="list-disc list-inside mt-1">
@@ -344,7 +344,7 @@ export default function Support() {
             </AccordionItem>
 
             <AccordionItem value="crm-filters" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">🔍 CRM Filters</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">CRM Filters</AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 <p>Filter contacts by:</p>
                 <ul className="list-disc list-inside mt-1">
