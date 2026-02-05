@@ -356,7 +356,7 @@ export default function Support() {
             </AccordionItem>
 
             <AccordionItem value="ordering" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">🛒 Ordering Physical Cards</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">Ordering Physical Cards</AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 <ol className="list-decimal list-inside space-y-1">
                   <li>Go to Settings</li>
