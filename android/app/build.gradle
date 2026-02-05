@@ -49,6 +49,13 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
+    // Firebase BOM (manages versions)
+implementation platform('com.google.firebase:firebase-bom:33.5.1')
+
+// Firebase services you need
+implementation 'com.google.firebase:firebase-analytics'
+implementation 'com.google.firebase:firebase-auth'
+implementation 'com.google.firebase:firebase-messaging'
     
     // ZXing for QR code generation in widget
     implementation 'com.google.zxing:core:3.5.2'
