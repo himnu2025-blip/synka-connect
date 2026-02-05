@@ -36,6 +36,7 @@ import Privacy from "./pages/Privacy";
 import Contact from "./pages/Contact";
 import Support from "./pages/Support";
 import Welcome from "./pages/Welcome";
+import DeleteAccount from "./pages/DeleteAccount";
 
 import { createContext, useContext } from "react";
 
@@ -135,6 +136,7 @@ function RouterContent() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/support" element={<Support />} />
         <Route path="/welcome" element={<Welcome />} />
+        <Route path="/delete-account" element={<DeleteAccount />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

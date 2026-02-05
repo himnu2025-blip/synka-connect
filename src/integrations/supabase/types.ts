@@ -686,6 +686,48 @@ export type Database = {
         }
         Relationships: []
       }
+      deletion_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          reason: string | null
+          reference_number: string
+          requested_at: string
+          scheduled_deletion_at: string
+          status: string
+          user_email: string | null
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          reference_number: string
+          requested_at?: string
+          scheduled_deletion_at?: string
+          status?: string
+          user_email?: string | null
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          reference_number?: string
+          requested_at?: string
+          scheduled_deletion_at?: string
+          status?: string
+          user_email?: string | null
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: []
+      }
       email_signatures: {
         Row: {
           created_at: string
