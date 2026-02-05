@@ -1,4 +1,6 @@
 import { useEffect, useState, useRef, useMemo } from "react";
+import { useCallback } from "react";
+import { useAdminOrders, useAdminStatus } from "@/hooks/useAdminData";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
@@ -79,8 +81,8 @@ interface UserOrderSummary {
 }
 
 export function AdminNFCOrdersTab() {
-  const [orders, setOrders] = useState<NFCOrder[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { isAdmin } = useAdminStatus();
+  const { data: ordersData = [], isLoading, isFetching, refetch } = useAdminOrders();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -96,9 +98,23 @@ export function AdminNFCOrdersTab() {
   const [updating, setUpdating] = useState(false);
 
   const refreshTimerRef = useRef<number | null>(null);
+  
+  // Filter for NFC orders only (pvc, metal)
+  const orders = useMemo(() => {
+    return (ordersData as NFCOrder[]).filter(o => 
+      o.product_type === 'pvc' || o.product_type === 'metal'
+    );
+  }, [ordersData]);
+
+  const scheduleRefresh = useCallback(() => {
+    if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = window.setTimeout(() => {
+      refetch();
+    }, 300);
+  }, [refetch]);
 
   useEffect(() => {
-    fetchOrders();
+    if (!isAdmin) return;
 
     const channel = supabase
       .channel("admin-nfc-orders")
@@ -113,55 +129,7 @@ export function AdminNFCOrdersTab() {
       if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
       supabase.removeChannel(channel);
     };
-  }, []);
-
-  const scheduleRefresh = () => {
-    if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
-    refreshTimerRef.current = window.setTimeout(() => {
-      fetchOrders();
-    }, 300);
-  };
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const { data: ordersData, error } = await supabase
-        .from("orders")
-        .select("*")
-        .in("product_type", ["pvc", "metal"])
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      const userIds = [...new Set(ordersData?.map((o) => o.user_id) || [])];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, email, phone")
-        .in("user_id", userIds);
-
-      const profileMap = new Map(
-        profiles?.map((p) => [
-          p.user_id,
-          { name: p.full_name, email: p.email, phone: p.phone },
-        ])
-      );
-
-      const enrichedOrders =
-        ordersData?.map((order) => ({
-          ...order,
-          user_name: profileMap.get(order.user_id)?.name || "Unknown",
-          user_email: profileMap.get(order.user_id)?.email || "",
-          user_phone: profileMap.get(order.user_id)?.phone || "",
-        })) || [];
-
-      setOrders(enrichedOrders);
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      toast.error("Failed to fetch orders");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [isAdmin, scheduleRefresh]);
 
   // Successful order statuses - only show these
   const successfulStatuses = ["paid", "processing", "shipped", "delivered", "placed", "dispatched"];
@@ -221,7 +189,7 @@ export function AdminNFCOrdersTab() {
 
       toast.success("Order status updated successfully");
       setIsEditOpen(false);
-      fetchOrders();
+      refetch();
     } catch (error) {
       console.error("Error updating order:", error);
       toast.error("Failed to update order status");
@@ -293,7 +261,7 @@ export function AdminNFCOrdersTab() {
     setIsEditOpen(true);
   };
 
-  if (loading && orders.length === 0) {
+  if (isLoading && orders.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -311,10 +279,10 @@ export function AdminNFCOrdersTab() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => fetchOrders()}
-          disabled={loading}
+          onClick={() => refetch()}
+          disabled={isFetching}
         >
-          {loading ? (
+          {isFetching ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           ) : (
             <RefreshCw className="w-4 h-4 mr-2" />

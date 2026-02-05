@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useAdmin } from '@/hooks/useAdmin';
+import { useAdminStatus } from '@/hooks/useAdminData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AdminUsersTab } from '@/components/admin/AdminUsersTab';
 import { AdminTransactionsTab } from '@/components/admin/AdminTransactionsTab';
@@ -16,34 +16,30 @@ import { Loader2, Shield } from 'lucide-react';
 
 export default function Admin() {
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: adminLoading } = useAdmin();
+  const { isAdmin, loading: adminLoading } = useAdminStatus();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('users');
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/login');
-      return;
-    }
+  // Redirect non-admin users
+  if (!authLoading && !user) {
+    navigate('/login');
+    return null;
+  }
 
-    if (!authLoading && !adminLoading && !isAdmin) {
-      navigate('/dashboard');
-    }
-  }, [user, authLoading, isAdmin, adminLoading, navigate]);
+  if (!authLoading && !adminLoading && !isAdmin) {
+    navigate('/dashboard');
+    return null;
+  }
 
-  if (authLoading || adminLoading) {
+  // Only show loader if we truly don't know admin status yet
+  if (authLoading || (adminLoading && !isAdmin)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
-
-  if (!isAdmin) {
-    return null;
-  }
-
-  return (
+  return isAdmin ? (
     <div className="w-full py-4 sm:py-8 px-3 sm:px-4 md:px-6 max-w-[1600px] mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
@@ -104,5 +100,5 @@ export default function Admin() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  ) : null;
 }

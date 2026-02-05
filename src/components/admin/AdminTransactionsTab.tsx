@@ -1,4 +1,6 @@
 import { useEffect, useState, useRef, useMemo } from "react";
+import { useAdminPayments, useAdminSubscriptions, useAdminStatus } from "@/hooks/useAdminData";
+import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
@@ -113,10 +115,11 @@ interface UserSubscriptionSummary {
 }
 
 export function AdminTransactionsTab() {
+  const { isAdmin } = useAdminStatus();
+  const { data: paymentsData = [], isLoading: paymentsLoading, isFetching: paymentsFetching, refetch: refetchPayments } = useAdminPayments();
+  const { data: subscriptionsData = [], isLoading: subsLoading, isFetching: subsFetching, refetch: refetchSubs } = useAdminSubscriptions();
+  
   const [activeTab, setActiveTab] = useState("payments");
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [planFilter, setPlanFilter] = useState<string>("all");
@@ -127,10 +130,28 @@ export function AdminTransactionsTab() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const refreshTimerRef = useRef<number | null>(null);
+  
+  // Use data from React Query
+  const payments = paymentsData as Payment[];
+  const subscriptions = subscriptionsData as Subscription[];
+  const loading = paymentsLoading || subsLoading;
+  const isFetching = paymentsFetching || subsFetching;
+
+  const fetchData = useCallback(() => {
+    refetchPayments();
+    refetchSubs();
+  }, [refetchPayments, refetchSubs]);
+
+  const scheduleRefresh = useCallback(() => {
+    if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = window.setTimeout(() => {
+      fetchData();
+    }, 300);
+  }, [fetchData]);
 
   useEffect(() => {
-    fetchData();
-    
+    if (!isAdmin) return;
+
     const paymentsChannel = supabase
       .channel("admin-payments")
       .on(
@@ -154,98 +175,7 @@ export function AdminTransactionsTab() {
       supabase.removeChannel(paymentsChannel);
       supabase.removeChannel(subscriptionsChannel);
     };
-  }, []);
-
-  const scheduleRefresh = () => {
-    if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
-    refreshTimerRef.current = window.setTimeout(() => {
-      fetchData();
-    }, 300);
-  };
-
-  const fetchData = async () => {
-    await Promise.all([fetchPayments(), fetchSubscriptions()]);
-  };
-
-  const fetchPayments = async () => {
-    setLoading(true);
-    try {
-      const { data: paymentsData, error } = await supabase
-        .from("payments")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      const userIds = [...new Set(paymentsData?.map((p) => p.user_id) || [])];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, email, phone")
-        .in("user_id", userIds);
-
-      const profileMap = new Map(
-        profiles?.map((p) => [
-          p.user_id,
-          { name: p.full_name, email: p.email, phone: p.phone },
-        ])
-      );
-
-      const enrichedPayments =
-        paymentsData?.map((payment) => ({
-          ...payment,
-          user_name: profileMap.get(payment.user_id)?.name || "Unknown",
-          user_email: profileMap.get(payment.user_id)?.email || "",
-          user_phone: profileMap.get(payment.user_id)?.phone || "",
-        })) || [];
-
-      setPayments(enrichedPayments);
-    } catch (error) {
-      console.error("Error fetching payments:", error);
-      toast.error("Failed to fetch payments");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchSubscriptions = async () => {
-    setLoading(true);
-    try {
-      const { data: subscriptionsData, error } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      const userIds = [...new Set(subscriptionsData?.map((s) => s.user_id) || [])];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, email, phone")
-        .in("user_id", userIds);
-
-      const profileMap = new Map(
-        profiles?.map((p) => [
-          p.user_id,
-          { name: p.full_name, email: p.email, phone: p.phone },
-        ])
-      );
-
-      const enrichedSubscriptions =
-        subscriptionsData?.map((sub) => ({
-          ...sub,
-          user_name: profileMap.get(sub.user_id)?.name || "Unknown",
-          user_email: profileMap.get(sub.user_id)?.email || "",
-          user_phone: profileMap.get(sub.user_id)?.phone || "",
-        })) || [];
-
-      setSubscriptions(enrichedSubscriptions);
-    } catch (error) {
-      console.error("Error fetching subscriptions:", error);
-      toast.error("Failed to fetch subscriptions");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [isAdmin, scheduleRefresh]);
 
   // Group payments by user
   const userPaymentSummaries = useMemo(() => {
@@ -407,9 +337,9 @@ export function AdminTransactionsTab() {
           variant="outline"
           size="sm"
           onClick={() => fetchData()}
-          disabled={loading}
+          disabled={isFetching}
         >
-          {loading ? (
+          {isFetching ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           ) : (
             <RefreshCw className="w-4 h-4 mr-2" />
