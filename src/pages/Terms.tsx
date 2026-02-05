@@ -133,7 +133,7 @@ export default function Terms() {
                 </li>
               </ul>
               <p className="text-sm text-muted-foreground pt-2 border-t border-border/30">
-                No courier charges apply. No time limit for reporting manufacturing defects or delivery damage.
+                Replacement requests must be initiated within 30 days of product delivery. Courier charges are not applicable for approved replacements.
               </p>
             </div>
 
