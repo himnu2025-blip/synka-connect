@@ -15,7 +15,7 @@ export default function Terms() {
           <div className="text-center space-y-3">
             <h1 className="text-4xl font-bold text-foreground tracking-tight">Terms of Service</h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Welcome to SYNKA. By using our services, you agree to these terms.
+              Welcome to SYNKA™. By using our services, you agree to these terms.
             </p>
           </div>
 
@@ -25,7 +25,7 @@ export default function Terms() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">1. Service Overview</h2>
             <p className="text-muted-foreground leading-relaxed">
-              SYNKA provides digital business cards, CRM tools, NFC card services, analytics, and sharing features to help you connect and grow your professional network.
+              SYNKA™ provides digital business cards, CRM tools, NFC card services, analytics, and sharing features to help you connect and grow your professional network.
             </p>
           </section>
 
@@ -70,14 +70,14 @@ export default function Terms() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-orange-500 mt-1">•</span>
-                <span>SYNKA is not responsible for NFC compatibility limitations on certain devices.</span>
+                <span>SYNKA™ is not responsible for NFC compatibility limitations on certain devices.</span>
               </li>
             </ul>
           </section>
 
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">5. Acceptable Use</h2>
-            <p className="text-muted-foreground">By using SYNKA, you agree not to:</p>
+            <p className="text-muted-foreground">By using SYNKA™, you agree not to:</p>
             <ul className="space-y-3 text-muted-foreground mt-3">
               <li className="flex items-start gap-3">
                 <span className="text-orange-500 mt-1">•</span>
@@ -97,14 +97,14 @@ export default function Terms() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">6. Account Termination</h2>
             <p className="text-muted-foreground leading-relaxed">
-              SYNKA reserves the right to suspend or terminate accounts that violate these terms or engage in activities that compromise the platform's integrity.
+              SYNKA™ reserves the right to suspend or terminate accounts that violate these terms or engage in activities that compromise the platform's integrity.
             </p>
           </section>
 
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">7. Updates to Terms</h2>
             <p className="text-muted-foreground leading-relaxed">
-              These terms may be updated periodically. Continued use of SYNKA after changes constitutes acceptance of the updated terms.
+              These terms may be updated periodically. Continued use of SYNKA™ after changes constitutes acceptance of the updated terms.
             </p>
           </section>
 
@@ -129,7 +129,7 @@ export default function Terms() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 mt-1">✓</span>
-                  <span>Printing or engraving errors caused by SYNKA</span>
+                  <span>Printing or engraving errors caused by SYNKA™</span>
                 </li>
               </ul>
               <p className="text-sm text-muted-foreground pt-2 border-t border-border/30">
@@ -198,7 +198,7 @@ export default function Terms() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-orange-500 mt-0.5">→</span>
-                  <span>SYNKA reserves the right to verify eligibility before processing</span>
+                  <span>SYNKA™ reserves the right to verify eligibility before processing</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-orange-500 mt-0.5">→</span>

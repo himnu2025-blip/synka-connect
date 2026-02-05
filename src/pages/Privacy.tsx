@@ -268,7 +268,7 @@ export default function Privacy() {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-orange-500 mt-0.5">•</span>
-                    <span>To protect rights, safety, or property of SYNKA, users, or the public</span>
+                    <span>To protect rights, safety, or property of SYNKA™, users, or the public</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-orange-500 mt-0.5">•</span>
