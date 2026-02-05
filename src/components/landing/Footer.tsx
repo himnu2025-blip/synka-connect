@@ -24,7 +24,7 @@ export function Footer() {
           </nav>
 
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Synka. All rights reserved.
+            © {new Date().getFullYear()} Synka™. All rights reserved.
           </p>
         </div>
       </div>

@@ -26,7 +26,7 @@ export function BrandLogo({ size = 'md', asLink = true, className }: BrandLogoPr
         decoding="async"
       />
       <span className={cn('font-anta font-bold gradient-text', text)}>
-        SYNKA
+        SYNKA<sup className="text-[0.5em] ml-0.5 opacity-70">™</sup>
       </span>
     </div>
   );

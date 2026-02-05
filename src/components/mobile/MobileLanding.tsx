@@ -83,8 +83,8 @@ export function MobileLanding({
             alt="Synka"
             className="w-8 h-8 object-contain"
           />
-          <span className="text-lg font-semibold tracking-tight gradient-text">
-            SYNKA
+          <span className="text-lg font-anta font-bold tracking-tight gradient-text">
+            SYNKA<sup className="text-[0.5em] ml-0.5 opacity-70">™</sup>
           </span>
         </div>
 
@@ -111,7 +111,7 @@ export function MobileLanding({
       <main className="px-4 text-center pt-4">
         {/* TAG */}
         <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
-          SYNKA — Simply Connected
+          SYNKA™ — Simply Connected
         </div>
 
         {/* H1 */}
