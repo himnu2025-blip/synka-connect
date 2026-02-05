@@ -42,7 +42,7 @@ export default function Support() {
 
         {/* How To Guide */}
         <div className="space-y-8">
-          <h2 className="text-2xl font-bold text-foreground">🚀 Getting Started (Basics)</h2>
+          <h2 className="text-2xl font-bold text-foreground">Getting Started (Basics)</h2>
           
           <Accordion type="single" collapsible className="space-y-4">
             <AccordionItem value="what-is-card" className="bg-card border border-border rounded-xl px-4">
@@ -67,7 +67,7 @@ export default function Support() {
             </AccordionItem>
 
             <AccordionItem value="sharing" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">🔁 How Sharing Works (Very Important)</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">How Sharing Works (Very Important)</AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 <div className="overflow-x-auto">
                   <table className="w-full mt-2">
@@ -108,7 +108,7 @@ export default function Support() {
             </AccordionItem>
 
             <AccordionItem value="my-card" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">🪪 MY CARD – How to Use</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">MY CARD – How to Use</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-4">
                 <div>
                   <p className="font-medium text-foreground">Switching Cards</p>
@@ -137,7 +137,7 @@ export default function Support() {
             </AccordionItem>
 
             <AccordionItem value="files" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">📎 Files on Card (Orange Only)</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">Files on Card (Orange Only)</AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 <p>You can upload:</p>
                 <ul className="list-disc list-inside mt-2">
@@ -155,7 +155,7 @@ export default function Support() {
             </AccordionItem>
 
             <AccordionItem value="share-download" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">📲 Share & Download Card</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">Share & Download Card</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-4">
                 <div>
                   <p className="font-medium text-foreground">Share Options</p>
@@ -183,24 +183,22 @@ export default function Support() {
             </AccordionItem>
 
             <AccordionItem value="nfc-cards" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">💳 Physical NFC Cards</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">Physical NFC Cards</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-4">
                 <div>
                   <p className="font-medium text-foreground">Available Materials</p>
                   <ul className="list-disc list-inside mt-1">
-                    <li>PVC White</li>
-                    <li>PVC Black</li>
-                    <li>PVC Black Matte</li>
+                    <li>PVC</li>
                     <li>Metal Gold</li>
                     <li>Metal Silver</li>
+                    <li>Metal Rose Gold</li>
                     <li>Metal Black</li>
                   </ul>
                 </div>
                 <div>
                   <p className="font-medium text-foreground">Customisation</p>
                   <ul className="list-disc list-inside mt-1">
-                    <li>PVC White → any color or design</li>
-                    <li>PVC Black / Matte → photo designs supported</li>
+                    <li>PVC → any color or design (photo designs supported)</li>
                     <li>Metal cards: Name, Role, Company logo (Fully engraved)</li>
                   </ul>
                   <p className="mt-2">Choose from:</p>
@@ -213,18 +211,18 @@ export default function Support() {
             </AccordionItem>
 
             <AccordionItem value="nfc-how" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">📡 How NFC Works</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">How NFC Works</AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 <ul className="space-y-2">
                   <li><span className="font-medium">Android:</span> Tap card on back of phone</li>
                   <li><span className="font-medium">iPhone:</span> Tap card on front / top</li>
                 </ul>
-                <p className="mt-3 text-primary">📌 Screen must be ON</p>
+                <p className="mt-3 text-primary">Screen must be ON</p>
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="nfc-writer" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">✍️ NFC Writer (Orange)</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">NFC Writer (Orange)</AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 <ol className="list-decimal list-inside space-y-1">
                   <li>Go to Settings → NFC Writer</li>
@@ -237,7 +235,7 @@ export default function Support() {
             </AccordionItem>
 
             <AccordionItem value="crm" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">👥 CRM – Contacts & Notes</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">CRM – Contacts & Notes</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-4">
                 <div>
                   <p className="font-medium text-foreground">How Contacts Are Captured</p>
@@ -251,7 +249,7 @@ export default function Support() {
                   <p className="mt-2">All contacts go directly into CRM.</p>
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">📝 Notes & History (Powerful Feature)</p>
+                  <p className="font-medium text-foreground">Notes & History (Powerful Feature)</p>
                   <p className="mt-1">You can instantly log:</p>
                   <ul className="list-disc list-inside mt-1">
                     <li>📞 Calls</li>
@@ -262,7 +260,7 @@ export default function Support() {
                   <p className="mt-2">One-tap capture → stored against contact.</p>
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">🏷️ Auto Tags & Events</p>
+                  <p className="font-medium text-foreground">Auto Tags & Events</p>
                   <ul className="list-disc list-inside mt-1">
                     <li>Auto-tag contacts by: Event, Source, Card used</li>
                     <li>Schedule events</li>
@@ -273,7 +271,7 @@ export default function Support() {
             </AccordionItem>
 
             <AccordionItem value="analytics" className="bg-card border border-border rounded-xl px-4">
-              <AccordionTrigger className="text-foreground font-semibold">📊 Analytics & Reports</AccordionTrigger>
+              <AccordionTrigger className="text-foreground font-semibold">Analytics & Reports</AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 <p className="font-medium text-foreground">Track:</p>
                 <ul className="list-disc list-inside mt-1">
