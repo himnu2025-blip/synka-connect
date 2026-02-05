@@ -4,23 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
-  Smartphone, 
-  Scan, 
-  Wifi, 
-  Share2, 
-  Settings, 
-  Image as ImageIcon, 
-  FileText, 
-  Users, 
-  Clock, 
-  Shield, 
   Zap,
   CheckCircle2,
   XCircle,
   AlertCircle,
-  Sparkles,
   ArrowRight
 } from 'lucide-react';
+import { Users, Clock, Scan, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Welcome() {
@@ -128,7 +118,6 @@ export default function Welcome() {
               {/* How to Use Your Card */}
               <section>
                 <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <Smartphone className="h-6 w-6 text-primary" />
                   How to Use Your Card
                 </h2>
                 
@@ -137,10 +126,7 @@ export default function Welcome() {
                   {/* NFC Tap */}
                   <AccordionItem value="nfc-tap" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      <div className="flex items-center gap-3">
-                        <Wifi className="h-5 w-5 text-primary" />
-                        <span>NFC Tap (Recommended)</span>
-                      </div>
+                      NFC Tap (Recommended)
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <div className="space-y-3">
@@ -182,10 +168,7 @@ export default function Welcome() {
                   {/* QR Scan */}
                   <AccordionItem value="qr-scan" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      <div className="flex items-center gap-3">
-                        <Scan className="h-5 w-5 text-primary" />
-                        <span>QR Code Scanning</span>
-                      </div>
+                      QR Code Scanning
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <div className="space-y-3">
@@ -235,10 +218,7 @@ export default function Welcome() {
                   {/* Link Sharing */}
                   <AccordionItem value="link-share" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      <div className="flex items-center gap-3">
-                        <Share2 className="h-5 w-5 text-primary" />
-                        <span>Share Your Link</span>
-                      </div>
+                      Share Your Link
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <div className="space-y-3">
@@ -327,7 +307,6 @@ export default function Welcome() {
               
               <section>
                 <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <Settings className="h-6 w-6 text-primary" />
                   Setup & Customize Your Card
                 </h2>
 
@@ -416,10 +395,7 @@ export default function Welcome() {
                   {/* Upload Photos */}
                   <AccordionItem value="upload-photos" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      <div className="flex items-center gap-3">
-                        <ImageIcon className="h-5 w-5 text-primary" />
-                        <span>Step 3: Upload Photos</span>
-                      </div>
+                      📷 Step 3: Upload Photos
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <div className="space-y-4">
@@ -468,10 +444,7 @@ export default function Welcome() {
                   {/* Choose Design */}
                   <AccordionItem value="design-layout" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      <div className="flex items-center gap-3">
-                        <Sparkles className="h-5 w-5 text-primary" />
-                        <span>Step 4: Choose Design Layout</span>
-                      </div>
+                      🎨 Step 4: Choose Design Layout
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <p>Synka offers multiple card layouts to match your style:</p>
@@ -516,10 +489,7 @@ export default function Welcome() {
                   {/* Multiple Cards */}
                   <AccordionItem value="multiple-cards" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      <div className="flex items-center gap-3">
-                        <Users className="h-5 w-5 text-primary" />
-                        <span>Managing Multiple Cards (Orange)</span>
-                      </div>
+                      Managing Multiple Cards (Orange)
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <p>With Orange (Pro) subscription, create multiple digital cards for different contexts:</p>
@@ -559,10 +529,7 @@ export default function Welcome() {
                   {/* Upload Documents */}
                   <AccordionItem value="upload-documents" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-5 w-5 text-primary" />
-                        <span>Upload Documents & Files (Orange)</span>
-                      </div>
+                      📄 Upload Documents & Files (Orange)
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <p>Orange users can attach files directly to their digital cards:</p>
@@ -601,6 +568,43 @@ export default function Welcome() {
                       <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
                         <p className="text-sm font-medium text-primary mb-1">💡 Use Case:</p>
                         <p className="text-sm">Perfect for sales meetings - share your product catalogue instantly when someone taps your card!</p>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  {/* Write NFC Card */}
+                  <AccordionItem value="write-nfc" className="bg-card border border-border rounded-xl px-4">
+                    <AccordionTrigger className="text-foreground font-semibold">
+                      📲 Step 5: Write NFC Card
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground space-y-4">
+                      <p>Program your NFC card to link directly to your digital profile:</p>
+                      
+                      <div className="space-y-3">
+                        <div className="border-l-4 border-primary/60 pl-4">
+                          <p className="font-medium text-foreground">How to Write Your NFC Card:</p>
+                          <ol className="list-decimal list-inside mt-2 space-y-2 text-sm">
+                            <li>Go to <strong>Settings</strong> page in the app</li>
+                            <li>Tap on <strong>Write NFC Card</strong> option</li>
+                            <li>Hold your NFC card near the back of your phone</li>
+                            <li>Keep it steady until you see the success message</li>
+                            <li>Your card is now programmed with your profile link!</li>
+                          </ol>
+                        </div>
+                      </div>
+
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <p className="font-medium mb-2 text-sm">📱 Requirements:</p>
+                        <ul className="text-xs space-y-1">
+                          <li>• NFC-enabled smartphone</li>
+                          <li>• NFC must be turned ON in phone settings</li>
+                          <li>• Blank or rewritable NFC card</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                        <p className="text-sm font-medium text-primary mb-1">💡 Pro Tip:</p>
+                        <p className="text-sm">You can rewrite your NFC card anytime if you change your default card or profile link!</p>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
