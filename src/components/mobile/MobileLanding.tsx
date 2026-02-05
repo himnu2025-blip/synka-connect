@@ -197,7 +197,8 @@ export function MobileLanding({
       </motion.div>
 
       {/* ===== FOOTER LINKS ===== */}
-      <div className="flex justify-center gap-6 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+      <div className="flex flex-col items-center gap-4 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+        <div className="flex justify-center gap-6">
         <button
           onClick={() => handleNavigate('/support')}
           className="text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -222,6 +223,10 @@ export function MobileLanding({
         >
           Contact
         </button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Synka™. All rights reserved.
+        </p>
       </div>
 
       {/* ===== CHAT ===== */}
