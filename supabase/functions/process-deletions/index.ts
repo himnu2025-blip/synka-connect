@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 Deno.serve(async (req) => {
@@ -13,74 +13,79 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    
+
     const supabase = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
     });
 
-    // Find all pending deletion requests that are past their scheduled date
-    const { data: pendingDeletions, error: fetchError } = await supabase
-      .from("deletion_requests")
-      .select("id, user_id, reference_number, user_email")
-      .eq("status", "pending")
-      .lte("scheduled_deletion_at", new Date().toISOString());
+    // Check for manual deletion action from admin
+    const body = await req.json().catch(() => ({}));
+    
+    if (body.action === "delete_single" && body.user_id && body.request_id) {
+      // Single user deletion triggered by admin
+      console.log(`Admin requested deletion for user ${body.user_id}`);
 
-    if (fetchError) {
-      throw new Error(`Failed to fetch pending deletions: ${fetchError.message}`);
-    }
+      // Delete the user from auth (this will cascade delete profile and related data)
+      const { error: deleteError } = await supabase.auth.admin.deleteUser(
+        body.user_id
+      );
 
-    if (!pendingDeletions || pendingDeletions.length === 0) {
+      if (deleteError) {
+        console.error(`Failed to delete user ${body.user_id}:`, deleteError);
+        return new Response(
+          JSON.stringify({ error: deleteError.message }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 400,
+          }
+        );
+      }
+
+      // Update the deletion request status
+      await supabase
+        .from("deletion_requests")
+        .update({
+          status: "approved",
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", body.request_id);
+
+      console.log(`Successfully deleted user ${body.user_id}`);
+      
       return new Response(
-        JSON.stringify({ message: "No pending deletions to process", processed: 0 }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          success: true,
+          user_id: body.user_id,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        }
       );
     }
 
-    const results: { success: string[]; failed: string[] } = { success: [], failed: [] };
-
-    for (const deletion of pendingDeletions) {
-      try {
-        // Delete the user from auth (this will cascade delete profile and related data)
-        const { error: deleteError } = await supabase.auth.admin.deleteUser(deletion.user_id);
-
-        if (deleteError) {
-          console.error(`Failed to delete user ${deletion.user_id}:`, deleteError);
-          results.failed.push(deletion.reference_number);
-          continue;
-        }
-
-        // Update deletion request status
-        await supabase
-          .from("deletion_requests")
-          .update({ 
-            status: "completed", 
-            completed_at: new Date().toISOString() 
-          })
-          .eq("id", deletion.id);
-
-        results.success.push(deletion.reference_number);
-        console.log(`Successfully deleted account for ${deletion.reference_number}`);
-      } catch (err) {
-        console.error(`Error processing deletion ${deletion.reference_number}:`, err);
-        results.failed.push(deletion.reference_number);
-      }
-    }
-
+    // Default response for other calls
     return new Response(
       JSON.stringify({
-        message: "Deletion processing complete",
-        processed: results.success.length,
-        failed: results.failed.length,
-        details: results,
+        message: "No action specified",
       }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      }
     );
   } catch (error: unknown) {
     console.error("Error in process-deletions:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
     return new Response(
       JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      }
     );
   }
 });
