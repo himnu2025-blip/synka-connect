@@ -58,7 +58,7 @@ export default function Index() {
 
               {/* Top Tag */}
               <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                SYNKA — Simply Connected
+              SYNKA™ — Simply Connected
               </div>
 
               {/* H1 */}
