@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { useAdmin } from '@/hooks/useAdmin';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { useAdminUsers, useAdminStatus } from '@/hooks/useAdminData';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Table,
@@ -33,39 +34,25 @@ interface ConfirmAction {
 }
 
 export function AdminUsersTab() {
-  const { isAdmin, loading: adminLoading, users, fetchUsers, upgradeUserPlan, downgradeUserPlan } = useAdmin();
-  const [loading, setLoading] = useState(true);
+  const { isAdmin } = useAdminStatus();
+  const { data: users = [], isLoading, isFetching, refetch } = useAdminUsers();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
   const refreshTimerRef = useRef<number | null>(null);
 
+  const scheduleRefresh = useCallback(() => {
+    if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = window.setTimeout(() => {
+      refetch();
+    }, 300);
+  }, [refetch]);
+
   useEffect(() => {
-    if (adminLoading) return;
-    if (!isAdmin) {
-      setLoading(false);
-      return;
-    }
-
-    const load = async () => {
-      setLoading(true);
-      try {
-        await fetchUsers();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const scheduleRefresh = () => {
-      if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
-      refreshTimerRef.current = window.setTimeout(() => {
-        fetchUsers();
-      }, 300);
-    };
-
-    load();
-
-    // Subscribe to realtime changes on profiles table (debounced)
+    if (!isAdmin) return;
+    
+    // Subscribe to realtime changes (debounced)
     const channel = supabase
       .channel('admin-profiles-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, scheduleRefresh)
@@ -75,7 +62,32 @@ export function AdminUsersTab() {
       if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
       supabase.removeChannel(channel);
     };
-  }, [adminLoading, isAdmin, fetchUsers]);
+  }, [isAdmin, scheduleRefresh]);
+
+  const upgradeUserPlan = async (userId: string, newPlan: string) => {
+    const { error } = await supabase.rpc('upgrade_user_plan', {
+      _user_id: userId,
+      _new_plan: newPlan,
+    });
+    if (error) throw error;
+    queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+  };
+
+  const downgradeUserPlan = async (userId: string) => {
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ plan: 'Free', updated_at: new Date().toISOString() })
+      .eq('user_id', userId);
+    if (profileError) throw profileError;
+
+    await supabase
+      .from('user_roles')
+      .update({ role: 'free' })
+      .eq('user_id', userId)
+      .eq('role', 'orange');
+
+    queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+  };
 
   const handleUpgradeClick = (userId: string, userName: string) => {
     setConfirmAction({ type: 'upgrade', userId, userName });
@@ -112,7 +124,8 @@ export function AdminUsersTab() {
       user.phone?.includes(searchTerm)
   );
 
-  if (loading) {
+  // Only show loader on initial load when no cached data
+  if (isLoading && users.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -133,7 +146,10 @@ export function AdminUsersTab() {
               className="pl-10"
             />
           </div>
-          <Badge variant="secondary">{users.length} users</Badge>
+          <Badge variant="secondary" className="gap-1">
+            {isFetching && <Loader2 className="h-3 w-3 animate-spin" />}
+            {users.length} users
+          </Badge>
         </div>
 
         <div className="rounded-md border">
