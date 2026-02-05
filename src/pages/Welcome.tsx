@@ -3,14 +3,6 @@ import { BrandLogo } from '@/components/BrandLogo';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Zap,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  ArrowRight
-} from 'lucide-react';
-import { Users, Clock, Scan, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Welcome() {
@@ -42,10 +34,7 @@ export default function Welcome() {
         {/* Quick Start Card */}
         <Card className="mb-8 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
           <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 rounded-full bg-primary/10">
-                <Zap className="h-6 w-6 text-primary" />
-              </div>
+            <div>
               <div className="flex-1">
                 <h3 className="text-xl font-semibold mb-2">Quick Start in 3 Steps</h3>
                 <div className="grid md:grid-cols-3 gap-4 mt-4">
@@ -117,7 +106,7 @@ export default function Welcome() {
               
               {/* How to Use Your Card */}
               <section>
-                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <h2 className="text-2xl font-bold mb-4">
                   How to Use Your Card
                 </h2>
                 
@@ -130,7 +119,7 @@ export default function Welcome() {
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <div className="space-y-3">
-                        <p className="font-medium text-foreground">📱 For Smartphones (NFC-enabled):</p>
+                        <p className="font-medium text-foreground">For Smartphones (NFC-enabled):</p>
                         <ol className="list-decimal list-inside space-y-2 ml-2">
                           <li><strong>Ensure NFC is ON:</strong> Check your phone's settings → NFC/Wireless</li>
                           <li><strong>Unlock your phone</strong> (screen must be on)</li>
@@ -141,8 +130,7 @@ export default function Welcome() {
                         </ol>
 
                         <div className="bg-muted/50 rounded-lg p-4 mt-4">
-                          <p className="font-medium mb-2 flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4 text-primary" />
+                          <p className="font-medium mb-2">
                             Where to tap on different phones:
                           </p>
                           <ul className="space-y-1 text-sm ml-6">
@@ -153,7 +141,7 @@ export default function Welcome() {
                         </div>
 
                         <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mt-4">
-                          <p className="text-sm font-medium text-primary mb-2">✨ Pro Tips:</p>
+                          <p className="text-sm font-medium text-primary mb-2">Pro Tips:</p>
                           <ul className="text-sm space-y-1">
                             <li>• Remove thick phone cases for better connection</li>
                             <li>• Don't tap too fast - hold steady for 1-2 seconds</li>
@@ -172,7 +160,7 @@ export default function Welcome() {
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <div className="space-y-3">
-                        <p className="font-medium text-foreground">📷 Three Ways to Scan:</p>
+                        <p className="font-medium text-foreground">Three Ways to Scan:</p>
                         
                         <div className="space-y-3">
                           <div className="border-l-4 border-primary pl-4">
@@ -204,7 +192,7 @@ export default function Welcome() {
                         </div>
 
                         <div className="bg-muted/50 rounded-lg p-4 mt-4">
-                          <p className="font-medium mb-2">📍 QR Code Locations on Your Card:</p>
+                          <p className="font-medium mb-2">QR Code Locations on Your Card:</p>
                           <ul className="space-y-1 text-sm">
                             <li>• <strong>Front:</strong> Main QR code (usually visible)</li>
                             <li>• <strong>Back:</strong> Alternative QR code</li>
@@ -231,25 +219,25 @@ export default function Welcome() {
                         <p className="font-medium text-foreground">Where to Share:</p>
                         <div className="grid md:grid-cols-2 gap-3">
                           <div className="border rounded-lg p-3">
-                            <p className="font-medium text-sm">📧 Email Signature</p>
+                            <p className="font-medium text-sm">Email Signature</p>
                             <p className="text-xs mt-1">Add to your email footer</p>
                           </div>
                           <div className="border rounded-lg p-3">
-                            <p className="font-medium text-sm">💬 WhatsApp/SMS</p>
+                            <p className="font-medium text-sm">WhatsApp/SMS</p>
                             <p className="text-xs mt-1">Send directly in messages</p>
                           </div>
                           <div className="border rounded-lg p-3">
-                            <p className="font-medium text-sm">💼 LinkedIn Bio</p>
+                            <p className="font-medium text-sm">LinkedIn Bio</p>
                             <p className="text-xs mt-1">Add to profile or posts</p>
                           </div>
                           <div className="border rounded-lg p-3">
-                            <p className="font-medium text-sm">📱 Social Media</p>
+                            <p className="font-medium text-sm">Social Media</p>
                             <p className="text-xs mt-1">Instagram, Twitter, etc.</p>
                           </div>
                         </div>
 
                         <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mt-4">
-                          <p className="text-sm font-medium text-primary mb-2">💡 Smart Tip:</p>
+                          <p className="text-sm font-medium text-primary mb-2">Smart Tip:</p>
                           <p className="text-sm">Use the Share button in your card to send via WhatsApp, Email, SMS, or copy the link!</p>
                         </div>
                       </div>
@@ -265,29 +253,25 @@ export default function Welcome() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="space-y-4">
-                      <div className="flex items-start gap-3">
-                        <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <div>
                         <div>
                           <p className="font-medium">Instant Profile View</p>
                           <p className="text-sm text-muted-foreground">Your digital card opens in their web browser</p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-3">
-                        <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <div>
                         <div>
                           <p className="font-medium">All Contact Info Visible</p>
                           <p className="text-sm text-muted-foreground">Name, company, role, phone, email, social links</p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-3">
-                        <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <div>
                         <div>
                           <p className="font-medium">One-Tap Actions</p>
                           <p className="text-sm text-muted-foreground">Call, email, WhatsApp, or save contact directly</p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-3">
-                        <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <div>
                         <div>
                           <p className="font-medium">No App Required</p>
                           <p className="text-sm text-muted-foreground">Works on any smartphone with NFC or camera</p>
@@ -306,7 +290,7 @@ export default function Welcome() {
             <div className="space-y-6 animate-fade-in">
               
               <section>
-                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <h2 className="text-2xl font-bold mb-4">
                   Setup & Customize Your Card
                 </h2>
 
@@ -315,7 +299,7 @@ export default function Welcome() {
                   {/* Create Account */}
                   <AccordionItem value="create-account" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      🚀 Step 1: Create Your Account
+                      Step 1: Create Your Account
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <ol className="list-decimal list-inside space-y-3 ml-2">
@@ -328,7 +312,7 @@ export default function Welcome() {
                       </ol>
 
                       <div className="bg-muted/50 rounded-lg p-4 mt-4">
-                        <p className="font-medium mb-2">📱 App Available On:</p>
+                        <p className="font-medium mb-2">App Available On:</p>
                         <div className="flex gap-3">
                           <Button variant="outline" size="sm" asChild>
                             <a href="https://play.google.com/store/apps/details?id=com.synka.app" target="_blank" rel="noopener noreferrer">
@@ -348,7 +332,7 @@ export default function Welcome() {
                   {/* Edit Profile */}
                   <AccordionItem value="edit-profile" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      ✏️ Step 2: Edit Your Profile
+                      Step 2: Edit Your Profile
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <p>Go to <strong>My Card</strong> section and fill in:</p>
@@ -386,7 +370,7 @@ export default function Welcome() {
                       </div>
 
                       <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mt-4">
-                        <p className="text-sm font-medium text-primary mb-2">✨ All changes save automatically!</p>
+                        <p className="text-sm font-medium text-primary mb-2">All changes save automatically!</p>
                         <p className="text-sm">No need to click "Save" - your card updates in real-time</p>
                       </div>
                     </AccordionContent>
@@ -395,7 +379,7 @@ export default function Welcome() {
                   {/* Upload Photos */}
                   <AccordionItem value="upload-photos" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      📷 Step 3: Upload Photos
+                      Step 3: Upload Photos
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <div className="space-y-4">
@@ -429,7 +413,7 @@ export default function Welcome() {
                         </div>
 
                         <div className="bg-muted/50 rounded-lg p-4">
-                          <p className="font-medium mb-2 text-sm">📸 Photo Tips:</p>
+                          <p className="font-medium mb-2 text-sm">Photo Tips:</p>
                           <ul className="text-xs space-y-1">
                             <li>• Use high-quality images (not blurry)</li>
                             <li>• Good lighting for profile photos</li>
@@ -444,7 +428,7 @@ export default function Welcome() {
                   {/* Choose Design */}
                   <AccordionItem value="design-layout" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      🎨 Step 4: Choose Design Layout
+                      Step 4: Choose Design Layout
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <p>Synka offers multiple card layouts to match your style:</p>
@@ -480,7 +464,7 @@ export default function Welcome() {
                       </div>
 
                       <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-                        <p className="text-sm font-medium text-primary mb-1">🎨 Orange (Pro) Feature:</p>
+                        <p className="text-sm font-medium text-primary mb-1">Orange (Pro) Feature:</p>
                         <p className="text-sm">Access premium layouts and custom color themes with Orange upgrade</p>
                       </div>
                     </AccordionContent>
@@ -496,15 +480,15 @@ export default function Welcome() {
                       
                       <div className="space-y-3">
                         <div className="border rounded-lg p-3">
-                          <p className="font-medium text-foreground">💼 Professional Card</p>
+                          <p className="font-medium text-foreground">Professional Card</p>
                           <p className="text-sm">For work contacts and business networking</p>
                         </div>
                         <div className="border rounded-lg p-3">
-                          <p className="font-medium text-foreground">🎨 Creative Card</p>
+                          <p className="font-medium text-foreground">Creative Card</p>
                           <p className="text-sm">For freelance projects and portfolio</p>
                         </div>
                         <div className="border rounded-lg p-3">
-                          <p className="font-medium text-foreground">🏢 Team Cards</p>
+                          <p className="font-medium text-foreground">Team Cards</p>
                           <p className="text-sm">Different cards for different roles or departments</p>
                         </div>
                       </div>
@@ -514,13 +498,13 @@ export default function Welcome() {
                         <ol className="list-decimal list-inside space-y-2 text-sm ml-2">
                           <li>Go to Dashboard or My Card section</li>
                           <li>View all your cards</li>
-                          <li>Tap the ⭐ (star) icon on the card you want as default</li>
+                          <li>Tap the star icon on the card you want as default</li>
                           <li>This card will open when anyone taps your NFC or scans QR</li>
                         </ol>
                       </div>
 
                       <div className="bg-muted/50 rounded-lg p-4">
-                        <p className="font-medium mb-2">🔄 Switch Anytime:</p>
+                        <p className="font-medium mb-2">Switch Anytime:</p>
                         <p className="text-sm">Change your default card as many times as you want. Your physical card and QR always point to your default card - no reprinting needed!</p>
                       </div>
                     </AccordionContent>
@@ -529,7 +513,7 @@ export default function Welcome() {
                   {/* Upload Documents */}
                   <AccordionItem value="upload-documents" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      📄 Upload Documents & Files (Orange)
+                      Upload Documents & Files (Orange)
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <p>Orange users can attach files directly to their digital cards:</p>
@@ -560,13 +544,13 @@ export default function Welcome() {
                       </div>
 
                       <div className="bg-muted/50 rounded-lg p-4">
-                        <p className="font-medium mb-2 text-sm">📄 Supported Formats:</p>
+                        <p className="font-medium mb-2 text-sm">Supported Formats:</p>
                         <p className="text-xs">PDF, DOC, DOCX, PPT, PPTX, JPG, PNG</p>
                         <p className="text-xs mt-2">Max file size: 10MB per file</p>
                       </div>
 
                       <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-                        <p className="text-sm font-medium text-primary mb-1">💡 Use Case:</p>
+                        <p className="text-sm font-medium text-primary mb-1">Use Case:</p>
                         <p className="text-sm">Perfect for sales meetings - share your product catalogue instantly when someone taps your card!</p>
                       </div>
                     </AccordionContent>
@@ -575,7 +559,7 @@ export default function Welcome() {
                   {/* Write NFC Card */}
                   <AccordionItem value="write-nfc" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      📲 Step 5: Write NFC Card
+                      Step 5: Write NFC Card
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <p>Program your NFC card to link directly to your digital profile:</p>
@@ -594,7 +578,7 @@ export default function Welcome() {
                       </div>
 
                       <div className="bg-muted/50 rounded-lg p-4">
-                        <p className="font-medium mb-2 text-sm">📱 Requirements:</p>
+                        <p className="font-medium mb-2 text-sm">Requirements:</p>
                         <ul className="text-xs space-y-1">
                           <li>• NFC-enabled smartphone</li>
                           <li>• NFC must be turned ON in phone settings</li>
@@ -603,7 +587,7 @@ export default function Welcome() {
                       </div>
 
                       <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-                        <p className="text-sm font-medium text-primary mb-1">💡 Pro Tip:</p>
+                        <p className="text-sm font-medium text-primary mb-1">Pro Tip:</p>
                         <p className="text-sm">You can rewrite your NFC card anytime if you change your default card or profile link!</p>
                       </div>
                     </AccordionContent>
@@ -627,7 +611,7 @@ export default function Welcome() {
                   {/* Analytics */}
                   <AccordionItem value="analytics" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      📊 Analytics & Insights
+                      Analytics & Insights
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <p>Track how people interact with your card:</p>
@@ -635,7 +619,7 @@ export default function Welcome() {
                       <div className="grid gap-3">
                         <div className="flex items-start gap-3 border rounded-lg p-3">
                           <div className="p-2 rounded bg-primary/10">
-                            <Users className="h-4 w-4 text-primary" />
+                            <div className="h-4 w-4 text-primary" />
                           </div>
                           <div className="flex-1">
                             <p className="font-medium text-foreground">Profile Views</p>
@@ -645,7 +629,7 @@ export default function Welcome() {
 
                         <div className="flex items-start gap-3 border rounded-lg p-3">
                           <div className="p-2 rounded bg-primary/10">
-                            <Clock className="h-4 w-4 text-primary" />
+                            <div className="h-4 w-4 text-primary" />
                           </div>
                           <div className="flex-1">
                             <p className="font-medium text-foreground">Click Tracking</p>
@@ -655,7 +639,7 @@ export default function Welcome() {
 
                         <div className="flex items-start gap-3 border rounded-lg p-3">
                           <div className="p-2 rounded bg-primary/10">
-                            <Scan className="h-4 w-4 text-primary" />
+                            <div className="h-4 w-4 text-primary" />
                           </div>
                           <div className="flex-1">
                             <p className="font-medium text-foreground">Scan History</p>
@@ -671,7 +655,7 @@ export default function Welcome() {
                   {/* CRM */}
                   <AccordionItem value="crm" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      👥 Built-in CRM
+                      Built-in CRM
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <p>Manage all your contacts in one place:</p>
@@ -705,7 +689,7 @@ export default function Welcome() {
                   {/* Contact Exchange */}
                   <AccordionItem value="mutual-exchange" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      🔄 Mutual Contact Exchange
+                      Mutual Contact Exchange
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <p>Exchange contacts seamlessly with other Synka users:</p>
@@ -722,7 +706,7 @@ export default function Welcome() {
                         </div>
 
                         <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-                          <p className="text-sm font-medium text-primary mb-1">⚡ Instant & Effortless</p>
+                          <p className="text-sm font-medium text-primary mb-1">Instant & Effortless</p>
                           <p className="text-sm">No manual typing, no phone number exchange, no app switching</p>
                         </div>
                       </div>
@@ -732,7 +716,7 @@ export default function Welcome() {
                   {/* Email Signature */}
                   <AccordionItem value="email-signature" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      ✉️ Email Signature Generator
+                      Email Signature Generator
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <p>Create a professional email signature with your Synka card link:</p>
@@ -764,7 +748,7 @@ export default function Welcome() {
                   {/* Widgets */}
                   <AccordionItem value="widgets" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      📱 Mobile Widgets (iOS & Android)
+                      Mobile Widgets (iOS & Android)
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <p>Add your QR code as a home screen widget for instant sharing:</p>
@@ -807,8 +791,7 @@ export default function Welcome() {
             <div className="space-y-6 animate-fade-in">
               
               <section>
-                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <Shield className="h-6 w-6 text-primary" />
+                <h2 className="text-2xl font-bold mb-4">
                   Tips & Card Care
                 </h2>
 
@@ -817,14 +800,13 @@ export default function Welcome() {
                   {/* Best Practices */}
                   <AccordionItem value="best-practices" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      ✨ Best Practices for Using Your Card
+                      Best Practices for Using Your Card
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       <div className="space-y-4">
                         
                         <div className="border-l-4 border-green-500 pl-4">
-                          <p className="font-medium text-foreground flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          <p className="font-medium text-foreground">
                             DO's:
                           </p>
                           <ul className="mt-2 space-y-2 text-sm">
@@ -840,8 +822,7 @@ export default function Welcome() {
                         </div>
 
                         <div className="border-l-4 border-red-500 pl-4">
-                          <p className="font-medium text-foreground flex items-center gap-2">
-                            <XCircle className="h-4 w-4 text-red-500" />
+                          <p className="font-medium text-foreground">
                             DON'Ts:
                           </p>
                           <ul className="mt-2 space-y-2 text-sm">
@@ -861,7 +842,7 @@ export default function Welcome() {
                   {/* Card Care */}
                   <AccordionItem value="card-care" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      🛡️ Physical Card Care & Maintenance
+                      Physical Card Care & Maintenance
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       
@@ -872,23 +853,18 @@ export default function Welcome() {
                           <p className="font-medium text-foreground mb-3">For PVC Cards:</p>
                           <ul className="space-y-2 text-sm">
                             <li className="flex items-start gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                               <span>Store in wallet, card holder, or protective sleeve</span>
                             </li>
                             <li className="flex items-start gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                               <span>Clean with soft cloth if dirty</span>
                             </li>
                             <li className="flex items-start gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                               <span>Avoid bending or twisting</span>
                             </li>
                             <li className="flex items-start gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                               <span>Keep away from water and heat</span>
                             </li>
                             <li className="flex items-start gap-2">
-                              <XCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
                               <span>Don't scratch the surface or QR code</span>
                             </li>
                           </ul>
@@ -899,23 +875,18 @@ export default function Welcome() {
                           <p className="font-medium text-foreground mb-3">For Metal Cards:</p>
                           <ul className="space-y-2 text-sm">
                             <li className="flex items-start gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                               <span>More durable than PVC but still needs care</span>
                             </li>
                             <li className="flex items-start gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                               <span>Polish with microfiber cloth to maintain shine</span>
                             </li>
                             <li className="flex items-start gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                               <span>Can withstand water but dry it properly</span>
                             </li>
                             <li className="flex items-start gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                               <span>Store separately from keys to avoid scratches</span>
                             </li>
                             <li className="flex items-start gap-2">
-                              <XCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
                               <span>Don't drop on hard surfaces</span>
                             </li>
                           </ul>
@@ -923,7 +894,7 @@ export default function Welcome() {
 
                         {/* General Tips */}
                         <div className="bg-muted/50 rounded-lg p-4">
-                          <p className="font-medium text-foreground mb-2">⚠️ Important:</p>
+                          <p className="font-medium text-foreground mb-2">Important:</p>
                           <ul className="space-y-2 text-sm">
                             <li>• NFC chip is delicate - avoid sharp impacts</li>
                             <li>• Keep away from strong magnets</li>
@@ -939,14 +910,14 @@ export default function Welcome() {
                   {/* Troubleshooting */}
                   <AccordionItem value="troubleshooting" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      🔧 Common Issues & Solutions
+                      Common Issues & Solutions
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       
                       <div className="space-y-3">
                         
                         <div className="border rounded-lg p-3">
-                          <p className="font-medium text-foreground">❌ Card Not Tapping/Reading</p>
+                          <p className="font-medium text-foreground">Card Not Tapping/Reading</p>
                           <ul className="mt-2 space-y-1 text-sm ml-4">
                             <li>✓ Check if NFC is enabled on the phone</li>
                             <li>✓ Remove thick phone case</li>
@@ -957,7 +928,7 @@ export default function Welcome() {
                         </div>
 
                         <div className="border rounded-lg p-3">
-                          <p className="font-medium text-foreground">❌ QR Code Not Scanning</p>
+                          <p className="font-medium text-foreground">QR Code Not Scanning</p>
                           <ul className="mt-2 space-y-1 text-sm ml-4">
                             <li>✓ Clean the card surface</li>
                             <li>✓ Ensure good lighting</li>
@@ -968,7 +939,7 @@ export default function Welcome() {
                         </div>
 
                         <div className="border rounded-lg p-3">
-                          <p className="font-medium text-foreground">❌ Profile Not Loading</p>
+                          <p className="font-medium text-foreground">Profile Not Loading</p>
                           <ul className="mt-2 space-y-1 text-sm ml-4">
                             <li>✓ Check internet connection</li>
                             <li>✓ Try refreshing the page</li>
@@ -978,7 +949,7 @@ export default function Welcome() {
                         </div>
 
                         <div className="border rounded-lg p-3">
-                          <p className="font-medium text-foreground">❌ Can't Edit Card</p>
+                          <p className="font-medium text-foreground">Can't Edit Card</p>
                           <ul className="mt-2 space-y-1 text-sm ml-4">
                             <li>✓ Ensure you're logged in</li>
                             <li>✓ Check internet connection</li>
@@ -988,7 +959,7 @@ export default function Welcome() {
                         </div>
 
                         <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mt-4">
-                          <p className="text-sm font-medium text-primary mb-2">💬 Still Need Help?</p>
+                          <p className="text-sm font-medium text-primary mb-2">Still Need Help?</p>
                           <p className="text-sm">Contact our support team:</p>
                           <div className="flex flex-col gap-2 mt-3">
                             <Button variant="outline" size="sm" onClick={() => navigate('/support')}>
@@ -1014,15 +985,14 @@ export default function Welcome() {
                   {/* Precautions */}
                   <AccordionItem value="precautions" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      ⚠️ Important Precautions
+                      Important Precautions
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
                       
                       <div className="space-y-3">
                         
                         <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-4">
-                          <p className="font-medium text-foreground mb-2 flex items-center gap-2">
-                            <AlertCircle className="h-5 w-5 text-yellow-600" />
+                          <p className="font-medium text-foreground mb-2">
                             Privacy & Security:
                           </p>
                           <ul className="space-y-2 text-sm">
@@ -1034,8 +1004,7 @@ export default function Welcome() {
                         </div>
 
                         <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-4">
-                          <p className="font-medium text-foreground mb-2 flex items-center gap-2">
-                            <Shield className="h-5 w-5 text-red-600" />
+                          <p className="font-medium text-foreground mb-2">
                             What NOT to Do:
                           </p>
                           <ul className="space-y-2 text-sm">
@@ -1049,7 +1018,7 @@ export default function Welcome() {
                         </div>
 
                         <div className="bg-green-500/5 border border-green-500/20 rounded-lg p-4">
-                          <p className="font-medium text-foreground mb-2">✅ Safety Tips:</p>
+                          <p className="font-medium text-foreground mb-2">Safety Tips:</p>
                           <ul className="space-y-2 text-sm">
                             <li>• Enable two-factor authentication in settings</li>
                             <li>• Use strong password for your account</li>
@@ -1081,7 +1050,6 @@ export default function Welcome() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button size="lg" onClick={() => navigate('/signup')} className="group">
                 Create Your Free Card
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate('/support')}>
                 Browse FAQs
@@ -1102,22 +1070,10 @@ export default function Welcome() {
           {/* Trust Badges */}
           <div className="pt-6 pb-8">
             <div className="flex flex-wrap justify-center gap-6 text-xs text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-green-500" />
-                <span>Secure & Private</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-yellow-500" />
-                <span>Instant Updates</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-blue-500" />
-                <span>10,000+ Users</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                <span>Made in India</span>
-              </div>
+              <div>Secure & Private</div>
+              <div>Instant Updates</div>
+              <div>10,000+ Users</div>
+              <div>Made in India</div>
             </div>
           </div>
         </div>
