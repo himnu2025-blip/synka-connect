@@ -19,7 +19,7 @@ export default function Support() {
         {/* Intro */}
         <div className="bg-card border border-border rounded-xl p-6 mb-8">
           <p className="text-muted-foreground">
-            With SYNKA, your QR, Link, and Physical NFC Card always remain the same, but what you share can change anytime.
+            With SYNKA™, your QR, Link, and Physical NFC Card always remain the same, but what you share can change anytime.
           </p>
           <ul className="mt-4 space-y-2 text-muted-foreground">
             <li>• One QR</li>
