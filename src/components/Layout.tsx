@@ -212,7 +212,7 @@ export function Layout() {
         </div>
       </header>
 
-      <main className="pt-14 md:pt-16 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-8 w-full">
+      <main className="pt-[calc(3.5rem+env(safe-area-inset-top))] md:pt-16 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-8 w-full">
         <Suspense fallback={<PageSkeleton variant={getSkeletonVariant(location.pathname)} />}>
           <div className="animate-fade-in">
             <Outlet />
