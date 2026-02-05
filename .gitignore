@@ -5,3 +5,5 @@ android-sdk/
 jdk*
 android-sdk/
 .gradle/
+android/app/synka-release-key.keystore
+android/gradle.properties

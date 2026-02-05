@@ -3,6 +3,14 @@ apply plugin: 'com.android.application'
 android {
     namespace "com.synka.app"
     compileSdk rootProject.ext.compileSdkVersion
+    signingConfigs {
+    release {
+        storeFile file(MYAPP_UPLOAD_STORE_FILE)
+        storePassword MYAPP_UPLOAD_STORE_PASSWORD
+        keyAlias MYAPP_UPLOAD_KEY_ALIAS
+        keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+    }
+}
     defaultConfig {
         applicationId "com.synka.app"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -17,11 +25,12 @@ android {
         }
     }
     buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+    release {
+        minifyEnabled false
+        signingConfig signingConfigs.release
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
+}
 }
 
 repositories {
