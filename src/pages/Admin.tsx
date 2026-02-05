@@ -12,6 +12,7 @@ import { AdminChatSessionsTab } from '@/components/admin/AdminChatSessionsTab';
 import { AdminBotSettingsTab } from '@/components/admin/AdminBotSettingsTab';
 import { AdminControlledLearningTab } from '@/components/admin/AdminControlledLearningTab';
 import { AdminNfcWriterTab } from '@/components/admin/AdminNfcWriterTab';
+import { AdminDeletionRequestsTab } from '@/components/admin/AdminDeletionRequestsTab';
 import { Loader2, Shield } from 'lucide-react';
 
 export default function Admin() {
@@ -55,6 +56,7 @@ export default function Admin() {
             <TabsTrigger value="transactions" className="whitespace-nowrap">Transactions</TabsTrigger>
             <TabsTrigger value="nfc-orders" className="whitespace-nowrap">NFC Orders</TabsTrigger>
             <TabsTrigger value="reports" className="whitespace-nowrap">Reports</TabsTrigger>
+            <TabsTrigger value="deletion-requests" className="whitespace-nowrap">Delete Account</TabsTrigger>
             <TabsTrigger value="chats" className="whitespace-nowrap">Chat Sessions</TabsTrigger>
             <TabsTrigger value="learning" className="whitespace-nowrap">Controlled Learning</TabsTrigger>
             <TabsTrigger value="bot" className="whitespace-nowrap">Bot Settings</TabsTrigger>
@@ -77,6 +79,10 @@ export default function Admin() {
 
         <TabsContent value="reports">
           <AdminReportsTab />
+        </TabsContent>
+
+        <TabsContent value="deletion-requests">
+          <AdminDeletionRequestsTab />
         </TabsContent>
 
         <TabsContent value="chats">
