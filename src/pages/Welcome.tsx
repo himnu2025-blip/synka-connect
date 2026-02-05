@@ -39,10 +39,10 @@ export default function Welcome() {
         {/* Hero Section */}
         <div className="text-center mb-10 space-y-4">
           <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-2">
-            🎉 Welcome to SYNKA
+            Welcome to SYNKA
           </div>
           <h1 className="text-4xl md:text-5xl font-bold">
-            Welcome to Your Smart Digital Card
+            Meet Your Smart NFC Business Card
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Your complete guide to getting started with your Synka NFC card. Learn how to tap, scan, customize, and make the most of your digital business card.
@@ -1091,11 +1091,6 @@ export default function Welcome() {
             <div className="flex flex-wrap justify-center gap-4 text-sm">
               <Button variant="link" onClick={() => navigate('/support')}>Support Center</Button>
               <Button variant="link" onClick={() => navigate('/contact')}>Contact Us</Button>
-              <Button variant="link" asChild>
-                <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">
-                  WhatsApp Chat
-                </a>
-              </Button>
               <Button variant="link" onClick={() => navigate('/settings/upgrade')}>Upgrade to Orange</Button>
             </div>
           </div>
