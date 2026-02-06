@@ -59,6 +59,9 @@ implementation 'com.google.firebase:firebase-messaging'
     
     // ZXing for QR code generation in widget
     implementation 'com.google.zxing:core:3.5.2'
+    
+    // Wearable Data Layer API for watch sync
+    implementation 'com.google.android.gms:play-services-wearable:18.1.0'
 }
 
 apply from: 'capacitor.build.gradle'

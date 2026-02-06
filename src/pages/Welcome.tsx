@@ -748,14 +748,15 @@ export default function Welcome() {
                   {/* Widgets */}
                   <AccordionItem value="widgets" className="bg-card border border-border rounded-xl px-4">
                     <AccordionTrigger className="text-foreground font-semibold">
-                      Mobile Widgets (iOS & Android)
+                      Widgets (Phone & Watch)
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground space-y-4">
-                      <p>Add your QR code as a home screen widget for instant sharing:</p>
+                      <p>Add your QR code as a widget for instant sharing:</p>
                       
-                      <div className="space-y-3">
+                      <div className="space-y-4">
+                        {/* iOS Widgets */}
                         <div className="border-l-4 border-primary/60 pl-4">
-                          <p className="font-medium text-foreground">iOS Widget:</p>
+                          <p className="font-medium text-foreground">📱 iPhone Widget:</p>
                           <ol className="list-decimal list-inside mt-2 space-y-1 text-sm">
                             <li>Long press on home screen</li>
                             <li>Tap "+" to add widget</li>
@@ -765,8 +766,19 @@ export default function Welcome() {
                           </ol>
                         </div>
 
+                        <div className="border-l-4 border-blue-500/60 pl-4">
+                          <p className="font-medium text-foreground">⌚ Apple Watch:</p>
+                          <ol className="list-decimal list-inside mt-2 space-y-1 text-sm">
+                            <li>Open Watch app on iPhone</li>
+                            <li>Go to Face Gallery or edit watch face</li>
+                            <li>Add "Synka QR" complication</li>
+                            <li>Your QR code appears on your wrist!</li>
+                          </ol>
+                        </div>
+
+                        {/* Android Widgets */}
                         <div className="border-l-4 border-primary/60 pl-4">
-                          <p className="font-medium text-foreground">Android Widget:</p>
+                          <p className="font-medium text-foreground">📱 Android Widget:</p>
                           <ol className="list-decimal list-inside mt-2 space-y-1 text-sm">
                             <li>Long press on home screen</li>
                             <li>Tap "Widgets"</li>
@@ -774,9 +786,19 @@ export default function Welcome() {
                             <li>Drag QR widget to screen</li>
                           </ol>
                         </div>
+
+                        <div className="border-l-4 border-green-500/60 pl-4">
+                          <p className="font-medium text-foreground">⌚ Wear OS Watch:</p>
+                          <ol className="list-decimal list-inside mt-2 space-y-1 text-sm">
+                            <li>Swipe up on your watch</li>
+                            <li>Go to Tiles settings</li>
+                            <li>Add "Synka QR Code" tile</li>
+                            <li>Swipe to access your QR anytime!</li>
+                          </ol>
+                        </div>
                       </div>
 
-                      <p className="text-sm text-primary font-medium">Your QR code is always accessible - just show your phone!</p>
+                      <p className="text-sm text-primary font-medium">Your QR code syncs automatically across all your devices!</p>
                     </AccordionContent>
                   </AccordionItem>
 
