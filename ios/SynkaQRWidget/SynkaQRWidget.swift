@@ -40,7 +40,7 @@ struct SynkaQRWidgetEntryView: View {
                 Color.white
                 
                 if let slug = entry.profileSlug, !slug.isEmpty {
-                    QRCodeView(url: "https://synka.app/u/\(slug)", size: min(geometry.size.width, geometry.size.height) - 16)
+                    QRCodeView(url: "https://synka.in/u/\(slug)", size: min(geometry.size.width, geometry.size.height) - 16)
                 } else {
                     VStack(spacing: 4) {
                         Image(systemName: "qrcode")
