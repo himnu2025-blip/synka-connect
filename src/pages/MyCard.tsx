@@ -20,6 +20,7 @@ import {
   Palette,
   Star,
   X,
+  Edit3,
 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { QRCodeSVG } from 'qrcode.react';
@@ -894,12 +895,13 @@ useEffect(() => {
             className="flex-1 min-w-0 active:scale-[0.97] transition-transform" 
             onClick={() => {
               hapticFeedback.light();
-              handleDownloadAndShare();
+              setIsEditOpen(true);
             }}
-            disabled={isLoading || !displayName || isGenerating}
+            disabled={isLoading}
+            data-tour="edit-button"
           >
-            <Download className="h-4 w-4 mr-2 shrink-0" />
-            <span className="truncate">{isGenerating ? 'Saving...' : 'Download'}</span>
+            <Edit3 className="h-4 w-4 mr-2 shrink-0" />
+            <span className="truncate">Edit</span>
           </Button>
           <Button 
             variant="outline" 
@@ -911,15 +913,30 @@ useEffect(() => {
             <span className="truncate">Layout</span>
           </Button>
         </div>
-        <Button 
-          variant="gradient" 
-          className="w-full font-medium tracking-tight" 
-          onClick={shareCard}
-          disabled={isLoading}
-        >
-          <Share2 className="h-4 w-4 mr-2" />
-          Share
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            variant="outline" 
+            className="flex-1 min-w-0 active:scale-[0.97] transition-transform" 
+            onClick={() => {
+              hapticFeedback.light();
+              handleDownloadAndShare();
+            }}
+            disabled={isLoading || !displayName || isGenerating}
+          >
+            <Download className="h-4 w-4 mr-2 shrink-0" />
+            <span className="truncate">{isGenerating ? 'Saving...' : 'Download'}</span>
+          </Button>
+          <Button 
+            variant="gradient" 
+            className="flex-1 min-w-0 font-medium tracking-tight active:scale-[0.97] transition-transform" 
+            onClick={shareCard}
+            disabled={isLoading}
+            data-tour="share-button"
+          >
+            <Share2 className="h-4 w-4 mr-2 shrink-0" />
+            <span className="truncate">Share</span>
+          </Button>
+        </div>
       </div>
 
       {/* Hidden Shareable Card Image for download */}

@@ -988,6 +988,8 @@ export type Database = {
           layout: string | null
           linkedin: string | null
           logo_url: string | null
+          onboarding_completed: boolean
+          onboarding_step: string | null
           phone: string | null
           photo_url: string | null
           pin_attempts: number
@@ -1014,6 +1016,8 @@ export type Database = {
           layout?: string | null
           linkedin?: string | null
           logo_url?: string | null
+          onboarding_completed?: boolean
+          onboarding_step?: string | null
           phone?: string | null
           photo_url?: string | null
           pin_attempts?: number
@@ -1040,6 +1044,8 @@ export type Database = {
           layout?: string | null
           linkedin?: string | null
           logo_url?: string | null
+          onboarding_completed?: boolean
+          onboarding_step?: string | null
           phone?: string | null
           photo_url?: string | null
           pin_attempts?: number
