@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { MobileLanding } from './mobile/MobileLanding';
 import { BiometricConsentDialog } from './mobile/BiometricConsentDialog';
 import { PageSkeleton } from '@/components/ui/page-skeleton';
+import { OnboardingTour } from './OnboardingTour';
 import { useAuth } from '@/hooks/useAuth';
 import { useCards } from '@/hooks/useCards';
 import { useProfile } from '@/hooks/useProfile';
@@ -221,6 +222,9 @@ export function Layout() {
       </main>
 
       <BottomNav />
+      
+      {/* Onboarding Tour for first-time users */}
+      <OnboardingTour />
     </div>
   );
 }
