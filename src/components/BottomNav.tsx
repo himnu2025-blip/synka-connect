@@ -41,6 +41,7 @@ export function BottomNav() {
           <NavLink
             key={item.to}
             to={item.to}
+            id={item.to === '/my-card' ? 'nav-my-card' : undefined}
             className={({ isActive }) =>
               cn(
                 "flex flex-col items-center justify-center py-2 px-2 sm:px-3 rounded-xl transition-all duration-200 min-w-0 flex-1 max-w-[72px]",
