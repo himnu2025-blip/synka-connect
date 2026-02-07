@@ -124,15 +124,15 @@ async function searchKnowledgeByKeywords(
     topicKeywords.push("pricing", "monthly", "yearly", "subscription", "plan");
   }
   if (/nfc|card|physical|metal|pvc|plastic/.test(lowerQuery)) {
-    topicKeywords.push("nfc", "card", "physical", "metal", "pvc", "plastic");
+    topicKeywords.push("nfc", "card", "physical", "metal", "pvc", "plastic", "pricing");
   }
-  // Enhanced metal card detection
+  // Enhanced metal card detection - add pricing keywords
   if (/metal/.test(lowerQuery)) {
-    topicKeywords.push("metal", "₹1499", "1499", "pricing", "stainless", "gold", "silver");
+    topicKeywords.push("metal", "₹1499", "1499", "pricing", "stainless", "gold", "silver", "price");
   }
-  // Enhanced PVC/plastic card detection
+  // Enhanced PVC/plastic card detection - add pricing keywords
   if (/pvc|plastic/.test(lowerQuery)) {
-    topicKeywords.push("pvc", "plastic", "₹499", "499", "pricing");
+    topicKeywords.push("pvc", "plastic", "₹499", "499", "pricing", "price");
   }
   if (/deliver|shipping|ship/.test(lowerQuery)) {
     topicKeywords.push("delivery", "shipping", "ship", "days");
@@ -178,16 +178,25 @@ async function searchKnowledgeByKeywords(
     return [];
   }
 
+  // Detect if this is a card-specific pricing query (metal/pvc)
+  const isCardPricingQuery = /metal|pvc|plastic|nfc\s*card/.test(lowerQuery) && isPricingQuery;
+
   const candidates = (() => {
     const list = data || [];
     if (!isPricingQuery) return list;
 
     // For pricing questions, strongly prefer pricing-tagged entries or entries that contain a rupee amount.
+    // But for card pricing queries, also allow entries with "metal" or "pvc" in the title.
     return list.filter((item: any) => {
       const title = (item?.title || "").toLowerCase();
       const content = item?.content || "";
       const hasRupee = /₹\s*\d+/.test(content);
       const looksPricing = item?.category === "pricing" || title.includes("pricing") || title.includes("pro plan");
+      const isCardEntry = title.includes("metal") || title.includes("pvc") || title.includes("nfc card");
+      
+      // For card pricing queries, include card-specific entries even without explicit pricing tag
+      if (isCardPricingQuery && isCardEntry && hasRupee) return true;
+      
       return hasRupee || looksPricing;
     });
   })();
@@ -215,6 +224,19 @@ async function searchKnowledgeByKeywords(
       // Specific boost for the common intent: "pro plan" → Orange plan pricing.
       if ((/\bpro\b/.test(lowerQuery) || lowerQuery.includes("pro plan")) && (title.includes("pro plan") || title.includes("orange plan") || content.includes("orange (pro)") || content.includes("pro plan"))) {
         score += 8;
+      }
+
+      // Boost for metal card pricing queries
+      if (/metal/.test(lowerQuery) && (title.includes("metal") || content.includes("metal"))) {
+        score += 8;
+        // Extra boost for the specific pricing entry
+        if (title.includes("pricing metal") || title.includes("metal nfc card")) score += 4;
+      }
+
+      // Boost for PVC/plastic card pricing queries
+      if (/pvc|plastic/.test(lowerQuery) && (title.includes("pvc") || content.includes("pvc") || title.includes("plastic"))) {
+        score += 8;
+        if (title.includes("pvc") || title.includes("plastic")) score += 4;
       }
 
       // Monthly/annual hints
@@ -632,6 +654,73 @@ serve(async (req) => {
             reply,
             intent,
             sessionMemory?.followups_done || []
+          );
+
+          return new Response(
+            JSON.stringify({ reply }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+    }
+
+    // ✅ Metal card pricing shortcut
+    if ((intent === "metal_card" || intent === "pricing") && latestUserMessage) {
+      const q = latestUserMessage.toLowerCase();
+      const isMetalCardQuery = /metal/.test(q) && (/price|cost|how much|₹|rate/.test(q) || intent === "metal_card");
+
+      if (isMetalCardQuery) {
+        const { data: metalKb } = await supabase
+          .from("knowledge_base")
+          .select("id, title, content, category")
+          .eq("is_active", true)
+          .or("title.ilike.%metal%pricing%,title.ilike.%pricing%metal%,title.ilike.%metal nfc card%")
+          .limit(1)
+          .maybeSingle();
+
+        if (metalKb?.content) {
+          const reply = metalKb.content;
+
+          await recordLearningSignal(
+            supabase, sessionId, latestUserMessage, null, metalKb.id, 1, reply, "knowledge_hit"
+          );
+
+          await updateSessionMemory(
+            supabase, sessionId, latestUserMessage, reply, intent, sessionMemory?.followups_done || []
+          );
+
+          return new Response(
+            JSON.stringify({ reply }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+    }
+
+    // ✅ PVC/plastic card pricing shortcut
+    if ((intent === "nfc_card" || intent === "pricing") && latestUserMessage) {
+      const q = latestUserMessage.toLowerCase();
+      const isPvcCardQuery = (/pvc|plastic/.test(q)) && (/price|cost|how much|₹|rate/.test(q) || intent === "nfc_card");
+
+      if (isPvcCardQuery) {
+        const { data: pvcKb } = await supabase
+          .from("knowledge_base")
+          .select("id, title, content, category")
+          .eq("is_active", true)
+          .or("title.ilike.%pvc%,title.ilike.%plastic%")
+          .eq("category", "pricing")
+          .limit(1)
+          .maybeSingle();
+
+        if (pvcKb?.content) {
+          const reply = pvcKb.content;
+
+          await recordLearningSignal(
+            supabase, sessionId, latestUserMessage, null, pvcKb.id, 1, reply, "knowledge_hit"
+          );
+
+          await updateSessionMemory(
+            supabase, sessionId, latestUserMessage, reply, intent, sessionMemory?.followups_done || []
           );
 
           return new Response(
