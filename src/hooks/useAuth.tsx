@@ -355,9 +355,11 @@ const signInWithGoogle = async () => {
 };
 
   const signInWithLinkedIn = async () => {
+    const redirectUrl = getAuthRedirectUrl();
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'linkedin_oidc',
-      options: { redirectTo: `${window.location.origin}/my-card` },
+      options: { redirectTo: redirectUrl },
     });
     return { error };
   };
