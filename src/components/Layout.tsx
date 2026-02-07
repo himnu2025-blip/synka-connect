@@ -4,6 +4,7 @@ import { Capacitor } from '@capacitor/core';
 import { BottomNav } from './BottomNav';
 import { DesktopNav } from './DesktopNav';
 import { ThemeToggle } from './ThemeToggle';
+
 import { CardSelector } from './CardSelector';
 import { BrandLogo } from './BrandLogo';
 import { Button } from '@/components/ui/button';
@@ -159,9 +160,6 @@ export function Layout() {
                 Sign up
               </Button>
 
-              <div className="ml-1 sm:ml-3">
-                <ThemeToggle />
-              </div>
             </div>
           </div>
         </header>
@@ -204,9 +202,8 @@ export function Layout() {
 
           <div className="flex items-center gap-2 flex-shrink-0">
             {isOrangePlan && (
-              <span className="w-2.5 h-2.5 rounded-full bg-orange-plan flex-shrink-0" />
+              <span className="w-3 h-3 rounded-full bg-orange-plan flex-shrink-0" />
             )}
-            <ThemeToggle />
           </div>
         </div>
       </header>

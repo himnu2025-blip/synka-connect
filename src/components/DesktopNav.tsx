@@ -1,7 +1,7 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, CreditCard, Settings, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ThemeToggle } from './ThemeToggle';
+
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useCards } from '@/hooks/useCards';
@@ -79,7 +79,6 @@ export function DesktopNav() {
           <BrandLogo size="md" className="hidden md:flex" />
 
           <div className="flex items-center gap-2 md:gap-3">
-            <ThemeToggle />
             <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
               Login
             </Button>
@@ -144,11 +143,6 @@ export function DesktopNav() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* ORANGE PLAN (same as mobile) */}
-          {isAuthenticated && isOrangePlan && (
-            <span className="w-2.5 h-2.5 rounded-full bg-orange-plan flex-shrink-0" />
-          )}
-
           {isAuthenticated && isMyCardPage && !cardsLoading && activeCard && (
             <div id="card-selector-desktop">
             <CardSelector
@@ -166,7 +160,9 @@ export function DesktopNav() {
             </div>
           )}
 
-          <ThemeToggle />
+          {isAuthenticated && isOrangePlan && (
+            <span className="w-3 h-3 rounded-full bg-orange-plan flex-shrink-0" />
+          )}
 
           {isAuthenticated ? (
             <Button variant="ghost" size="sm" onClick={signOut}>
