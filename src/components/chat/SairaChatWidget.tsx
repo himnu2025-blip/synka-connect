@@ -287,6 +287,16 @@ export function SairaChatWidget() {
   const scrollEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Lock body scroll when chat is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
   // Create session in DB via edge function
   const createSessionInDB = async (sessionSnapshot: ChatSession, userInfo: UserInfo) => {
     if (sessionCreatedInDBRef.current) return { isExistingUser: userInfo.isExistingUser };
@@ -1075,6 +1085,8 @@ export function SairaChatWidget() {
           "transition-all duration-300 ease-out origin-bottom-right",
           isOpen ? "scale-100 opacity-100" : "scale-0 opacity-0 pointer-events-none"
         )}
+        style={{ overscrollBehavior: 'contain', touchAction: 'pan-y' }}
+        onTouchMove={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border bg-primary/5">
