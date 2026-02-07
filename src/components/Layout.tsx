@@ -204,9 +204,7 @@ export function Layout() {
 
           <div className="flex items-center gap-2 flex-shrink-0">
             {isOrangePlan && (
-              <Badge className="bg-orange-plan text-white font-semibold text-xs px-2 py-0.5 shadow-sm">
-                ORANGE
-              </Badge>
+              <span className="w-2.5 h-2.5 rounded-full bg-orange-plan flex-shrink-0" />
             )}
             <ThemeToggle />
           </div>
