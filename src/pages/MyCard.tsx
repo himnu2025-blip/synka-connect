@@ -740,7 +740,7 @@ useEffect(() => {
         {/* Edit pencil button */}
         <button
           onClick={() => setIsEditOpen(true)}
-          className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur border border-border/40 shadow-sm flex items-center justify-center active:scale-90 transition-transform"
+          className="absolute top-3 right-3 z-30 h-8 w-8 rounded-full bg-background/80 backdrop-blur border border-border/40 shadow-sm flex items-center justify-center active:scale-90 transition-transform"
           aria-label="Edit card"
         >
           <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
