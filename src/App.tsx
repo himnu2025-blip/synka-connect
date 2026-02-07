@@ -16,6 +16,7 @@ import { Layout } from "@/components/Layout";
 import { DeepLinkHandler } from "@/components/DeepLinkHandler";
 import { useIOSDeepLinkRestore } from "@/components/IOSPWAPrompt";
 import { useAppLock } from "@/hooks/useAppLock";
+import { useNativePermissions } from "@/hooks/useNativePermissions";
 import HomeRedirect from "./HomeRedirect";
 
 import Index from "./pages/Index";
@@ -96,6 +97,9 @@ function RouterContent() {
   
   // Restore deep link path when iOS PWA opens
   useIOSDeepLinkRestore();
+  
+  // Request native permissions on first app launch
+  useNativePermissions();
 
   // Show minimal loading indicator while auth initializes (prevents blank screen)
   if (authLoading) {
