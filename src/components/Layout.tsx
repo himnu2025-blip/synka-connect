@@ -185,7 +185,7 @@ export function Layout() {
             <BrandLogo size="sm" />
 
             {isMyCardPage && !cardsLoading && activeCard && Array.isArray(cards) && (
-              <div className="ml-2 sm:ml-3 min-w-0 flex-1">
+              <div id="card-selector-mobile" className="ml-2 sm:ml-3 min-w-0 flex-1">
                 <CardSelector
                   cards={cards}
                   activeCard={activeCard}

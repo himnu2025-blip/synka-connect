@@ -148,6 +148,7 @@ export function DesktopNav() {
           {isAuthenticated && isOrangePlan && <OrangePlanPill />}
 
           {isAuthenticated && isMyCardPage && !cardsLoading && activeCard && (
+            <div id="card-selector-desktop">
             <CardSelector
               cards={cards}
               activeCard={activeCard}
@@ -160,6 +161,7 @@ export function DesktopNav() {
               variant="desktop"
               isOrangePlan={isOrangePlan}
             />
+            </div>
           )}
 
           <ThemeToggle />
