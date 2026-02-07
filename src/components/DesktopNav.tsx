@@ -145,7 +145,9 @@ export function DesktopNav() {
 
         <div className="flex items-center gap-2">
           {/* ORANGE PLAN (same as mobile) */}
-          {isAuthenticated && isOrangePlan && <OrangePlanPill />}
+          {isAuthenticated && isOrangePlan && (
+            <span className="w-2.5 h-2.5 rounded-full bg-orange-plan flex-shrink-0" />
+          )}
 
           {isAuthenticated && isMyCardPage && !cardsLoading && activeCard && (
             <div id="card-selector-desktop">
