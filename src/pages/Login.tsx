@@ -489,7 +489,7 @@ export default function Login() {
         // First time - show consent dialog
         setPendingLoginCredentials({ email, userId: user_id });
         setIsLoading(false);
-        toast({ title: 'Welcome back!', description: 'You have successfully logged in.' });
+        setIsLoading(false);
         setShowBiometricConsent(true);
         return; // Don't navigate yet - wait for consent response
       } else if (biometricEnabled) {
@@ -499,10 +499,6 @@ export default function Login() {
     }
     
     setIsLoading(false);
-    toast({
-      title: 'Welcome back!',
-      description: 'You have successfully logged in.',
-    });
     navigate('/my-card');
   };
   
