@@ -761,6 +761,22 @@ useEffect(() => {
   <div className="w-full h-72 rounded-3xl bg-muted/40 animate-pulse" />
 )}
 
+          {/* "Complete your Card" CTA — only when no photo uploaded */}
+          {cardReady && !activeCard?.photo_url && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3 gap-2"
+              onClick={() => {
+                hapticFeedback.light();
+                setIsEditOpen(true);
+              }}
+            >
+              <Sparkles className="h-4 w-4" />
+              Complete your Card
+            </Button>
+          )}
+
           {cardReady && currentLayout !== 'photo-only' ? (
   <div className="text-center mt-4 space-y-1 text-foreground">
     <h2 className="text-[22px] font-semibold tracking-tight text-foreground">
