@@ -20,6 +20,7 @@ import {
   Palette,
   Star,
   X,
+  Pencil,
 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { QRCodeSVG } from 'qrcode.react';
@@ -735,7 +736,15 @@ useEffect(() => {
       )}
 
       {/* Profile Card View */}
-      <div className="bg-card/95 backdrop-blur-xl rounded-3xl border border-border/40 shadow-[0_20px_40px_rgba(0,0,0,0.06)] overflow-hidden">
+      <div className="relative bg-card/95 backdrop-blur-xl rounded-3xl border border-border/40 shadow-[0_20px_40px_rgba(0,0,0,0.06)] overflow-hidden">
+        {/* Edit pencil button */}
+        <button
+          onClick={() => setIsEditOpen(true)}
+          className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur border border-border/40 shadow-sm flex items-center justify-center active:scale-90 transition-transform"
+          aria-label="Edit card"
+        >
+          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
         <div
   className={cn(
     "relative pt-0 flex flex-col items-center",
