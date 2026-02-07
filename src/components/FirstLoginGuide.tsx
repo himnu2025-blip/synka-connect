@@ -12,10 +12,10 @@ interface SpotlightStep {
 
 const STEPS: SpotlightStep[] = [
   {
-    targetId: 'nav-my-card',
-    title: 'Your Digital Card',
-    description: 'Edit your details, upload photo or logo here.',
-    placement: 'top',
+    targetId: 'card-selector-mobile',
+    title: 'Set up your card',
+    description: 'Complete your profile, add photo or logo, connect social media links & start sharing.',
+    placement: 'bottom',
   },
 ];
 
@@ -43,10 +43,10 @@ export function FirstLoginGuide() {
     const step = STEPS[currentStep];
     if (!step) return;
 
-    // Try mobile nav first, then desktop nav
+    // Try mobile header first, then desktop header
     let el = document.getElementById(step.targetId);
     if (!el || el.offsetParent === null) {
-      el = document.getElementById(step.targetId + '-desktop');
+      el = document.getElementById('card-selector-desktop');
     }
     if (el) {
       setTargetRect(el.getBoundingClientRect());
