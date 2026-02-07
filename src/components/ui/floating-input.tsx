@@ -82,7 +82,7 @@ export const FloatingInput = ({
   onBlur,
 }: FloatingInputProps) => {
   return (
-    <div className={cn("relative h-14", className)}>
+    <div className={cn("relative h-14 overflow-visible", className)}>
       <input
         ref={inputRef}
         type={type}
@@ -194,7 +194,7 @@ export const FloatingPhoneInput = ({
   onBlur,
 }: FloatingPhoneInputProps) => {
   return (
-    <div className={cn("relative h-14", className)}>
+    <div className={cn("relative h-14 overflow-visible", className)}>
       {/* Container with border */}
       <div className="peer w-full h-full rounded-xl border border-border focus-within:border-foreground flex items-center">
         {/* Country code selector - compact, no emoji */}

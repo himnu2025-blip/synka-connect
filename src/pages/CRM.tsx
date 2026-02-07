@@ -1901,7 +1901,7 @@ if (!contacts && contactsLoading) {
           onClose={() => setShowAddContact(false)}
           title="Add Contact"
         >
-          <div className="space-y-4">
+          <div className="space-y-4 pt-1">
             <FloatingNameInput
               firstName={newContact.firstName}
               lastName={newContact.lastName}
@@ -1989,7 +1989,7 @@ if (!contacts && contactsLoading) {
             <DialogHeader>
               <DialogTitle>Add Contact</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 pt-1">
               <FloatingNameInput
                 firstName={newContact.firstName}
                 lastName={newContact.lastName}
