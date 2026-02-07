@@ -73,7 +73,18 @@ function getIntentFollowUp(intent: string): string | null {
 // ✅ FIX 2: Check if knowledge matches are confident enough
 function isKnowledgeConfident(matches: any[]): boolean {
   if (!matches || matches.length === 0) return false;
-  return (matches[0]?.similarity || 0) >= 0.6;
+
+  const top = matches[0];
+  const similarity = (top?.similarity || 0) as number;
+  if (similarity >= 0.6) return true;
+
+  // Pricing is highly structured (₹ amounts). Allow a slightly lower threshold
+  // when we have strong signals that the match is actually a pricing entry.
+  const content = top?.content || "";
+  const hasRupee = /₹\s*\d+/.test(content);
+  const isPricingTagged = top?.category === "pricing" || (top?.title || "").toLowerCase().includes("pricing");
+
+  return similarity >= 0.55 && (hasRupee || isPricingTagged);
 }
 
 // Load bot configuration from database
@@ -145,11 +156,16 @@ async function searchKnowledgeByKeywords(
     return [];
   }
 
-  const orConditions = allKeywords
+  let orConditions = allKeywords
     .slice(0, 6)
     .map(kw => `title.ilike.%${kw}%,content.ilike.%${kw}%`)
     .join(",");
-  
+
+  // Ensure pricing queries always consider explicitly tagged pricing entries.
+  if (isPricingQuery) {
+    orConditions = `${orConditions},category.eq.pricing`;
+  }
+
   const { data, error } = await supabase
     .from("knowledge_base")
     .select("id, title, content, category")
@@ -162,7 +178,21 @@ async function searchKnowledgeByKeywords(
     return [];
   }
 
-  const scored = (data || []).map((item: any) => {
+  const candidates = (() => {
+    const list = data || [];
+    if (!isPricingQuery) return list;
+
+    // For pricing questions, strongly prefer pricing-tagged entries or entries that contain a rupee amount.
+    return list.filter((item: any) => {
+      const title = (item?.title || "").toLowerCase();
+      const content = item?.content || "";
+      const hasRupee = /₹\s*\d+/.test(content);
+      const looksPricing = item?.category === "pricing" || title.includes("pricing") || title.includes("pro plan");
+      return hasRupee || looksPricing;
+    });
+  })();
+
+  const scored = candidates.map((item: any) => {
     const text = `${item.title} ${item.content}`.toLowerCase();
     let score = 0;
     for (const kw of allKeywords) {
@@ -170,20 +200,34 @@ async function searchKnowledgeByKeywords(
       if (item.title.toLowerCase().includes(kw)) score += 2;
     }
 
-    // Extra confidence boost for pricing answers so we don't incorrectly fall back
-    // when the KB has the exact price but the user's query doesn't include the same tokens (e.g., "price" vs "₹").
-    if (isPricingQuery && item.category === "pricing") {
-      score += 4;
-    }
-    if (isPricingQuery && item.title.toLowerCase().includes("pricing")) {
-      score += 2;
+    // Strong boosts for pricing/plans so we don't incorrectly fall back.
+    if (isPricingQuery) {
+      const title = item.title.toLowerCase();
+      const content = (item.content || "").toLowerCase();
+
+      // Prefer entries explicitly tagged/labelled as pricing.
+      if (item.category === "pricing") score += 6;
+      if (title.includes("pricing")) score += 3;
+
+      // Prefer answers that actually contain a rupee price.
+      if (/₹\s*\d+/.test(item.content || "")) score += 6;
+
+      // Specific boost for the common intent: "pro plan" → Orange plan pricing.
+      if ((/\bpro\b/.test(lowerQuery) || lowerQuery.includes("pro plan")) && (title.includes("pro plan") || title.includes("orange plan") || content.includes("orange (pro)") || content.includes("pro plan"))) {
+        score += 8;
+      }
+
+      // Monthly/annual hints
+      if (/monthly|month/.test(lowerQuery) && (/monthly|\/month|per month|299/.test(content))) score += 3;
+      if (/yearly|annual|year/.test(lowerQuery) && (/yearly|annual|\/year|per year|1999/.test(content))) score += 3;
     }
 
     // Convert score to similarity (0-1 range)
-    const maxPossibleScore = allKeywords.length * 3;
+    const maxPossibleScore = Math.max(1, allKeywords.length * 3 + (isPricingQuery ? 10 : 0));
     const similarity = Math.min(0.95, 0.5 + (score / maxPossibleScore) * 0.5);
     return { ...item, similarity };
   });
+
 
   return scored
     .filter((item: any) => item.similarity > 0.5)
@@ -550,6 +594,54 @@ serve(async (req) => {
       }
     }
 
+    // ✅ Pro-plan pricing shortcut (still uses KB as source of truth)
+    if ((intent === "pricing" || intent === "plans") && latestUserMessage) {
+      const q = latestUserMessage.toLowerCase();
+      const isProPlanQuery = /\bpro\b/.test(q) || q.includes("pro plan") || q.includes("orange plan");
+
+      if (isProPlanQuery) {
+        const { data: proPlanKb, error: proPlanKbError } = await supabase
+          .from("knowledge_base")
+          .select("id, title, content, category")
+          .eq("is_active", true)
+          .ilike("title", "%pro plan%")
+          .maybeSingle();
+
+        if (proPlanKbError) {
+          console.error("Pro plan KB lookup error:", proPlanKbError);
+        }
+
+        if (proPlanKb?.content) {
+          const reply = proPlanKb.content;
+
+          await recordLearningSignal(
+            supabase,
+            sessionId,
+            latestUserMessage,
+            null,
+            proPlanKb.id,
+            1,
+            reply,
+            "knowledge_hit"
+          );
+
+          await updateSessionMemory(
+            supabase,
+            sessionId,
+            latestUserMessage,
+            reply,
+            intent,
+            sessionMemory?.followups_done || []
+          );
+
+          return new Response(
+            JSON.stringify({ reply }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+    }
+
     // ✅ FIX 5: If no KB match → polite fallback ONLY (no LLM hallucination)
     if (!isKnowledgeConfident(matchedKnowledge) && isMeaningfulQuestion(latestUserMessage)) {
       const fallback = "I don't have the right information on this yet. Our team will get back to you shortly — you can also reach us at support@synka.in! 🙏";
@@ -576,6 +668,52 @@ serve(async (req) => {
       );
     }
 
+    // ✅ Direct KB answers for pricing/plans (avoid LLM uncertainty)
+    if ((intent === "pricing" || intent === "plans") && isKnowledgeConfident(matchedKnowledge)) {
+      const lower = (latestUserMessage || "").toLowerCase();
+
+      const isProPlanQuery = /\bpro\b/.test(lower) || lower.includes("pro plan") || lower.includes("orange plan");
+
+      const preferred = matchedKnowledge.find((k: any) => {
+        const title = (k?.title || "").toLowerCase();
+        const content = k?.content || "";
+        const hasRupee = /₹\s*\d+/.test(content);
+        const isPricingEntry = k?.category === "pricing" || title.includes("pricing");
+        const isProPlanEntry = title.includes("pro plan") || title.includes("orange plan") || /orange\s*\(pro\)/i.test(content);
+
+        if (isProPlanQuery) return isPricingEntry && isProPlanEntry;
+        return isPricingEntry && hasRupee;
+      });
+
+      const top = preferred || matchedKnowledge[0];
+      const directReply = top?.content || "";
+
+      await recordLearningSignal(
+        supabase,
+        sessionId,
+        latestUserMessage,
+        null,
+        top?.id || null,
+        top?.similarity || null,
+        directReply,
+        "knowledge_hit"
+      );
+
+      await updateSessionMemory(
+        supabase,
+        sessionId,
+        latestUserMessage,
+        directReply,
+        intent,
+        sessionMemory?.followups_done || []
+      );
+
+      return new Response(
+        JSON.stringify({ reply: directReply }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Build system prompt (no generic follow-ups!)
     const systemPrompt = buildSystemPrompt(
       personality,
@@ -585,6 +723,7 @@ serve(async (req) => {
       firstName,
       isExistingUser
     );
+
 
     // Prepare conversation messages
     const conversationMessages = [
