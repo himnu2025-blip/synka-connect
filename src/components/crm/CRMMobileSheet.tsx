@@ -58,7 +58,7 @@ export function CRMMobileSheet({
 
           {/* Header with title and close button */}
           {(title || showCloseButton) && (
-            <div className="flex items-center justify-between px-6 pb-3">
+            <div className="flex items-center justify-between px-6 pb-4">
               {title && (
                 <h2 className="text-xl font-semibold">{title}</h2>
               )}
