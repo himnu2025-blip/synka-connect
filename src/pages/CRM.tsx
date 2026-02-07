@@ -1466,24 +1466,29 @@ if (!contacts && contactsLoading) {
   };
 
   // Handle export contacts
-  const handleExportContacts = () => {
-  if (!isOrangePlan) {
+  const handleExportContacts = async () => {
+    if (!isOrangePlan) {
+      hapticFeedback.light();
+      navigate('/settings/upgrade');
+      return;
+    }
+
     hapticFeedback.light();
-    navigate('/settings/upgrade');
-    return;
-  }
+    const filename = `synka_contacts_${new Date().toISOString().split('T')[0]}.csv`;
 
-  hapticFeedback.light();
-  const filename = `synka_contacts_${new Date().toISOString().split('T')[0]}.csv`;
+    try {
+      const success = await downloadContactsCSV(localContacts, filename);
 
-  const success = downloadContactsCSV(localContacts, filename);
-
-  if (success) {
-    toast({ title: `Exported ${localContacts.length} contacts` });
-  } else {
-    toast({ title: 'Export failed', variant: 'destructive' });
-  }
-};
+      if (success) {
+        toast({ title: `Exported ${localContacts.length} contacts` });
+      } else {
+        toast({ title: 'Export failed', variant: 'destructive' });
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({ title: 'Export failed', variant: 'destructive' });
+    }
+  };
 
   // Handle import contacts
   const handleImportClick = () => {

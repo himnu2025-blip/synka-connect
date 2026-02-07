@@ -2,6 +2,9 @@
  * CSV Import/Export utilities for CRM contacts
  */
 
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { Contact } from '@/hooks/useContacts';
 
 // Fields to export/import
@@ -55,15 +58,62 @@ export function exportContactsToCSV(contacts: Contact[]): string {
 }
 
 /**
- * Download contacts as CSV file
+ * Download contacts as CSV file - handles both web and native platforms
  */
-export function downloadContactsCSV(
+export async function downloadContactsCSV(
   contacts: Contact[],
   filename = 'contacts.csv'
-): boolean {
+): Promise<boolean> {
   try {
     const csv = exportContactsToCSV(contacts);
 
+    // Native app: Use Capacitor Filesystem + Share
+    if (Capacitor.isNativePlatform()) {
+      return await downloadCSVNative(csv, filename);
+    }
+
+    // Web: Use standard blob download
+    return downloadCSVWeb(csv, filename);
+  } catch (error) {
+    console.error('CSV download failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Native platform CSV download using Filesystem + Share
+ */
+async function downloadCSVNative(csv: string, filename: string): Promise<boolean> {
+  try {
+    // Write file to cache directory
+    const result = await Filesystem.writeFile({
+      path: filename,
+      data: csv,
+      directory: Directory.Cache,
+      encoding: Encoding.UTF8,
+    });
+
+    // Share the file
+    await Share.share({
+      title: 'Export Contacts',
+      text: 'Synka CRM Contacts',
+      url: result.uri,
+      dialogTitle: 'Save or Share Contacts',
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Native CSV export failed:', error);
+    // Fallback to web method if share fails
+    return downloadCSVWeb(csv, filename);
+  }
+}
+
+/**
+ * Web platform CSV download using blob URL
+ */
+function downloadCSVWeb(csv: string, filename: string): boolean {
+  try {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
 
@@ -76,10 +126,10 @@ export function downloadContactsCSV(
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    return true; // ✅ success
+    return true;
   } catch (error) {
-    console.error('CSV download failed:', error);
-    return false; // ❌ failed
+    console.error('Web CSV download failed:', error);
+    return false;
   }
 }
 
