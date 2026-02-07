@@ -24,6 +24,38 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+
+	<!-- Camera Usage Description -->
+	<key>NSCameraUsageDescription</key>
+	<string>Synka needs camera access to scan QR codes and business cards</string>
+
+	<!-- Photo Library Usage -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Synka needs access to your photos to set profile pictures and save business cards</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Synka needs access to save images to your photo library</string>
+
+	<!-- Contacts Usage -->
+	<key>NSContactsUsageDescription</key>
+	<string>Synka needs access to your contacts to save and manage business connections</string>
+
+	<!-- Face ID / Touch ID Usage -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>Synka uses Face ID to securely unlock the app</string>
+
+	<!-- Custom URL Scheme for Deep Linking -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.synka.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>synka</string>
+			</array>
+		</dict>
+	</array>
+
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -47,5 +79,14 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleDefault</string>
+
+	<!-- Scene configuration -->
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+	</dict>
 </dict>
 </plist>
