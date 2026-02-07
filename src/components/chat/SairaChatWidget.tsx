@@ -963,16 +963,28 @@ export function SairaChatWidget() {
       // Backend controls follow-up - just render what it returns
       if (result.followUp) {
         setAwaitingClosureConfirmation(true);
-        
+
         const followUpMessage: Message = {
           id: crypto.randomUUID(),
           role: "assistant",
           content: result.followUp,
-          timestamp: new Date()
+          timestamp: new Date(),
         };
-        
-        setMessages(prev => [...prev, followUpMessage]);
+
+        setMessages((prev) => [...prev, followUpMessage]);
         await saveMessageToDB(sessionId, "assistant", result.followUp);
+      }
+
+      // If the backend returned a JSON reply (non-streaming), we must append it to UI here.
+      // For SSE streaming, streamChat already creates/updates the assistant message.
+      if (result.content && !streamingMessageIdRef.current) {
+        const assistantMsg: Message = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: result.content,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMsg]);
       }
 
       if (result.content) {
