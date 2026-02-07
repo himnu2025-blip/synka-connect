@@ -37,11 +37,12 @@ function detectIntent(message: string): string {
   const text = message.toLowerCase();
   
   if (/metal\s*(card|nfc)?/.test(text)) return "metal_card";
-  if (/nfc|pvc\s*card/.test(text)) return "nfc_card";
+  if (/nfc|pvc\s*card|plastic\s*card/.test(text)) return "nfc_card";
+  if (/write\s*nfc|nfc\s*writ|program\s*nfc|nfc\s*program/.test(text)) return "nfc_write";
   if (/price|pricing|cost|₹|rupee|how much|rate/.test(text)) return "pricing";
   if (/replace|lost|damage|broken/.test(text)) return "replacement";
   if (/deliver|shipping|ship|when will|how long/.test(text)) return "delivery";
-  if (/orange|plan|upgrade|premium|subscription/.test(text)) return "plans";
+  if (/orange|pro\s*plan|plan|upgrade|premium|subscription/.test(text)) return "plans";
   if (/crm|contact|lead|manage/.test(text)) return "crm";
   if (/qr|scan|share|link/.test(text)) return "sharing";
   if (/design|custom|template|layout/.test(text)) return "design";
@@ -54,7 +55,8 @@ function detectIntent(message: string): string {
 function getIntentFollowUp(intent: string): string | null {
   const followUps: Record<string, string> = {
     metal_card: "Would you like to see available metal colors like rose gold or black?",
-    nfc_card: "Do you want help choosing a design or should our AI design it for you?",
+    nfc_card: "Do you want help choosing between PVC and Metal cards?",
+    nfc_write: "Need help troubleshooting NFC writing issues?",
     pricing: "Should I explain what's included in each plan?",
     replacement: "Want me to explain how the replacement policy works?",
     delivery: "Would you like to know about express delivery options?",
@@ -110,22 +112,30 @@ async function searchKnowledgeByKeywords(
   if (/monthly|yearly|annual|subscription/.test(lowerQuery)) {
     topicKeywords.push("pricing", "monthly", "yearly", "subscription", "plan");
   }
-  if (/nfc|card|physical|metal|pvc/.test(lowerQuery)) {
-    topicKeywords.push("nfc", "card", "physical", "metal", "pvc");
+  if (/nfc|card|physical|metal|pvc|plastic/.test(lowerQuery)) {
+    topicKeywords.push("nfc", "card", "physical", "metal", "pvc", "plastic");
   }
   // Enhanced metal card detection
   if (/metal/.test(lowerQuery)) {
-    topicKeywords.push("metal", "₹1499", "1499", "pricing");
+    topicKeywords.push("metal", "₹1499", "1499", "pricing", "stainless", "gold", "silver");
   }
-  // Enhanced PVC card detection
-  if (/pvc/.test(lowerQuery)) {
-    topicKeywords.push("pvc", "₹499", "499", "pricing");
+  // Enhanced PVC/plastic card detection
+  if (/pvc|plastic/.test(lowerQuery)) {
+    topicKeywords.push("pvc", "plastic", "₹499", "499", "pricing");
   }
   if (/deliver|shipping|ship/.test(lowerQuery)) {
-    topicKeywords.push("delivery", "shipping", "ship");
+    topicKeywords.push("delivery", "shipping", "ship", "days");
   }
   if (/replace|lost|damage/.test(lowerQuery)) {
     topicKeywords.push("replacement", "replace", "warranty");
+  }
+  // NFC writing detection
+  if (/write|program|writer/.test(lowerQuery)) {
+    topicKeywords.push("write", "writer", "nfc", "program", "settings");
+  }
+  // Pro plan / Orange plan detection
+  if (/pro\s*plan|pro\b/.test(lowerQuery)) {
+    topicKeywords.push("pro", "orange", "plan", "pricing");
   }
   
   const allKeywords = [...new Set([...keywords, ...topicKeywords])];
