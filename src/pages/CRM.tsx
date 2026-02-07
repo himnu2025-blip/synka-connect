@@ -2911,26 +2911,51 @@ if (!contacts && contactsLoading) {
         </Drawer>
       )}
 
-      {/* Notes Popup - Mobile Portal */}
-      {isMobile && mobileSheetMounted && showNotesPopup && (
-        <CRMMobileSheet open={showNotesPopup} onClose={() => setShowNotesPopup(false)} title="Notes" maxHeight="70dvh">
-          <div className="flex gap-2">
-            <Textarea value={notesInput} onChange={(e) => setNotesInput(e.target.value)} placeholder="Write a note..." className="flex-1" />
-            <Button variant="gradient" onClick={saveNote}><Save className="h-4 w-4" /></Button>
-          </div>
-          <div className="mt-4 space-y-3 max-h-[200px] overflow-y-auto">
-            {notesHistory.length === 0 && (<p className="text-sm text-muted-foreground text-center">No notes yet</p>)}
-            {notesHistory.map((entry, i) => (
-              <div key={i} className="p-3 rounded-lg bg-muted/40 border flex items-start justify-between gap-2">
-                <div className="flex-1"><p className="text-[15px] leading-relaxed">{entry.text}</p><p className="text-[10px] text-muted-foreground">{formatSmartTime(entry.timestamp)}</p></div>
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <button onClick={() => { const parsed = parseNoteForEdit(entry.text); setEditNoteDialog({ open: true, index: i, systemText: parsed.systemText, userText: parsed.userText }); }} className="p-1 rounded hover:bg-muted" title="Edit note"><Edit2 className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                  <button onClick={() => { setConfirmDialog({ open: true, title: 'Delete Note', description: 'This action cannot be undone.', onConfirm: () => { const updatedHistory = notesHistory.filter((_, idx) => idx !== i); updateContact(selectedContact!.id, { notes_history: updatedHistory }); setNotesHistory(updatedHistory); setConfirmDialog(prev => ({ ...prev, open: false })); } }); }} className="p-1 rounded hover:bg-muted" title="Delete note"><Trash2 className="w-3.5 h-3.5 text-muted-foreground" /></button>
+      {/* Notes Popup - Mobile Portal (centered popup, not bottom drawer) */}
+      {isMobile && showNotesPopup && createPortal(
+        <>
+          <div className="fixed inset-0 z-[2000] bg-black/50" onClick={() => setShowNotesPopup(false)} />
+          <div className="fixed inset-0 z-[2001] flex items-center justify-center p-4 pointer-events-none">
+            <div className="bg-background rounded-2xl shadow-2xl w-full max-w-sm pointer-events-auto overflow-hidden">
+              {/* Header: X close + Save chip */}
+              <div className="flex items-center justify-between px-4 pt-4 pb-2">
+                <h3 className="text-lg font-semibold">Notes</h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={saveNote}
+                    className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium active:scale-95 transition-transform"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setShowNotesPopup(false)}
+                    className="h-7 w-7 rounded-full bg-muted flex items-center justify-center active:scale-95"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </div>
-            ))}
+              {/* Input */}
+              <div className="px-4 pb-3">
+                <Textarea value={notesInput} onChange={(e) => setNotesInput(e.target.value)} placeholder="Write a note..." className="min-h-[80px]" />
+              </div>
+              {/* History */}
+              <div className="px-4 pb-4 space-y-3 max-h-[200px] overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                {notesHistory.length === 0 && (<p className="text-sm text-muted-foreground text-center">No notes yet</p>)}
+                {notesHistory.map((entry, i) => (
+                  <div key={i} className="p-3 rounded-lg bg-muted/40 border flex items-start justify-between gap-2">
+                    <div className="flex-1"><p className="text-[15px] leading-relaxed">{entry.text}</p><p className="text-[10px] text-muted-foreground">{formatSmartTime(entry.timestamp)}</p></div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button onClick={() => { const parsed = parseNoteForEdit(entry.text); setEditNoteDialog({ open: true, index: i, systemText: parsed.systemText, userText: parsed.userText }); }} className="p-1 rounded hover:bg-muted" title="Edit note"><Edit2 className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                      <button onClick={() => { setConfirmDialog({ open: true, title: 'Delete Note', description: 'This action cannot be undone.', onConfirm: () => { const updatedHistory = notesHistory.filter((_, idx) => idx !== i); updateContact(selectedContact!.id, { notes_history: updatedHistory }); setNotesHistory(updatedHistory); setConfirmDialog(prev => ({ ...prev, open: false })); } }); }} className="p-1 rounded hover:bg-muted" title="Delete note"><Trash2 className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </CRMMobileSheet>
+        </>,
+        document.body
       )}
 
       {/* Confirm Dialog */}
