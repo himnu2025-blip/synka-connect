@@ -616,17 +616,20 @@ serve(async (req) => {
       }
     }
 
-    // ✅ Pro-plan pricing shortcut (still uses KB as source of truth)
+    // ✅ Pro-plan / Upgrade shortcut (still uses KB as source of truth)
     if ((intent === "pricing" || intent === "plans") && latestUserMessage) {
       const q = latestUserMessage.toLowerCase();
       const isProPlanQuery = /\bpro\b/.test(q) || q.includes("pro plan") || q.includes("orange plan");
+      const isUpgradeQuery = /upgrade|how to upgrade|upgrade plan/.test(q);
 
-      if (isProPlanQuery) {
+      if (isProPlanQuery || isUpgradeQuery) {
+        // For upgrade queries, prefer the "Upgrade to Orange" or "FAQ Upgrade" entries
+        const searchTitle = isUpgradeQuery ? "%upgrade%" : "%pro plan%";
         const { data: proPlanKb, error: proPlanKbError } = await supabase
           .from("knowledge_base")
           .select("id, title, content, category")
           .eq("is_active", true)
-          .ilike("title", "%pro plan%")
+          .or(`title.ilike.${searchTitle},title.ilike.%pro plan%,title.ilike.%orange plan%`)
           .maybeSingle();
 
         if (proPlanKbError) {
