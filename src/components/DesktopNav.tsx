@@ -108,6 +108,7 @@ export function DesktopNav() {
                 <NavLink
                   key={item.to}
                   to={item.to}
+                  id={item.to === '/my-card' ? 'nav-my-card-desktop' : undefined}
                   className={({ isActive }) =>
                     cn(
                       'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition',
