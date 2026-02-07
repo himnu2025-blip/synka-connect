@@ -20,13 +20,25 @@ serve(async (req) => {
 
     console.log(`Session action: ${action} for session ${sessionId || "N/A"}`);
 
-    // Get bot messages from config
+    // Get bot messages from config + latest knowledge_base version stamp
     if (action === "get_messages") {
+      // Fetch bot messages
       const { data: config } = await supabase
         .from("bot_config")
         .select("config_value")
         .eq("config_key", "messages")
         .maybeSingle();
+
+      // Fetch latest knowledge_base updated_at as version stamp
+      const { data: kbLatest } = await supabase
+        .from("knowledge_base")
+        .select("updated_at")
+        .eq("is_active", true)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const kbVersion = kbLatest?.updated_at || null;
 
       const messages = config?.config_value || {
         welcome: "Hi, I'm Saira — Synka's AI assistant.\nHow can I help you today?",
@@ -40,7 +52,7 @@ serve(async (req) => {
       };
 
       return new Response(
-        JSON.stringify({ success: true, messages }),
+        JSON.stringify({ success: true, messages, kbVersion }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

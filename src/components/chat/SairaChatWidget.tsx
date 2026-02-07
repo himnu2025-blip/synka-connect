@@ -36,6 +36,7 @@ const SESSION_CREATED_KEY = "synka_chat_session_created";
 const GOODBYE_SENT_KEY = "synka_chat_goodbye_sent";
 const SHOW_FORM_KEY = "synka_chat_show_form";
 const BOT_MESSAGES_KEY = "synka_bot_messages";
+const KB_VERSION_KEY = "synka_kb_version";
 const WARNING_TIMEOUT_MS = 60000;
 const END_TIMEOUT_MS = 120000;
 const IDLE_CHECK_INTERVAL_MS = 10000; // Check for pending follow-ups every 10 seconds
@@ -237,6 +238,7 @@ export function SairaChatWidget() {
   });
 
   // Fetch bot messages from backend on mount - REQUIRED before showing content
+  // Also checks KB version and auto-resets session if knowledge has been updated
   useEffect(() => {
     const fetchBotMessages = async () => {
       try {
@@ -250,6 +252,44 @@ export function SairaChatWidget() {
           botMessagesRef.current = result.messages;
           saveBotMessages(result.messages);
           setBotMessagesLoaded(true);
+
+          // Check KB version and auto-reset session if changed
+          const serverKbVersion = result.kbVersion || null;
+          const localKbVersion = localStorage.getItem(KB_VERSION_KEY);
+
+          if (serverKbVersion && localKbVersion && serverKbVersion !== localKbVersion) {
+            // KB has been updated - clear chat cache and reset session
+            console.log("KB updated, resetting chat session", { serverKbVersion, localKbVersion });
+            clearSession();
+            sessionEndedRef.current = false;
+            goodbyeSentRef.current = false;
+            warningShownRef.current = false;
+            sessionCreatedInDBRef.current = false;
+
+            const newSession: ChatSession = {
+              sessionId: crypto.randomUUID(),
+              userInfo: { name: "", email: "", mobile: "", isExistingUser: false },
+              detailsCaptured: false,
+            };
+            setSession(newSession);
+            setSessionEnded(false);
+            setShowForm(false);
+            setHasUserSentMessage(false);
+            setAwaitingClosureConfirmation(false);
+            setMessages([
+              {
+                id: crypto.randomUUID(),
+                role: "assistant",
+                content: result.messages.welcome,
+                timestamp: new Date(),
+              },
+            ]);
+          }
+
+          // Store new KB version
+          if (serverKbVersion) {
+            localStorage.setItem(KB_VERSION_KEY, serverKbVersion);
+          }
         } else {
           console.error("Failed to load bot messages from backend");
         }
